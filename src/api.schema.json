@@ -1,0 +1,381 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "Actor": {
+            "properties": {
+                "dateOfBirthISO": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "dateOfBirthISO",
+                "id",
+                "name"
+            ],
+            "type": "object"
+        },
+        "CreateMovieRequest": {
+            "properties": {
+                "castActorIds": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "plotSummary": {
+                    "type": "string"
+                },
+                "revenueUsd": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "castActorIds",
+                "plotSummary",
+                "revenueUsd",
+                "title",
+                "year"
+            ],
+            "type": "object"
+        },
+        "Endpoint<{movieId:string;actorId:string;},{},Actor>": {
+            "properties": {
+                "params": {
+                    "properties": {
+                        "actorId": {
+                            "type": "string"
+                        },
+                        "movieId": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "actorId",
+                        "movieId"
+                    ],
+                    "type": "object"
+                },
+                "request": {
+                    "properties": {
+                    },
+                    "type": "object"
+                },
+                "response": {
+                    "$ref": "#/definitions/Actor"
+                }
+            },
+            "required": [
+                "params",
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "Endpoint<{movieId:string;},Partial<CreateMovieRequest>,Movie>": {
+            "properties": {
+                "params": {
+                    "properties": {
+                        "movieId": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "movieId"
+                    ],
+                    "type": "object"
+                },
+                "request": {
+                    "$ref": "#/definitions/Partial<CreateMovieRequest>"
+                },
+                "response": {
+                    "$ref": "#/definitions/Movie"
+                }
+            },
+            "required": [
+                "params",
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "Endpoint<{},CreateMovieRequest,Movie>": {
+            "properties": {
+                "params": {
+                    "properties": {
+                    },
+                    "type": "object"
+                },
+                "request": {
+                    "$ref": "#/definitions/CreateMovieRequest"
+                },
+                "response": {
+                    "$ref": "#/definitions/Movie"
+                }
+            },
+            "required": [
+                "params",
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "GetEndpoint<{movieId:string;actorId:string;},Actor>": {
+            "properties": {
+                "params": {
+                    "properties": {
+                        "actorId": {
+                            "type": "string"
+                        },
+                        "movieId": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "actorId",
+                        "movieId"
+                    ],
+                    "type": "object"
+                },
+                "request": {
+                    "type": "null"
+                },
+                "response": {
+                    "$ref": "#/definitions/Actor"
+                }
+            },
+            "required": [
+                "params",
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "GetEndpoint<{movieId:string;},Actor[]>": {
+            "properties": {
+                "params": {
+                    "properties": {
+                        "movieId": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "movieId"
+                    ],
+                    "type": "object"
+                },
+                "request": {
+                    "type": "null"
+                },
+                "response": {
+                    "items": {
+                        "$ref": "#/definitions/Actor"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "params",
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "GetEndpoint<{movieId:string;},Movie>": {
+            "properties": {
+                "params": {
+                    "properties": {
+                        "movieId": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "movieId"
+                    ],
+                    "type": "object"
+                },
+                "request": {
+                    "type": "null"
+                },
+                "response": {
+                    "$ref": "#/definitions/Movie"
+                }
+            },
+            "required": [
+                "params",
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "GetEndpoint<{},MoviesResponse>": {
+            "properties": {
+                "params": {
+                    "properties": {
+                    },
+                    "type": "object"
+                },
+                "request": {
+                    "type": "null"
+                },
+                "response": {
+                    "$ref": "#/definitions/MoviesResponse"
+                }
+            },
+            "required": [
+                "params",
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "Movie": {
+            "properties": {
+                "cast": {
+                    "items": {
+                        "$ref": "#/definitions/Actor"
+                    },
+                    "type": "array"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "plotSummary": {
+                    "type": "string"
+                },
+                "revenueUsd": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "cast",
+                "id",
+                "plotSummary",
+                "revenueUsd",
+                "title",
+                "year"
+            ],
+            "type": "object"
+        },
+        "MoviesResponse": {
+            "properties": {
+                "movies": {
+                    "items": {
+                        "$ref": "#/definitions/Movie"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "movies"
+            ],
+            "type": "object"
+        },
+        "Partial<CreateMovieRequest>": {
+            "properties": {
+                "castActorIds": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "plotSummary": {
+                    "type": "string"
+                },
+                "revenueUsd": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "properties": {
+        "/movies": {
+            "properties": {
+                "get": {
+                    "$ref": "#/definitions/GetEndpoint<{},MoviesResponse>"
+                },
+                "post": {
+                    "$ref": "#/definitions/Endpoint<{},CreateMovieRequest,Movie>"
+                }
+            },
+            "required": [
+                "get",
+                "post"
+            ],
+            "type": "object"
+        },
+        "/movies/:movieId": {
+            "properties": {
+                "get": {
+                    "$ref": "#/definitions/GetEndpoint<{movieId:string;},Movie>"
+                },
+                "patch": {
+                    "$ref": "#/definitions/Endpoint<{movieId:string;},Partial<CreateMovieRequest>,Movie>"
+                }
+            },
+            "required": [
+                "get",
+                "patch"
+            ],
+            "type": "object"
+        },
+        "/movies/:movieId/actors": {
+            "properties": {
+                "get": {
+                    "$ref": "#/definitions/GetEndpoint<{movieId:string;},Actor[]>"
+                }
+            },
+            "required": [
+                "get"
+            ],
+            "type": "object"
+        },
+        "/movies/:movieId/actors/:actorId": {
+            "properties": {
+                "delete": {
+                    "$ref": "#/definitions/Endpoint<{movieId:string;actorId:string;},{},Actor>"
+                },
+                "get": {
+                    "$ref": "#/definitions/GetEndpoint<{movieId:string;actorId:string;},Actor>"
+                }
+            },
+            "required": [
+                "delete",
+                "get"
+            ],
+            "type": "object"
+        }
+    },
+    "required": [
+        "/movies",
+        "/movies/:movieId",
+        "/movies/:movieId/actors",
+        "/movies/:movieId/actors/:actorId"
+    ],
+    "type": "object"
+}
+
