@@ -18,8 +18,20 @@ export class HTTPError extends Error {
 
 type RequestParams = Parameters<express.RequestHandler>;
 
-type AnyEndpoint = Endpoint<any, any, any>;
+type AnyEndpoint = Endpoint<any, any>;
 type HTTPVerb = 'get' | 'post' | 'put' | 'delete' | 'patch';
+
+type SafeKey<T, K extends string> = T[K & keyof T];
+
+// TODO: Look into fancier variation from https://ja.nsommer.dk/articles/type-checked-url-router.html
+type ExtractRouteParams<T extends string> =
+  string extends T
+  ? Record<string, string>
+  : T extends `${infer Start}:${infer Param}/${infer Rest}`
+  ? {[k in Param | keyof ExtractRouteParams<Rest>]: string}
+  : T extends `${infer Start}:${infer Param}`
+  ? {[k in Param]: string}
+  : {};
 
 export class TypedRouter<API> {
   apiSchema: any;
@@ -33,6 +45,18 @@ export class TypedRouter<API> {
     this.ajv.addSchema(apiSchema);
   }
 
+  get<Path extends keyof API, Spec extends SafeKey<API[Path], 'get'> = SafeKey<API[Path], 'get'>>(
+    route: Path,
+    handler: (
+      params: Spec extends AnyEndpoint ? ExtractRouteParams<Path & string> : never,
+      request: express.Request,
+      response: express.Response,
+    ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>
+  ) {
+    // TODO: fill in with a more streamlined implementation?
+    this.registerEndpoint('get' as any, route, (params, _, request, response) => handler(params, request, response));
+  }
+
   /** Register a handler on the router for the given path and verb */
   registerEndpoint<
     Path extends keyof API,
@@ -42,7 +66,7 @@ export class TypedRouter<API> {
     method: Method,
     route: Path,
     handler: (
-      params: Spec extends AnyEndpoint ? Spec['params'] : never,
+      params: Spec extends AnyEndpoint ? ExtractRouteParams<Path & string> : never,
       body: Spec extends AnyEndpoint ? Spec['request'] : never,
       request: express.Request,
       response: express.Response,
@@ -118,5 +142,9 @@ export class TypedRouter<API> {
           }
         });
     });
+  }
+
+  checkComplete() {
+    // TODO: check that all methods in this.apiSchema are implemented.
   }
 }

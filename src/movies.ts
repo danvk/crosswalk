@@ -37,7 +37,7 @@ const MOVIE_DB: Movie[] = [
 ]
 
 export function register(router: TypedRouter<API>) {
-  router.registerEndpoint('get', '/movies', async () => ({movies: MOVIE_DB}));
+  router.get('/movies', async () => ({movies: MOVIE_DB}));
 
   router.registerEndpoint('post', '/movies', async ({}, body) => {
     const {castActorIds, ...movie} = body;
@@ -60,7 +60,7 @@ export function register(router: TypedRouter<API>) {
     return newMovie;
   });
 
-  router.registerEndpoint('get', '/movies/:movieId', async ({movieId}) => {
+  router.get('/movies/:movieId', async ({movieId}) => {
     const movie = MOVIE_DB.find(m => m.id === movieId);
     if (!movie) {
       throw new HTTPError(404, `No such movie ${movieId}`);

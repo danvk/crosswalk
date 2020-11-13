@@ -1,10 +1,9 @@
-export interface Endpoint<Params extends object, Request, Response> {
+export interface Endpoint<Request, Response> {
   request: Request;
   response: Response;
-  params: Params;
 }
 
-export type GetEndpoint<Params extends object, Response> = Endpoint<Params, null, Response>;
+export type GetEndpoint<Response> = Endpoint<null, Response>;
 
 export interface Actor {
   id: string;
@@ -31,18 +30,18 @@ export interface CreateMovieRequest extends Omit<Movie, 'id' | 'cast'> {
 
 export interface API {
   '/movies': {
-    get: GetEndpoint<{}, MoviesResponse>;
-    post: Endpoint<{}, CreateMovieRequest, Movie>;
+    get: GetEndpoint<MoviesResponse>;
+    post: Endpoint<CreateMovieRequest, Movie>;
   },
   '/movies/:movieId': {
-    get: GetEndpoint<{movieId: string}, Movie>;
-    patch: Endpoint<{movieId: string}, Partial<CreateMovieRequest>, Movie>;
+    get: GetEndpoint<Movie>;
+    patch: Endpoint<Partial<CreateMovieRequest>, Movie>;
   }
   '/movies/:movieId/actors': {
-    get: GetEndpoint<{movieId: string}, Actor[]>;
+    get: GetEndpoint<Actor[]>;
   }
   '/movies/:movieId/actors/:actorId': {
-    get: GetEndpoint<{movieId: string; actorId: string}, Actor>;
-    delete: Endpoint<{movieId: string; actorId: string}, {}, Actor>;
+    get: GetEndpoint<Actor>;
+    delete: Endpoint<{}, Actor>;
   }
 }
