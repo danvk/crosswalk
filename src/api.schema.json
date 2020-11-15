@@ -50,73 +50,8 @@
             ],
             "type": "object"
         },
-        "Endpoint<{movieId:string;actorId:string;},{},Actor>": {
+        "Endpoint<CreateMovieRequest,Movie>": {
             "properties": {
-                "params": {
-                    "properties": {
-                        "actorId": {
-                            "type": "string"
-                        },
-                        "movieId": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "actorId",
-                        "movieId"
-                    ],
-                    "type": "object"
-                },
-                "request": {
-                    "properties": {
-                    },
-                    "type": "object"
-                },
-                "response": {
-                    "$ref": "#/definitions/Actor"
-                }
-            },
-            "required": [
-                "params",
-                "request",
-                "response"
-            ],
-            "type": "object"
-        },
-        "Endpoint<{movieId:string;},Partial<CreateMovieRequest>,Movie>": {
-            "properties": {
-                "params": {
-                    "properties": {
-                        "movieId": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "movieId"
-                    ],
-                    "type": "object"
-                },
-                "request": {
-                    "$ref": "#/definitions/Partial<CreateMovieRequest>"
-                },
-                "response": {
-                    "$ref": "#/definitions/Movie"
-                }
-            },
-            "required": [
-                "params",
-                "request",
-                "response"
-            ],
-            "type": "object"
-        },
-        "Endpoint<{},CreateMovieRequest,Movie>": {
-            "properties": {
-                "params": {
-                    "properties": {
-                    },
-                    "type": "object"
-                },
                 "request": {
                     "$ref": "#/definitions/CreateMovieRequest"
                 },
@@ -125,29 +60,45 @@
                 }
             },
             "required": [
-                "params",
                 "request",
                 "response"
             ],
             "type": "object"
         },
-        "GetEndpoint<{movieId:string;actorId:string;},Actor>": {
+        "Endpoint<Partial<CreateMovieRequest>,Movie>": {
             "properties": {
-                "params": {
+                "request": {
+                    "$ref": "#/definitions/Partial<CreateMovieRequest>"
+                },
+                "response": {
+                    "$ref": "#/definitions/Movie"
+                }
+            },
+            "required": [
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "Endpoint<{},Actor>": {
+            "properties": {
+                "request": {
                     "properties": {
-                        "actorId": {
-                            "type": "string"
-                        },
-                        "movieId": {
-                            "type": "string"
-                        }
                     },
-                    "required": [
-                        "actorId",
-                        "movieId"
-                    ],
                     "type": "object"
                 },
+                "response": {
+                    "$ref": "#/definitions/Actor"
+                }
+            },
+            "required": [
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "GetEndpoint<Actor>": {
+            "properties": {
                 "request": {
                     "type": "null"
                 },
@@ -156,25 +107,13 @@
                 }
             },
             "required": [
-                "params",
                 "request",
                 "response"
             ],
             "type": "object"
         },
-        "GetEndpoint<{movieId:string;},Actor[]>": {
+        "GetEndpoint<Actor[]>": {
             "properties": {
-                "params": {
-                    "properties": {
-                        "movieId": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "movieId"
-                    ],
-                    "type": "object"
-                },
                 "request": {
                     "type": "null"
                 },
@@ -186,25 +125,13 @@
                 }
             },
             "required": [
-                "params",
                 "request",
                 "response"
             ],
             "type": "object"
         },
-        "GetEndpoint<{movieId:string;},Movie>": {
+        "GetEndpoint<Movie>": {
             "properties": {
-                "params": {
-                    "properties": {
-                        "movieId": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "movieId"
-                    ],
-                    "type": "object"
-                },
                 "request": {
                     "type": "null"
                 },
@@ -213,19 +140,13 @@
                 }
             },
             "required": [
-                "params",
                 "request",
                 "response"
             ],
             "type": "object"
         },
-        "GetEndpoint<{},MoviesResponse>": {
+        "GetEndpoint<MoviesResponse>": {
             "properties": {
-                "params": {
-                    "properties": {
-                    },
-                    "type": "object"
-                },
                 "request": {
                     "type": "null"
                 },
@@ -234,7 +155,6 @@
                 }
             },
             "required": [
-                "params",
                 "request",
                 "response"
             ],
@@ -316,10 +236,10 @@
         "/movies": {
             "properties": {
                 "get": {
-                    "$ref": "#/definitions/GetEndpoint<{},MoviesResponse>"
+                    "$ref": "#/definitions/GetEndpoint<MoviesResponse>"
                 },
                 "post": {
-                    "$ref": "#/definitions/Endpoint<{},CreateMovieRequest,Movie>"
+                    "$ref": "#/definitions/Endpoint<CreateMovieRequest,Movie>"
                 }
             },
             "required": [
@@ -331,10 +251,10 @@
         "/movies/:movieId": {
             "properties": {
                 "get": {
-                    "$ref": "#/definitions/GetEndpoint<{movieId:string;},Movie>"
+                    "$ref": "#/definitions/GetEndpoint<Movie>"
                 },
                 "patch": {
-                    "$ref": "#/definitions/Endpoint<{movieId:string;},Partial<CreateMovieRequest>,Movie>"
+                    "$ref": "#/definitions/Endpoint<Partial<CreateMovieRequest>,Movie>"
                 }
             },
             "required": [
@@ -346,7 +266,7 @@
         "/movies/:movieId/actors": {
             "properties": {
                 "get": {
-                    "$ref": "#/definitions/GetEndpoint<{movieId:string;},Actor[]>"
+                    "$ref": "#/definitions/GetEndpoint<Actor[]>"
                 }
             },
             "required": [
@@ -357,10 +277,10 @@
         "/movies/:movieId/actors/:actorId": {
             "properties": {
                 "delete": {
-                    "$ref": "#/definitions/Endpoint<{movieId:string;actorId:string;},{},Actor>"
+                    "$ref": "#/definitions/Endpoint<{},Actor>"
                 },
                 "get": {
-                    "$ref": "#/definitions/GetEndpoint<{movieId:string;actorId:string;},Actor>"
+                    "$ref": "#/definitions/GetEndpoint<Actor>"
                 }
             },
             "required": [

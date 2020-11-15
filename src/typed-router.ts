@@ -1,7 +1,7 @@
 import Ajv from 'ajv';
 import express from 'express';
 
-import {Endpoint} from './api';
+import {Endpoint} from './api-spec';
 import jsonSchema from './api.schema.json';
 
 /** Throw this in a handler to produce an HTTP error response */
@@ -34,18 +34,23 @@ type ExtractRouteParams<T extends string> =
   : {};
 
 export class TypedRouter<API> {
-  apiSchema: any;
   router: express.Router;
-  ajv: Ajv.Ajv;
+  apiSchema?: any;
+  ajv?: Ajv.Ajv;
 
-  constructor(apiSchema: any, router: express.Router) {
-    this.apiSchema = apiSchema;
+  constructor(router: express.Router, apiSchema?: any) {
     this.router = router;
-    this.ajv = new Ajv({allErrors: true});
-    this.ajv.addSchema(apiSchema);
+    if (apiSchema) {
+      this.apiSchema = apiSchema;
+      this.ajv = new Ajv({allErrors: true});
+      this.ajv.addSchema(apiSchema);
+    }
   }
 
-  get<Path extends keyof API, Spec extends SafeKey<API[Path], 'get'> = SafeKey<API[Path], 'get'>>(
+  get<
+    Path extends keyof API,
+    Spec extends SafeKey<API[Path], 'get'> = SafeKey<API[Path], 'get'>
+  >(
     route: Path,
     handler: (
       params: Spec extends AnyEndpoint ? ExtractRouteParams<Path & string> : never,
@@ -90,7 +95,7 @@ export class TypedRouter<API> {
     }
 
     let validate: Ajv.ValidateFunction | undefined;
-    if (requestType) {
+    if (requestType && this.ajv) {
       if (typeof requestType === 'string') {
         validate = this.ajv.getSchema(requestType);
       } else {
@@ -109,7 +114,7 @@ export class TypedRouter<API> {
 
       if (validate && !validate(body)) {
         return response.status(400).json({
-          error: this.ajv.errorsText(validate.errors),
+          error: this.ajv!.errorsText(validate.errors),
           errors: validate.errors,
           invalidRequest: body,
         });

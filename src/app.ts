@@ -10,7 +10,7 @@ import * as movies from './movies';
 const app = express();
 app.use(bodyParser.json());
 
-const typedRouter = new TypedRouter<API>(jsonSchema, app);
+const typedRouter = new TypedRouter<API>(app, jsonSchema);
 
 movies.register(typedRouter);
 

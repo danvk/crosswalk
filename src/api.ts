@@ -1,9 +1,4 @@
-export interface Endpoint<Request, Response> {
-  request: Request;
-  response: Response;
-}
-
-export type GetEndpoint<Response> = Endpoint<null, Response>;
+import { Endpoint, GetEndpoint } from "./api-spec";
 
 export interface Actor {
   id: string;
