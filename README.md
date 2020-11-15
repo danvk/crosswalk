@@ -1,5 +1,7 @@
 # Typed Router
 
+🚧🏗 _Under construction, work in progress!_ 🏗🚧
+
 This library helps you build type-safe REST APIs using Express using
 TypeScript.
 
@@ -124,6 +126,30 @@ part of your continuous integration workflow and fail if there are any diffs.
 The TypeScript definition (`api.ts`) is the source of truth, not the JSON
 Schema (`api.schema.json`).
 
+### Error handling
+
+You may `throw` an `HTTPError` in a handler to produce an error response.
+In `users.ts`:
+
+```ts
+import {API} from './api';
+import {TypedRouter, HTTPError} from 'typed-router';
+
+function getUserById(userId: string): User | null {
+  // ...
+}
+
+export function registerAPI(router: TypedRouter<API>) {
+  router.get('/users/:userId', async ({userId}) => {
+    const user = getUserById(userId);
+    if (!user) {
+      throw new HTTPError(404, `No such user ${userId}`);
+    }
+    return user;
+  });
+}
+```
+
 ### Verifying implementation completeness
 
 With JSON Schema for your API (see above), the typed router can also check
@@ -142,7 +168,8 @@ typedRouter.assertComplete();
 You can convert your API definition into Swagger form to get interactive
 HTML documentation:
 
-    TODO
+swagger-ui-express seems like the way to go here.
+https://github.com/sidewalklabs/cityci/pull/3297/files
 
 ## TODO
 
@@ -158,5 +185,6 @@ HTML documentation:
 - [ ] Make a demo project, maybe TODO or based on GraphQL demo
 - [ ] Decide on a parameter ordering for methods
 - [ ] Look into generating API docs, e.g. w/ Swagger
+- [ ] Options for request logging
 - [x] Make the runtime validation part optional
 - [x] Plug in TS 4.1 template literal types
