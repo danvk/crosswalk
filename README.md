@@ -184,7 +184,7 @@ https://github.com/sidewalklabs/cityci/pull/3297/files
 - [ ] Figure out how to handle `@types` deps (peer deps?)
 - [ ] Make a demo project, maybe TODO or based on GraphQL demo
 - [ ] Decide on a parameter ordering for methods
-- [ ] Look into generating API docs, e.g. w/ Swagger
 - [ ] Options for request logging
+- [x] Look into generating API docs, e.g. w/ Swagger
 - [x] Make the runtime validation part optional
 - [x] Plug in TS 4.1 template literal types
