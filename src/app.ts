@@ -1,5 +1,6 @@
 import bodyParser from 'body-parser';
 import express from 'express';
+import swaggerUI from 'swagger-ui-express';
 
 import {API} from './api';
 import jsonSchema from './api.schema.json';
@@ -9,6 +10,9 @@ import * as movies from './movies';
 
 const app = express();
 app.use(bodyParser.json());
+app.use('/docs', swaggerUI.serve, swaggerUI.setup(
+  require('/Users/danvk/github/typed-router/api.swagger.json'))
+);
 
 const typedRouter = new TypedRouter<API>(app, jsonSchema);
 

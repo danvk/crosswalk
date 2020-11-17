@@ -239,7 +239,8 @@
                     "$ref": "#/definitions/GetEndpoint<MoviesResponse>"
                 },
                 "post": {
-                    "$ref": "#/definitions/Endpoint<CreateMovieRequest,Movie>"
+                    "$ref": "#/definitions/Endpoint<CreateMovieRequest,Movie>",
+                    "description": "Create a new movie in the database."
                 }
             },
             "required": [

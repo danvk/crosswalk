@@ -26,6 +26,7 @@ export interface CreateMovieRequest extends Omit<Movie, 'id' | 'cast'> {
 export interface API {
   '/movies': {
     get: GetEndpoint<MoviesResponse>;
+    /** Create a new movie in the database. */
     post: Endpoint<CreateMovieRequest, Movie>;
   },
   '/movies/:movieId': {
