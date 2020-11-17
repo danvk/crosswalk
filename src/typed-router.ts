@@ -4,7 +4,6 @@ import Ajv from 'ajv';
 import express from 'express';
 
 import {Endpoint} from './api-spec';
-import jsonSchema from './api.schema.json';
 import { ExtractRouteParams, HTTPVerb, SafeKey } from './utils';
 
 /** Throw this in a handler to produce an HTTP error response */
@@ -73,7 +72,7 @@ export class TypedRouter<API> {
     }
     const refSchema: string = apiDef[route].properties[method].$ref;
     const endpoint = refSchema.slice('#/definitions/'.length);
-    const endpointTypes = (jsonSchema.definitions as any)[endpoint].properties;
+    const endpointTypes = (this.apiSchema.definitions as any)[endpoint].properties;
     let requestType = endpointTypes.request;
     if (requestType.$ref) {
       requestType = requestType.$ref; // allow either references or inline types
