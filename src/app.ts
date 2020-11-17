@@ -7,12 +7,11 @@ import jsonSchema from './api.schema.json';
 import {TypedRouter} from './typed-router';
 
 import * as movies from './movies';
+import { apiSpecToOpenApi } from './openapi';
 
 const app = express();
 app.use(bodyParser.json());
-app.use('/docs', swaggerUI.serve, swaggerUI.setup(
-  require('/Users/danvk/github/typed-router/api.swagger.json'))
-);
+app.use('/docs', swaggerUI.serve, swaggerUI.setup(apiSpecToOpenApi(jsonSchema)));
 
 const typedRouter = new TypedRouter<API>(app, jsonSchema);
 
