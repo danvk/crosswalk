@@ -9,9 +9,10 @@ Here's the deal:
 
 - You define your API using TypeScript types.
 - The typed router will give you:
-  - Type API implementations (for your server)
-  - Runtime request validation (also server, using ajv and typescript-json-schema)
-  - Type safe API requests (for your client code)
+  - Type-safe API implementations (for your server)
+  - Type-safe API requests (for your client code)
+  - Runtime request validation (for your server, using ajv and typescript-json-schema)
+  - Interactive API documentation (via swagger-ui-express)
 
 Requirements:
 
@@ -19,14 +20,15 @@ Requirements:
 - Express
 
 There is an optional requirement of typescript-json-schema if you want runtime
-request validation. (You probably do!)
+request validation or API docs. (You probably do!)
 
 ## Usage
 
 First, define your API in `api.ts`:
 
 ```ts
-import type {Endpoint, GetEndpoint} from 'typed-router';
+import type {Endpoint, GetEndpoint} from 'typed-router/dist/api-spec';
+
 export interface API {
   '/users': {
     get: GetEndpoint<UsersResponse>;
@@ -99,6 +101,17 @@ async function demo () {
 
 This uses the `fetch` API under the hood, but you can plug in your own fetch
 function if you need to pass extra headers or prefer to use Axios.
+
+You can also construct API URLs for mocking or requesting yourself. The path
+paramters will be type checked. No more `/path/to/undefined/null`!
+
+```ts
+import {apiUrlMaker} from 'typed-router';
+const urlMaker = apiUrlMaker<API>('/api/v0');
+const getUser = urlMaker('/users/:userId');
+const fredUrl = getUser({userId: 'fred'});
+// /api/v0/users/fred
+```
 
 ## Bells and Whistles
 
