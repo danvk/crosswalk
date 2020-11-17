@@ -1,8 +1,11 @@
+/** Type-safe wrapper around Express router for REST APIs */
+
 import Ajv from 'ajv';
 import express from 'express';
 
 import {Endpoint} from './api-spec';
 import jsonSchema from './api.schema.json';
+import { ExtractRouteParams, HTTPVerb, SafeKey } from './utils';
 
 /** Throw this in a handler to produce an HTTP error response */
 export class HTTPError extends Error {
@@ -19,19 +22,6 @@ export class HTTPError extends Error {
 type RequestParams = Parameters<express.RequestHandler>;
 
 type AnyEndpoint = Endpoint<any, any>;
-type HTTPVerb = 'get' | 'post' | 'put' | 'delete' | 'patch';
-
-type SafeKey<T, K extends string> = T[K & keyof T];
-
-// TODO: Look into fancier variation from https://ja.nsommer.dk/articles/type-checked-url-router.html
-type ExtractRouteParams<T extends string> =
-  string extends T
-  ? Record<string, string>
-  : T extends `${infer _Start}:${infer Param}/${infer Rest}`
-  ? {[k in Param | keyof ExtractRouteParams<Rest>]: string}
-  : T extends `${infer _Start}:${infer Param}`
-  ? {[k in Param]: string}
-  : {};
 
 export class TypedRouter<API> {
   router: express.Router;

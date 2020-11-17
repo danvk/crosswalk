@@ -6,6 +6,7 @@ This library helps you build type-safe REST APIs using Express using
 TypeScript.
 
 Here's the deal:
+
 - You define your API using TypeScript types.
 - The typed router will give you:
   - Type API implementations (for your server)
@@ -13,6 +14,7 @@ Here's the deal:
   - Type safe API requests (for your client code)
 
 Requirements:
+
 - TypeScript 4.1+
 - Express
 
