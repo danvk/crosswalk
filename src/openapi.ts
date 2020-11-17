@@ -56,28 +56,29 @@ function expressPathToOpenApiPath(path: string): string {
   return path.replace(/:([^/]+)/g, '{$1}');
 }
 
+const DEFINITION = "#/definitions/";
+export function followApiRef(spec: any, schema: Schema): [string, unknown] {
+  const ref = schema.$ref;
+  if (!ref.startsWith(DEFINITION)) {
+    throw new Error(`Confused by ${schema} / ${ref}`);
+  }
+
+  const name = ref.slice(DEFINITION.length);
+  const def = spec.definitions[name];
+  if (!def) {
+    throw new Error(`Unable to find definition for ${name}`);
+  }
+  return [name, def];
+}
+
 /** Convert an API spec (generated via typescript-json-schema) to OpenAPI. */
 export function apiSpecToOpenApi(apiSpec: any, options?: Options): any {
+  apiSpec = JSON.parse(JSON.stringify(apiSpec));  // defensive copy
   const {
     required: endpoints,
     properties: endpointSpecs,
     definitions,
-  } = JSON.parse(JSON.stringify(apiSpec));  // defensive copy
-
-  const DEFINITION = "#/definitions/";
-  function followRef(schema: Schema): [string, unknown] {
-    const ref = schema.$ref;
-    if (!ref.startsWith(DEFINITION)) {
-      throw new Error(`Confused by ${schema} / ${ref}`);
-    }
-
-    const name = ref.slice(DEFINITION.length);
-    const def = definitions[name];
-    if (!def) {
-      throw new Error(`Unable to find definition for ${name}`);
-    }
-    return [name, def];
-  }
+  } = apiSpec;
 
   // Remove endpoints, helpers
   const paths: Record<string, any> = {};
@@ -87,7 +88,7 @@ export function apiSpecToOpenApi(apiSpec: any, options?: Options): any {
     paths[openApiPath] = {};
     const byVerb = endpointSpecs[endpoint].properties;
     for (const [verb, ref] of Object.entries(byVerb)) {
-      const [name, schema] = followRef(ref as Schema);
+      const [name, schema] = followApiRef(apiSpec, ref as Schema);
       const { request, response } = (schema as any).properties;
 
       const parameters: Param[] = extractPathParams(endpoint);
@@ -121,9 +122,6 @@ export function apiSpecToOpenApi(apiSpec: any, options?: Options): any {
       description: "testing testing",
       version: "",
     },
-    host: "localhost:4567",
-    basePath: "/",
-    schemes: ["http"],
     paths,
     definitions,
     ...options,

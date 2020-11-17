@@ -26,6 +26,7 @@ export class TypedRouter<API> {
   router: express.Router;
   apiSchema?: any;
   ajv?: Ajv.Ajv;
+  registrations: {path: string, method: HTTPVerb}[];
 
   constructor(router: express.Router, apiSchema?: any) {
     this.router = router;
@@ -34,6 +35,7 @@ export class TypedRouter<API> {
       this.ajv = new Ajv({allErrors: true});
       this.ajv.addSchema(apiSchema);
     }
+    this.registrations = [];
   }
 
   get<
@@ -100,6 +102,7 @@ export class TypedRouter<API> {
         }
       }
     }
+    this.registrations.push({path: route as string, method});
 
     this.router[method](route as any, (...[req, response, next]: RequestParams) => {
       const {body} = req;
@@ -142,6 +145,32 @@ export class TypedRouter<API> {
   }
 
   checkComplete() {
-    // TODO: check that all methods in this.apiSchema are implemented.
+    if (!this.apiSchema) {
+      throw new Error('TypedRouter.checkComplete requires JSON Schema');
+    }
+
+    const expected = new Set<string>();
+    const {
+      required: endpoints,
+      properties: endpointSpecs,
+    } = this.apiSchema;
+    for (const path of endpoints) {
+      const methods = endpointSpecs[path].required;
+      for (const method of methods) {
+        expected.add(`${method} ${path}`);
+      }
+    }
+
+    for (const {method, path} of this.registrations) {
+      const key = `${method} ${path}`;
+      expected.delete(key);
+    }
+
+    if (expected.size > 0) {
+      const missing = Array.from(expected.values()).join('\n');
+      throw new Error(
+        `Failed to register these endpoints, which were specified in API JSON Schema:\n${missing}`
+      );
+    }
   }
 }

@@ -168,24 +168,37 @@ typedRouter.assertComplete();
 ### Generating API docs
 
 You can convert your API definition into Swagger form to get interactive
-HTML documentation:
+HTML documentation.
 
-swagger-ui-express seems like the way to go here.
-https://github.com/sidewalklabs/cityci/pull/3297/files
+First, install `swagger-ui-express`:
+
+    yarn add swagger-ui-express
+
+Then convert your API schema to Open API format and serve it up:
+
+```ts
+import swaggerUI from 'swagger-ui-express';
+import {TypedRouter, apiSpecToOpenApi} from 'typed-router';
+
+app.use('/docs', swaggerUI.serve, swaggerUI.setup(apiSpecToOpenApi(apiSchema)));
+```
+
+Then visit `/docs`. You may need to pass some additional options to
+`apiSpecToOpenApi` to get query execution from the Swagger docs to work.
 
 ## TODO
 
 - [ ] Write unit tests
 - [ ] Plug into cityci
 - [ ] Add helper methods for all HTTP verbs
-- [ ] Add a check that all endpoints are implemented
 - [ ] Look into cleaning up generics
 - [ ] Decide on a name (ts-eliot?)
 - [ ] Should TypedRouter be a class or a function?
 - [ ] Figure out how to handle `@types` deps (peer deps?)
-- [ ] Make a demo project, maybe TODO or based on GraphQL demo
 - [ ] Decide on a parameter ordering for methods
 - [ ] Options for request logging
+- [x] Add a check that all endpoints are implemented
+- [x] Make a demo project, maybe TODO or based on GraphQL demo
 - [x] Add helpers for constructing URLs
 - [x] Look into generating API docs, e.g. w/ Swagger
 - [x] Make the runtime validation part optional
