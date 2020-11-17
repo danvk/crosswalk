@@ -4,15 +4,15 @@ import { compile } from "path-to-regexp";
 
 import { ExtractRouteParams, SafeKey, HTTPVerb, Unionize } from "./utils";
 
+type ExtractRouteParamsVarArgs<T extends string> =
+  {} extends ExtractRouteParams<T> ? [] : [params: ExtractRouteParams<T>];
+
 /** Utility for safely constructing API URLs */
-export function apiUrlMaker<API>(
-  prefix?: string
-): <Path extends keyof API>(
-  endpoint: Path & string
-) => (params: ExtractRouteParams<Path & string>) => string {
-  return (endpoint) => {
+export function apiUrlMaker<API>(prefix?: string) {
+  return <Path extends keyof API>(endpoint: Path & string) => {
     const toPath = compile(endpoint);
-    return (params) => prefix + toPath(params as any);
+    return (...paramsList: ExtractRouteParamsVarArgs<Path & string>) =>
+      prefix + toPath(paramsList[0] as any);
   };
 }
 
@@ -43,9 +43,11 @@ export function typedApi<API>(options?: Options) {
   const { prefix = "" } = options || {};
   const fetcher = options?.fetch ?? fetchJson;
 
+  const urlMaker = apiUrlMaker<API>(prefix);
+
   type Paths = keyof API & string;
-  type GetPaths = Extract<Unionize<API>, {v: {get: any}}>['k'] & Paths;
-  type PostPaths = Extract<Unionize<API>, {v: {post: any}}>['k'] & Paths;
+  type GetPaths = Extract<Unionize<API>, { v: { get: any } }>["k"] & Paths;
+  type PostPaths = Extract<Unionize<API>, { v: { post: any } }>["k"] & Paths;
 
   const request = <
     Path extends Paths,
@@ -58,28 +60,29 @@ export function typedApi<API>(options?: Options) {
     type Endpoint = API[Path][Method];
     type Request = SafeKey<Endpoint, "request">;
     type Response = SafeKey<Endpoint, "response">;
-    const toPath = compile(endpoint);
-    // TODO: make params optional for requests that don't take them
+    const makeUrl = urlMaker(endpoint);
     return (queryParams: Params, body: Request): Promise<Response> =>
-      fetcher(prefix + toPath(queryParams), method, body) as Promise<Response>;
+      fetcher((makeUrl as any)(queryParams), method, body) as Promise<Response>;
   };
 
   return {
     request,
 
     get: <Path extends GetPaths>(endpoint: Path) => {
-      type Params = ExtractRouteParams<Path & string>;
-      type Endpoint = SafeKey<API[Path], 'get'>;
+      type ParamsList = ExtractRouteParamsVarArgs<Path & string>;
+      type Endpoint = SafeKey<API[Path], "get">;
       type Response = SafeKey<Endpoint, "response">;
-      return (params: Params): Promise<Response> => request(endpoint, "get" as any)(params, null as any);
+      return (...params: ParamsList): Promise<Response> =>
+        request(endpoint, "get" as any)(params?.[0] as any, null as any);
     },
 
     post: <Path extends PostPaths>(endpoint: Path) => {
       type Params = ExtractRouteParams<Path & string>;
-      type Endpoint = SafeKey<API[Path], 'post'>;
+      type Endpoint = SafeKey<API[Path], "post">;
       type Request = SafeKey<Endpoint, "request">;
       type Response = SafeKey<Endpoint, "response">;
-      return (params: Params, request: Request): Promise<Response> => request(endpoint, "post" as any)(params, request);
+      return (params: Params, request: Request): Promise<Response> =>
+        request(endpoint, "post" as any)(params, request);
     },
   };
 }

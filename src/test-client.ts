@@ -1,11 +1,15 @@
 import { API } from "./api";
-import { typedApi } from "./typed-request";
+import { apiUrlMaker, typedApi } from "./typed-request";
 
 const api = typedApi<API>();
 
+const urlMaker = apiUrlMaker<API>();
+const moviesUrl = urlMaker('/movies')();
+const getMovieUrl = urlMaker('/movies/:movieId');
+
 (async () => {
   const movies1 = await api.request('/movies', 'get')({}, null);
-  const movies2 = await api.get('/movies')({});
+  const movies2 = await api.get('/movies')();
 
   const getActors = api.get('/movies/:movieId/actors');
   const actors = await getActors({movieId: 'ep4'});
