@@ -66,35 +66,38 @@ export class TypedRouter<API> {
       response: express.Response,
     ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
   ) {
-    const apiDef = this.apiSchema.properties as any;
-    if (!apiDef[route]) {
-      throw new Error(`API JSONSchema is missing entry for ${route}`);
-    }
-    const refSchema: string = apiDef[route].properties[method].$ref;
-    const endpoint = refSchema.slice('#/definitions/'.length);
-    const endpointTypes = (this.apiSchema.definitions as any)[endpoint].properties;
-    let requestType = endpointTypes.request;
-    if (requestType.$ref) {
-      requestType = requestType.$ref; // allow either references or inline types
-    } else if (requestType.type && requestType.type === 'null') {
-      requestType = null; // no request body, no validation
-    } else if (requestType.allOf) {
-      // TODO(danvk): figure out how to make ajv understand these.
-      throw new Error('Intersection types in APIs are not supported yet.');
-    }
-
+    const {apiSchema} = this;
     let validate: Ajv.ValidateFunction | undefined;
-    if (requestType && this.ajv) {
-      if (typeof requestType === 'string') {
-        validate = this.ajv.getSchema(requestType);
-      } else {
-        // Create a new AJV validate for inline object types.
-        // This assumes these will never reference other type definitions.
-        const requestAjv = new Ajv();
-        validate = requestAjv.compile(requestType);
+    if (apiSchema) {
+      const apiDef = apiSchema.properties as any;
+      if (!apiDef[route]) {
+        throw new Error(`API JSONSchema is missing entry for ${route}`);
       }
-      if (!validate) {
-        throw new Error(`Unable to get schema for '${requestType}'`);
+      const refSchema: string = apiDef[route].properties[method].$ref;
+      const endpoint = refSchema.slice('#/definitions/'.length);
+      const endpointTypes = (apiSchema.definitions as any)[endpoint].properties;
+      let requestType = endpointTypes.request;
+      if (requestType.$ref) {
+        requestType = requestType.$ref; // allow either references or inline types
+      } else if (requestType.type && requestType.type === 'null') {
+        requestType = null; // no request body, no validation
+      } else if (requestType.allOf) {
+        // TODO(danvk): figure out how to make ajv understand these.
+        throw new Error('Intersection types in APIs are not supported yet.');
+      }
+
+      if (requestType && this.ajv) {
+        if (typeof requestType === 'string') {
+          validate = this.ajv.getSchema(requestType);
+        } else {
+          // Create a new AJV validate for inline object types.
+          // This assumes these will never reference other type definitions.
+          const requestAjv = new Ajv();
+          validate = requestAjv.compile(requestType);
+        }
+        if (!validate) {
+          throw new Error(`Unable to get schema for '${requestType}'`);
+        }
       }
     }
 

@@ -29,8 +29,35 @@ interface SwaggerEndpoint {
   };
 }
 
+export interface Options {
+  info?: {
+    title?: string;
+    description?: string;
+    version?: string;
+  };
+  host?: string;
+  basePath?: string;
+  schemes?: ("http" | "https")[];
+}
+
+const isObject = <T>(x: T): x is object & T => !!x && typeof x === "object";
+
+function extractPathParams(path: string): PathParam[] {
+  const tokens = pathToRegexp.parse(path);
+  return tokens.filter(isObject).map((tok) => ({
+    name: "" + tok.name,
+    in: "path",
+    type: "string",
+  }));
+}
+
+/** Convert /foo/:bar/:baz --> /foo/{bar}/{baz} */
+function expressPathToOpenApiPath(path: string): string {
+  return path.replace(/:([^/]+)/g, '{$1}');
+}
+
 /** Convert an API spec (generated via typescript-json-schema) to OpenAPI. */
-export function apiSpecToOpenApi(apiSpec: any): any {
+export function apiSpecToOpenApi(apiSpec: any, options?: Options): any {
   const {
     required: endpoints,
     properties: endpointSpecs,
@@ -52,22 +79,12 @@ export function apiSpecToOpenApi(apiSpec: any): any {
     return [name, def];
   }
 
-  const isObject = <T>(x: T): x is object & T => !!x && typeof x === "object";
-
-  function extractPathParams(path: string): PathParam[] {
-    const tokens = pathToRegexp.parse(path);
-    return tokens.filter(isObject).map((tok) => ({
-      name: "" + tok.name,
-      in: "path",
-      type: "string",
-    }));
-  }
-
   // Remove endpoints, helpers
   const paths: Record<string, any> = {};
 
   for (const endpoint of endpoints) {
-    paths[endpoint] = {};
+    const openApiPath = expressPathToOpenApiPath(endpoint);
+    paths[openApiPath] = {};
     const byVerb = endpointSpecs[endpoint].properties;
     for (const [verb, ref] of Object.entries(byVerb)) {
       const [name, schema] = followRef(ref as Schema);
@@ -92,7 +109,7 @@ export function apiSpecToOpenApi(apiSpec: any): any {
           },
         },
       };
-      paths[endpoint][verb] = swagger;
+      paths[openApiPath][verb] = swagger;
       delete definitions[name];
     }
   }
@@ -109,5 +126,6 @@ export function apiSpecToOpenApi(apiSpec: any): any {
     schemes: ["http"],
     paths,
     definitions,
+    ...options,
   };
 }
