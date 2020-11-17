@@ -189,14 +189,14 @@ Then visit `/docs`. You may need to pass some additional options to
 ## TODO
 
 - [ ] Write unit tests
-- [ ] Plug into cityci
 - [ ] Add helper methods for all HTTP verbs
 - [ ] Look into cleaning up generics
 - [ ] Decide on a name (ts-eliot?)
-- [ ] Should TypedRouter be a class or a function?
 - [ ] Figure out how to handle `@types` deps (peer deps?)
 - [ ] Decide on a parameter ordering for methods
 - [ ] Options for request logging
+- [x] Should TypedRouter be a class ~or a function~?
+- [x] Plug into cityci
 - [x] Add a check that all endpoints are implemented
 - [x] Make a demo project, maybe TODO or based on GraphQL demo
 - [x] Add helpers for constructing URLs
