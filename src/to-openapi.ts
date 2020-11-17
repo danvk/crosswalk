@@ -1,6 +1,7 @@
 // Convert API JSON Schema to Open API format.
 
 import * as fs from 'fs';
+import * as pathToRegexp from 'path-to-regexp';
 
 if (process.argv.length !== 3) {
   console.error('invalid invocation');
@@ -27,6 +28,17 @@ function followRef(schema: Schema): [string, unknown] {
   return [name, def];
 }
 
+const isObject = <T>(x: T): x is object & T => !!x && typeof x === 'object';
+
+function extractPathParams(path: string): PathParam[] {
+  const tokens = pathToRegexp.parse(path);
+  return tokens.filter(isObject).map(tok => ({
+    name: '' + tok.name,
+    in: 'path',
+    type: 'string',
+  }));
+}
+
 // Remove endpoints, helpers
 const paths: Record<string, any> = {};
 
@@ -36,8 +48,8 @@ for (const endpoint of endpoints) {
   for (const [verb, ref] of Object.entries(byVerb)) {
     const [name, schema] = followRef(ref as Schema);
     const {request, response} = (schema as any).properties;
-    const parameters: Param[] = [];
 
+    const parameters: Param[] = extractPathParams(endpoint);
     if (request?.type !== 'null') {
       parameters.push({
         name: 'body',
@@ -45,12 +57,12 @@ for (const endpoint of endpoints) {
         schema: request,
       });
     }
-    // TODO: path parameters
 
     const swagger: SwaggerEndpoint = {
       summary: (ref as any).description,
       ...(parameters.length && {parameters}),
       responses: {
+        // TODO: do I need to break this down by status?
         200: {
           schema: response
         }
@@ -95,10 +107,10 @@ const openApiSpec = {
     description: "testing testing",
     version: "",
   },
-  host: 'localhost',
+  host: 'localhost:4567',
   basePath: '/',
   schemes: [
-    "https",
+    "http",
   ],
   paths,
   definitions,

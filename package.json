@@ -15,6 +15,7 @@
   "dependencies": {
     "ajv": "^6.12.6",
     "express": "^4.17.1",
+    "path-to-regexp": "^6.2.0",
     "swagger-ui-express": "^4.1.4"
   }
 }
