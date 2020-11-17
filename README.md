@@ -178,7 +178,6 @@ https://github.com/sidewalklabs/cityci/pull/3297/files
 - [ ] Write unit tests
 - [ ] Plug into cityci
 - [ ] Add helper methods for all HTTP verbs
-- [ ] Add helpers for constructing URLs
 - [ ] Add a check that all endpoints are implemented
 - [ ] Look into cleaning up generics
 - [ ] Decide on a name (ts-eliot?)
@@ -187,6 +186,7 @@ https://github.com/sidewalklabs/cityci/pull/3297/files
 - [ ] Make a demo project, maybe TODO or based on GraphQL demo
 - [ ] Decide on a parameter ordering for methods
 - [ ] Options for request logging
+- [x] Add helpers for constructing URLs
 - [x] Look into generating API docs, e.g. w/ Swagger
 - [x] Make the runtime validation part optional
 - [x] Plug in TS 4.1 template literal types
