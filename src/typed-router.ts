@@ -144,7 +144,8 @@ export class TypedRouter<API> {
     });
   }
 
-  checkComplete() {
+  /** Throw if any routes declared in the API spec have not been implemented. */
+  assertAllRoutesRegistered() {
     if (!this.apiSchema) {
       throw new Error('TypedRouter.checkComplete requires JSON Schema');
     }

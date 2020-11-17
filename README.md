@@ -161,7 +161,7 @@ that you've implemented all the endpoints you declared. In `server.ts`:
 const apiSchema = require('./api.schema.json');
 const typedRouter = new TypedRouter<API>(app, apiSchema);
 registerAPI(typedRouter);
-typedRouter.assertComplete();
+typedRouter.assertAllRoutesRegistered();
 // will throw unless all endpoints are registered
 ```
 
