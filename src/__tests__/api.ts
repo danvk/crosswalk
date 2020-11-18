@@ -18,7 +18,8 @@ export interface API {
   '/users/:userId': {
     get: GetEndpoint<User>;
     /** Edit an existing user */
-    patch: Endpoint<CreateUserRequest, User>;
+    patch: Endpoint<Partial<CreateUserRequest>, User>;
+    put: Endpoint<{name?: string; age?: number}, User>;
     delete: Endpoint<{}, {}>;
   }
 }

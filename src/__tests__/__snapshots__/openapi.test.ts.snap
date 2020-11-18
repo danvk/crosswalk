@@ -3,6 +3,17 @@
 exports[`Open API integration should have the expected endpoints: open-api 1`] = `
 Object {
   "definitions": Object {
+    "Partial<Pick<User,\\"name\\"|\\"age\\">>": Object {
+      "properties": Object {
+        "age": Object {
+          "type": "number",
+        },
+        "name": Object {
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
     "Pick<User,\\"name\\"|\\"age\\">": Object {
       "properties": Object {
         "age": Object {
@@ -64,7 +75,7 @@ Object {
             },
           },
         },
-        "summary": undefined,
+        "summary": "Get the full list of users",
       },
       "post": Object {
         "parameters": Array [
@@ -83,7 +94,7 @@ Object {
             },
           },
         },
-        "summary": undefined,
+        "summary": "Create a new user",
       },
     },
     "/users/{userId}": Object {
@@ -141,7 +152,39 @@ Object {
             "in": "body",
             "name": "body",
             "schema": Object {
-              "$ref": "#/definitions/Pick<User,\\"name\\"|\\"age\\">",
+              "$ref": "#/definitions/Partial<Pick<User,\\"name\\"|\\"age\\">>",
+            },
+          },
+        ],
+        "responses": Object {
+          "200": Object {
+            "schema": Object {
+              "$ref": "#/definitions/User",
+            },
+          },
+        },
+        "summary": "Edit an existing user",
+      },
+      "put": Object {
+        "parameters": Array [
+          Object {
+            "in": "path",
+            "name": "userId",
+            "type": "string",
+          },
+          Object {
+            "in": "body",
+            "name": "body",
+            "schema": Object {
+              "properties": Object {
+                "age": Object {
+                  "type": "number",
+                },
+                "name": Object {
+                  "type": "string",
+                },
+              },
+              "type": "object",
             },
           },
         ],
