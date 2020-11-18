@@ -81,8 +81,8 @@ export function typedApi<API>(options?: Options) {
       type Endpoint = SafeKey<API[Path], "post">;
       type Request = SafeKey<Endpoint, "request">;
       type Response = SafeKey<Endpoint, "response">;
-      return (params: Params, request: Request): Promise<Response> =>
-        request(endpoint, "post" as any)(params, request);
+      return (params: Params, body: Request): Promise<Response> =>
+        request(endpoint, "post" as any)(params, body);
     },
   };
 }
