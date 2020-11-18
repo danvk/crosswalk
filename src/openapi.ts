@@ -83,6 +83,8 @@ export function apiSpecToOpenApi(apiSpec: any, options?: Options): any {
   // Remove endpoints, helpers
   const paths: Record<string, any> = {};
 
+  const toDelete = new Set<string>();
+
   for (const endpoint of endpoints) {
     const openApiPath = expressPathToOpenApiPath(endpoint);
     paths[openApiPath] = {};
@@ -111,9 +113,13 @@ export function apiSpecToOpenApi(apiSpec: any, options?: Options): any {
         },
       };
       paths[openApiPath][verb] = swagger;
-      delete definitions[name];
+      toDelete.add(name);
     }
   }
+
+  toDelete.forEach(name => {
+    delete definitions[name];
+  });
 
   return {
     swagger: "2.0",

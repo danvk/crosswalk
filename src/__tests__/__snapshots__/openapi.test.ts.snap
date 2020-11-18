@@ -1,0 +1,161 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Open API integration should have the expected endpoints: open-api 1`] = `
+Object {
+  "definitions": Object {
+    "Pick<User,\\"name\\"|\\"age\\">": Object {
+      "properties": Object {
+        "age": Object {
+          "type": "number",
+        },
+        "name": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "age",
+        "name",
+      ],
+      "type": "object",
+    },
+    "User": Object {
+      "properties": Object {
+        "age": Object {
+          "type": "number",
+        },
+        "id": Object {
+          "type": "string",
+        },
+        "name": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "age",
+        "id",
+        "name",
+      ],
+      "type": "object",
+    },
+  },
+  "info": Object {
+    "description": "testing testing",
+    "title": "Generated API",
+    "version": "",
+  },
+  "paths": Object {
+    "/users": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "schema": Object {
+              "properties": Object {
+                "users": Object {
+                  "items": Object {
+                    "$ref": "#/definitions/User",
+                  },
+                  "type": "array",
+                },
+              },
+              "required": Array [
+                "users",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "summary": undefined,
+      },
+      "post": Object {
+        "parameters": Array [
+          Object {
+            "in": "body",
+            "name": "body",
+            "schema": Object {
+              "$ref": "#/definitions/Pick<User,\\"name\\"|\\"age\\">",
+            },
+          },
+        ],
+        "responses": Object {
+          "200": Object {
+            "schema": Object {
+              "$ref": "#/definitions/User",
+            },
+          },
+        },
+        "summary": undefined,
+      },
+    },
+    "/users/{userId}": Object {
+      "delete": Object {
+        "parameters": Array [
+          Object {
+            "in": "path",
+            "name": "userId",
+            "type": "string",
+          },
+          Object {
+            "in": "body",
+            "name": "body",
+            "schema": Object {
+              "properties": Object {},
+              "type": "object",
+            },
+          },
+        ],
+        "responses": Object {
+          "200": Object {
+            "schema": Object {
+              "properties": Object {},
+              "type": "object",
+            },
+          },
+        },
+        "summary": undefined,
+      },
+      "get": Object {
+        "parameters": Array [
+          Object {
+            "in": "path",
+            "name": "userId",
+            "type": "string",
+          },
+        ],
+        "responses": Object {
+          "200": Object {
+            "schema": Object {
+              "$ref": "#/definitions/User",
+            },
+          },
+        },
+        "summary": undefined,
+      },
+      "patch": Object {
+        "parameters": Array [
+          Object {
+            "in": "path",
+            "name": "userId",
+            "type": "string",
+          },
+          Object {
+            "in": "body",
+            "name": "body",
+            "schema": Object {
+              "$ref": "#/definitions/Pick<User,\\"name\\"|\\"age\\">",
+            },
+          },
+        ],
+        "responses": Object {
+          "200": Object {
+            "schema": Object {
+              "$ref": "#/definitions/User",
+            },
+          },
+        },
+        "summary": undefined,
+      },
+    },
+  },
+  "swagger": "2.0",
+}
+`;
