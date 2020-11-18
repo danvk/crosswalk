@@ -1,0 +1,156 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "Endpoint<Pick<User,\"name\"|\"age\">,User>": {
+            "properties": {
+                "request": {
+                    "$ref": "#/definitions/Pick<User,\"name\"|\"age\">"
+                },
+                "response": {
+                    "$ref": "#/definitions/User"
+                }
+            },
+            "required": [
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "Endpoint<{},{}>": {
+            "properties": {
+                "request": {
+                    "properties": {
+                    },
+                    "type": "object"
+                },
+                "response": {
+                    "properties": {
+                    },
+                    "type": "object"
+                }
+            },
+            "required": [
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "GetEndpoint<User>": {
+            "properties": {
+                "request": {
+                    "type": "null"
+                },
+                "response": {
+                    "$ref": "#/definitions/User"
+                }
+            },
+            "required": [
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "GetEndpoint<{users:User[];}>": {
+            "properties": {
+                "request": {
+                    "type": "null"
+                },
+                "response": {
+                    "properties": {
+                        "users": {
+                            "items": {
+                                "$ref": "#/definitions/User"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "required": [
+                        "users"
+                    ],
+                    "type": "object"
+                }
+            },
+            "required": [
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "Pick<User,\"name\"|\"age\">": {
+            "properties": {
+                "age": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "age",
+                "name"
+            ],
+            "type": "object"
+        },
+        "User": {
+            "properties": {
+                "age": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "age",
+                "id",
+                "name"
+            ],
+            "type": "object"
+        }
+    },
+    "properties": {
+        "/users": {
+            "properties": {
+                "get": {
+                    "$ref": "#/definitions/GetEndpoint<{users:User[];}>"
+                },
+                "post": {
+                    "$ref": "#/definitions/Endpoint<Pick<User,\"name\"|\"age\">,User>"
+                }
+            },
+            "required": [
+                "get",
+                "post"
+            ],
+            "type": "object"
+        },
+        "/users/:userId": {
+            "properties": {
+                "delete": {
+                    "$ref": "#/definitions/Endpoint<{},{}>"
+                },
+                "get": {
+                    "$ref": "#/definitions/GetEndpoint<User>"
+                },
+                "patch": {
+                    "$ref": "#/definitions/Endpoint<Pick<User,\"name\"|\"age\">,User>"
+                }
+            },
+            "required": [
+                "delete",
+                "get",
+                "patch"
+            ],
+            "type": "object"
+        }
+    },
+    "required": [
+        "/users",
+        "/users/:userId"
+    ],
+    "type": "object"
+}
+

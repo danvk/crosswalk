@@ -8,7 +8,7 @@ type ExtractRouteParamsVarArgs<T extends string> =
   {} extends ExtractRouteParams<T> ? [] : [params: ExtractRouteParams<T>];
 
 /** Utility for safely constructing API URLs */
-export function apiUrlMaker<API>(prefix?: string) {
+export function apiUrlMaker<API>(prefix = '') {
   return <Path extends keyof API>(endpoint: Path & string) => {
     const toPath = compile(endpoint);
     return (...paramsList: ExtractRouteParamsVarArgs<Path & string>) =>
