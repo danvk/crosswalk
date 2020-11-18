@@ -115,7 +115,7 @@ export class TypedRouter<API> {
         });
       }
 
-      if (req.app.get('env') === 'development') {
+      if (req.app.get('env') === 'test') {
         // eslint-disable-next-line no-console
         console.debug(method, route, 'params=', req.params, 'body=', body);
       }
@@ -135,7 +135,8 @@ export class TypedRouter<API> {
           }
         })
         .catch((error: any) => {
-          if (error instanceof HTTPError) {
+          // With target below ES2015, instanceof doesn't work here.
+          if (error instanceof HTTPError || (error.code)) {
             response.status(error.code).json({error: error.message});
           } else {
             next(error);
