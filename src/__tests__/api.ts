@@ -20,6 +20,6 @@ export interface API {
     /** Edit an existing user */
     patch: Endpoint<Partial<CreateUserRequest>, User>;
     put: Endpoint<{name?: string; age?: number}, User>;
-    delete: Endpoint<{}, {}>;
+    delete: Endpoint<{}, User>;
   }
 }

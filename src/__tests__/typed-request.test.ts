@@ -1,5 +1,5 @@
 import {API, User} from './api';
-import {typedApi, apiUrlMaker} from '..';
+import {typedApi, apiUrlMaker, fetchJson} from '..';
 
 describe('typed requests', () => {
   describe('apiUrlMaker', () => {
@@ -59,6 +59,27 @@ describe('typed requests', () => {
       expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
+    });
+
+    it('should have a reasonable default fetcher', async () => {
+      const fetchMock = jest.fn(() =>
+        Promise.resolve({
+          json: () => Promise.resolve({ hello: 'fetch' }),
+        })
+      );
+      (global as any).fetch = fetchMock;
+      expect(await fetchJson('/api/v0/hello', 'get', {payload: 42})).toEqual({hello: 'fetch'});
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/v0/hello', {
+          method: 'get',
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: `{"payload":42}`,
+        },
+      )
     });
   });
 });

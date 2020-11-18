@@ -1,7 +1,9 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
     "definitions": {
         "Endpoint<Partial<Pick<User,\"name\"|\"age\">>,User>": {
+            "additionalProperties": false,
             "properties": {
                 "request": {
                     "$ref": "#/definitions/Partial<Pick<User,\"name\"|\"age\">>"
@@ -17,6 +19,7 @@
             "type": "object"
         },
         "Endpoint<Pick<User,\"name\"|\"age\">,User>": {
+            "additionalProperties": false,
             "properties": {
                 "request": {
                     "$ref": "#/definitions/Pick<User,\"name\"|\"age\">"
@@ -32,8 +35,10 @@
             "type": "object"
         },
         "Endpoint<{name?:string|undefined;age?:number|undefined;},User>": {
+            "additionalProperties": false,
             "properties": {
                 "request": {
+                    "additionalProperties": false,
                     "properties": {
                         "age": {
                             "type": "number"
@@ -54,7 +59,8 @@
             ],
             "type": "object"
         },
-        "Endpoint<{},{}>": {
+        "Endpoint<{},User>": {
+            "additionalProperties": false,
             "properties": {
                 "request": {
                     "properties": {
@@ -62,9 +68,7 @@
                     "type": "object"
                 },
                 "response": {
-                    "properties": {
-                    },
-                    "type": "object"
+                    "$ref": "#/definitions/User"
                 }
             },
             "required": [
@@ -74,6 +78,7 @@
             "type": "object"
         },
         "GetEndpoint<User>": {
+            "additionalProperties": false,
             "properties": {
                 "request": {
                     "type": "null"
@@ -89,11 +94,13 @@
             "type": "object"
         },
         "GetEndpoint<{users:User[];}>": {
+            "additionalProperties": false,
             "properties": {
                 "request": {
                     "type": "null"
                 },
                 "response": {
+                    "additionalProperties": false,
                     "properties": {
                         "users": {
                             "items": {
@@ -115,6 +122,7 @@
             "type": "object"
         },
         "Partial<Pick<User,\"name\"|\"age\">>": {
+            "additionalProperties": false,
             "properties": {
                 "age": {
                     "type": "number"
@@ -126,6 +134,7 @@
             "type": "object"
         },
         "Pick<User,\"name\"|\"age\">": {
+            "additionalProperties": false,
             "properties": {
                 "age": {
                     "type": "number"
@@ -141,6 +150,7 @@
             "type": "object"
         },
         "User": {
+            "additionalProperties": false,
             "properties": {
                 "age": {
                     "type": "number"
@@ -162,6 +172,7 @@
     },
     "properties": {
         "/users": {
+            "additionalProperties": false,
             "properties": {
                 "get": {
                     "$ref": "#/definitions/GetEndpoint<{users:User[];}>",
@@ -179,9 +190,10 @@
             "type": "object"
         },
         "/users/:userId": {
+            "additionalProperties": false,
             "properties": {
                 "delete": {
-                    "$ref": "#/definitions/Endpoint<{},{}>"
+                    "$ref": "#/definitions/Endpoint<{},User>"
                 },
                 "get": {
                     "$ref": "#/definitions/GetEndpoint<User>"

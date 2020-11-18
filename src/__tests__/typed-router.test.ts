@@ -12,7 +12,7 @@ test('TypedRouter', async () => {
 
   const router = new TypedRouter<API>(app, apiSchemaJson);
 
-  const users: User[] = [{
+  let users: User[] = [{
     id: 'fred',
     name: 'Fred',
     age: 42,
@@ -58,6 +58,15 @@ test('TypedRouter', async () => {
     return user;
   });
 
+  router.registerEndpoint('delete', '/users/:userId', async ({userId}) => {
+    const user = userOr404(userId);
+    users = users.filter(u => u !== user);
+    return user;
+  });
+  router.registerEndpoint('patch', '/users/:userId', async () => {
+    throw new Error('Not implemented');
+  });
+
   const api = request(app);
 
   const responseUsers = await api.get('/users').expect(200);
@@ -82,6 +91,44 @@ test('TypedRouter', async () => {
     name: 'Pebbles',
     age: 2,
   });
+
+  await api.get('/users/id').expect(200);
+  await api.delete('/users/wilma').expect(200);
+  await api.get('/users/wilma').expect(404);
+
+  // Request validation tests
+  await api.post('/users')
+    .send({age: 42})
+    .set('Accept', 'application/json')
+    .expect(400)
+    .expect(response => {
+      expect(response.body).toMatchObject({
+        error: `data should have required property 'name'`,
+      });
+    });
+
+  await api.put('/users/fred')
+    .send({age: '42'})
+    .set('Accept', 'application/json')
+    .expect(400)
+    .expect(response => {
+      expect(response.body).toMatchObject({
+        error: 'data.age should be number',
+      })
+    });
+
+
+  await api.put('/users/fred')
+    .send({lastName: 'Flintstone'})
+    .set('Accept', 'application/json')
+    .expect(400)
+    .expect(response => {
+      expect(response.body).toMatchObject({
+        error: 'data should NOT have additional properties',
+      })
+    });
+
+  router.assertAllRoutesRegistered();
 });
 
 // to test:

@@ -127,10 +127,6 @@ export class TypedRouter<API> {
           } else if (typeof responseObject === 'string') {
             response.status(200).send(responseObject);
           } else {
-            // Allow handlers to send a response other than 200 if they prefer (e.g. 201).
-            if (!response.statusCode) {
-              response.status(200);
-            }
             response.json(responseObject);
           }
         })
