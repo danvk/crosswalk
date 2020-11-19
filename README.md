@@ -1,17 +1,19 @@
-# Typed Router
-
-🚧🏗 _Under construction, work in progress!_ 🏗🚧
+# Crosswalk: safe routes for Express and TypeScript
 
 This library helps you build type-safe REST APIs using Express using
 TypeScript.
 
-Here's the deal:
+Here's what you have to do:
 
-- You define your API using TypeScript types.
+- Define your API using TypeScript types (see below).
+- Run `typescript-json-schema` to produce a JSON Schema for your API.
+
+Here's what you get in return:
+
 - The typed router will give you:
   - Type-safe API implementations (for your server)
   - Type-safe API requests (for your client code)
-  - Runtime request validation (for your server, using ajv and typescript-json-schema)
+  - Runtime request validation (for your server, using [ajv][])
   - Interactive API documentation (via swagger-ui-express)
 
 Requirements:
@@ -19,12 +21,22 @@ Requirements:
 - TypeScript 4.1+
 - Express
 
-There is an optional requirement of typescript-json-schema if you want runtime
-request validation or API docs. (You probably do!)
+There is an optional requirement of [`typescript-json-schema`][tsjs] if you
+want runtime request validation or API docs. (You probably do!)
+
+For a full example of a project using crosswalk, see this [demo repo][demo].
 
 ## Usage
 
-First, define your API in `api.ts`:
+First install `crosswalk` and its peer dependencies (if you haven't already):
+
+    # if needed
+    npm install express
+    npm install -D typescript @types/express
+
+    npm install crosswalk
+
+Then define your API in `api.ts`:
 
 ```ts
 import type {Endpoint, GetEndpoint} from 'typed-router/dist/api-spec';
@@ -72,7 +84,9 @@ There are a few things you get by doing this:
   expected response type.
 
 While not required, it's not much extra work to get runtime request validation
-and this is highly recommended. See below.
+and this is highly recommended. See "Runtime request validation" below.
+
+For a complete example, check out the [crosswalk-demo repo][demo].
 
 ## Type-safe API usage
 
@@ -103,22 +117,20 @@ This uses the `fetch` API under the hood, but you can plug in your own fetch
 function if you need to pass extra headers or prefer to use Axios.
 
 You can also construct API URLs for mocking or requesting yourself. The path
-paramters will be type checked. No more `/path/to/undefined/null`!
+parameters will be type checked. No more `/path/to/undefined/null`!
 
 ```ts
 import {apiUrlMaker} from 'typed-router';
 const urlMaker = apiUrlMaker<API>('/api/v0');
-const getUser = urlMaker('/users/:userId');
-const fredUrl = getUser({userId: 'fred'});
+const getUserUrl = urlMaker('/users/:userId');
+const fredUrl = getUserUrl({userId: 'fred'});
 // /api/v0/users/fred
 ```
 
-## Bells and Whistles
-
-### Runtime request validation
+## Runtime request validation
 
 To ensure that your users hit API endpoints with the correct payloads, use
-typescript-json-schema to convert your API definition to JSON Schema:
+`typescript-json-schema` to convert your API definition to JSON Schema:
 
     typescript-json-schema --required --strictNullChecks api.ts API --out api.schema.json
 
@@ -140,6 +152,8 @@ The recommended way to keep them in sync is to run `typescript-json-schema` as
 part of your continuous integration workflow and fail if there are any diffs.
 The TypeScript definition (`api.ts`) is the source of truth, not the JSON
 Schema (`api.schema.json`).
+
+## Bells and Whistles
 
 ### Error handling
 
@@ -199,15 +213,72 @@ app.use('/docs', swaggerUI.serve, swaggerUI.setup(apiSpecToOpenApi(apiSchema)));
 Then visit `/docs`. You may need to pass some additional options to
 `apiSpecToOpenApi` to get query execution from the Swagger docs to work.
 
+## Questions
+
+**GraphQL has types, why not use that?**
+
+If you want to use GraphQL, that's great! Go for it! But there are many reasons
+that REST APIs are still around. If you're already using REST and want to get
+type safety without havin to do a full GraphQL conversion, then Crosswalk can
+help.
+
+**Why do I have to define my API in TypeScript _and_ JSON Schema?**
+
+[TypeScript types get erased at runtime][1], so if you want to use TypeScript
+types as your source of truth, you need to have some way of accessing them at
+runtime. For Crosswalk, that way is JSON Schema. This is a convenient form
+since there are many JSON Schema validators (such as [ajv][]) and JSON Schema
+is also used by OpenAPI, which makes it easy to generate documentation.
+
+Why not use JSON Schema as the source of truth? Some developers choose to do
+this, but personally I find TypeScript's type declaration syntax much
+friendlier to use. And you'd still need some way to get TypeScript types out
+of it to get static type checking.
+
+There are several tools for defining types that are available both at runtime
+and for TypeScript. If running `typescript-json-schema` bothers you, you might
+want to look into [iots][] or [zod][].
+
+**How do I keep `api.ts` and `api.schema.json` in sync?**
+
+I recommend adding a check to your continuous integration system that runs
+`typescript-json-schema` and then `git diff` to make sure there are no changes.
+You could also do this as a prepush or precommit hook.
+
+## Development setup
+
+After cloning, run:
+
+    yarn
+
+You may get some warnings about peer dependencies, but these can be ignored.
+
+Then:
+
+    yarn test
+    yarn test --coverage
+
+To test with the [demo repo][demo],
+
+    yarn tsc
+    cd ../crosswalk-demo
+    yarn add ../crosswalk
+
+To publish:
+
+    yarn tsc
+    yarn publish
+
 ## TODO
 
-- [ ] Write unit tests
 - [ ] Add helper methods for all HTTP verbs
 - [ ] Look into cleaning up generics
-- [ ] Decide on a name (ts-eliot?)
-- [ ] Figure out how to handle `@types` deps (peer deps?)
-- [ ] Decide on a parameter ordering for methods
 - [ ] Options for request logging
+- [ ] Narrow types of request.params, request.body in handlers
+- [x] Write unit tests
+- [x] Decide on a name
+- [x] Figure out how to handle `@types` deps (peer deps?)
+- [x] Decide on a parameter ordering for methods
 - [x] Should TypedRouter be a class ~or a function~?
 - [x] Plug into cityci
 - [x] Add a check that all endpoints are implemented
@@ -216,3 +287,10 @@ Then visit `/docs`. You may need to pass some additional options to
 - [x] Look into generating API docs, e.g. w/ Swagger
 - [x] Make the runtime validation part optional
 - [x] Plug in TS 4.1 template literal types
+
+[tsjs]: https://github.com/YousefED/typescript-json-schema
+[ajv]: https://ajv.js.org/
+[1]: https://effectivetypescript.com/2020/07/27/safe-queryselector/
+[zod]: https://github.com/colinhacks/zod
+[iots]: https://github.com/gcanti/io-ts
+[demo]: https://github.com/danvk/crosswalk-demo
