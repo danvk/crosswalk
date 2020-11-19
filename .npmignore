@@ -2,3 +2,5 @@ src
 jest.config.js
 tsconfig.json
 yarn.lock
+**/__tests__
+.vscode
