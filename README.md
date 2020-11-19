@@ -10,11 +10,10 @@ Here's what you have to do:
 
 Here's what you get in return:
 
-- The typed router will give you:
-  - Type-safe API implementations (for your server)
-  - Type-safe API requests (for your client code)
-  - Runtime request validation (for your server, using [ajv][])
-  - Interactive API documentation (via swagger-ui-express)
+- Type-safe API implementations (for your server)
+- Type-safe API requests (for your client code)
+- Runtime request validation (for your server, using [ajv][])
+- Interactive API documentation (via [swagger-ui-express][suie])
 
 Requirements:
 
@@ -245,6 +244,11 @@ I recommend adding a check to your continuous integration system that runs
 `typescript-json-schema` and then `git diff` to make sure there are no changes.
 You could also do this as a prepush or precommit hook.
 
+**Why does this require TypeScript 4.1 or later?**
+
+Because it has a hard dependency on [template literal types][ts41]. These are
+used to [generate types based on Express paths][tweet].
+
 ## Development setup
 
 After cloning, run:
@@ -294,3 +298,6 @@ To publish:
 [zod]: https://github.com/colinhacks/zod
 [iots]: https://github.com/gcanti/io-ts
 [demo]: https://github.com/danvk/crosswalk-demo
+[suie]: https://github.com/scottie1984/swagger-ui-express
+[ts41]: https://devblogs.microsoft.com/typescript/announcing-typescript-4-1-rc/
+[tweet]: https://twitter.com/danvdk/status/1301707026507198464
