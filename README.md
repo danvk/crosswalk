@@ -249,6 +249,11 @@ You could also do this as a prepush or precommit hook.
 Because it has a hard dependency on [template literal types][ts41]. These are
 used to [generate types based on Express paths][tweet].
 
+**What's with the name?**
+
+A crosswalk is a _safe route_ across a road. Also a nod to [Sidewalk Labs][swl],
+where this project was originally developed.
+
 ## Development setup
 
 After cloning, run:
@@ -279,6 +284,7 @@ To publish:
 - [ ] Look into cleaning up generics
 - [ ] Options for request logging
 - [ ] Narrow types of request.params, request.body in handlers
+- [ ] Set up prettier, eslint, CI
 - [x] Write unit tests
 - [x] Decide on a name
 - [x] Figure out how to handle `@types` deps (peer deps?)
@@ -301,3 +307,4 @@ To publish:
 [suie]: https://github.com/scottie1984/swagger-ui-express
 [ts41]: https://devblogs.microsoft.com/typescript/announcing-typescript-4-1-rc/
 [tweet]: https://twitter.com/danvdk/status/1301707026507198464
+[swl]: https://sidewalklabs.com/
