@@ -38,7 +38,7 @@ First install `crosswalk` and its peer dependencies (if you haven't already):
 Then define your API in `api.ts`:
 
 ```ts
-import type {Endpoint, GetEndpoint} from 'typed-router/dist/api-spec';
+import type {Endpoint, GetEndpoint} from 'crosswalk/dist/api-spec';
 
 export interface API {
   '/users': {
@@ -55,7 +55,7 @@ Then implement the API (`users.ts`):
 
 ```ts
 import {API} from './api';
-import {TypedRouter} from 'typed-router';
+import {TypedRouter} from 'crosswalk';
 
 export function registerAPI(router: TypedRouter<API>) {
   router.get('/users', async () => users;
@@ -92,7 +92,7 @@ For a complete example, check out the [crosswalk-demo repo][demo].
 In your client-side code, you can make type-safe API requests:
 
 ```ts
-import {typedApi} from 'typed-router';
+import {typedApi} from 'crosswalk';
 import {API} from './api';
 
 const api = typedApi<API>();
@@ -119,7 +119,7 @@ You can also construct API URLs for mocking or requesting yourself. The path
 parameters will be type checked. No more `/path/to/undefined/null`!
 
 ```ts
-import {apiUrlMaker} from 'typed-router';
+import {apiUrlMaker} from 'crosswalk';
 const urlMaker = apiUrlMaker<API>('/api/v0');
 const getUserUrl = urlMaker('/users/:userId');
 const fredUrl = getUserUrl({userId: 'fred'});
@@ -161,7 +161,7 @@ In `users.ts`:
 
 ```ts
 import {API} from './api';
-import {TypedRouter, HTTPError} from 'typed-router';
+import {TypedRouter, HTTPError} from 'crosswalk';
 
 function getUserById(userId: string): User | null {
   // ...
@@ -204,7 +204,7 @@ Then convert your API schema to Open API format and serve it up:
 
 ```ts
 import swaggerUI from 'swagger-ui-express';
-import {TypedRouter, apiSpecToOpenApi} from 'typed-router';
+import {TypedRouter, apiSpecToOpenApi} from 'crosswalk';
 
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(apiSpecToOpenApi(apiSchema)));
 ```
