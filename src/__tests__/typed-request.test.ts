@@ -1,3 +1,5 @@
+import { assert as assertType, _ } from 'spec.ts';
+
 import {API, User} from './api';
 import {typedApi, apiUrlMaker, fetchJson} from '..';
 
@@ -35,14 +37,16 @@ describe('typed requests', () => {
       const getUserById = api.get('/users/:userId');
 
       mockFetcher.mockReturnValueOnce(Promise.resolve({users: []}));
-      const users: {users: User[]} = await getUsers();
+      const users = await getUsers();
+      assertType(users, _ as {users: User[]});
       expect(users).toEqual({users: []});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/users', 'get', null);
 
       mockFetcher.mockClear();
       mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});
-      const user: User = await getUserById({userId: 'fred'});
+      const user = await getUserById({userId: 'fred'});
+      assertType(user, _ as User);
       expect(user).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/users/fred', 'get', null);
@@ -55,7 +59,8 @@ describe('typed requests', () => {
       const createUser = api.post('/users');
 
       mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});
-      const newUser: User = await createUser({}, {name: 'Fred', age: 42});
+      const newUser = await createUser({}, {name: 'Fred', age: 42});
+      assertType(newUser, _ as User);
       expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});

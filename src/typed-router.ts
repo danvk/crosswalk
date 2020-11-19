@@ -50,7 +50,10 @@ export class TypedRouter<API> {
     ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>
   ) {
     // TODO: fill in with a more streamlined implementation?
-    this.registerEndpoint('get' as any, route, (params, _, request, response) => handler(params, request as any, response as any));
+    this.registerEndpoint(
+      'get' as any, route,
+      (params, _, request, response) => handler(params, request as any, response as any)
+    );
   }
 
   /** Register a handler on the router for the given path and verb */
@@ -68,40 +71,7 @@ export class TypedRouter<API> {
       response: express.Response<SafeKey<Spec, 'response'>>,
     ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
   ) {
-    const {apiSchema} = this;
-    let validate: Ajv.ValidateFunction | undefined;
-    if (apiSchema) {
-      const apiDef = apiSchema.properties as any;
-      if (!apiDef[route]) {
-        throw new Error(`API JSONSchema is missing entry for ${route}`);
-      }
-      const refSchema: string = apiDef[route].properties[method].$ref;
-      const endpoint = refSchema.slice('#/definitions/'.length);
-      const endpointTypes = (apiSchema.definitions as any)[endpoint].properties;
-      let requestType = endpointTypes.request;
-      if (requestType.$ref) {
-        requestType = requestType.$ref; // allow either references or inline types
-      } else if (requestType.type && requestType.type === 'null') {
-        requestType = null; // no request body, no validation
-      } else if (requestType.allOf) {
-        // TODO(danvk): figure out how to make ajv understand these.
-        throw new Error('Intersection types in APIs are not supported yet.');
-      }
-
-      if (requestType && this.ajv) {
-        if (typeof requestType === 'string') {
-          validate = this.ajv.getSchema(requestType);
-        } else {
-          // Create a new AJV validate for inline object types.
-          // This assumes these will never reference other type definitions.
-          const requestAjv = new Ajv();
-          validate = requestAjv.compile(requestType);
-        }
-        if (!validate) {
-          throw new Error(`Unable to get schema for '${requestType}'`);
-        }
-      }
-    }
+    const validate = this.getValidator(route, method);
     this.registrations.push({path: route as string, method});
 
     this.router[method](route as any, (...[req, response, next]: RequestParams) => {
@@ -139,6 +109,48 @@ export class TypedRouter<API> {
           }
         });
     });
+  }
+
+  /** Get a validation function for request bodies for the endpoint, or null if not applicable. */
+  getValidator(route: string, method: HTTPVerb): Ajv.ValidateFunction | null {
+    const {apiSchema} = this;
+    if (!apiSchema) {
+      return null;
+    }
+
+    const apiDef = apiSchema.properties as any;
+    if (!apiDef[route]) {
+      throw new Error(`API JSONSchema is missing entry for ${route}`);
+    }
+    const refSchema: string = apiDef[route].properties[method].$ref;
+    const endpoint = refSchema.slice('#/definitions/'.length);
+    const endpointTypes = (apiSchema.definitions as any)[endpoint].properties;
+    let requestType = endpointTypes.request;
+    if (requestType.$ref) {
+      requestType = requestType.$ref; // allow either references or inline types
+    } else if (requestType.type && requestType.type === 'null') {
+      requestType = null; // no request body, no validation
+    } else if (requestType.allOf) {
+      // TODO(danvk): figure out how to make ajv understand these.
+      throw new Error('Intersection types in APIs are not supported yet.');
+    }
+
+    if (requestType && this.ajv) {
+      let validate;
+      if (typeof requestType === 'string') {
+        validate = this.ajv.getSchema(requestType) ?? null;
+      } else {
+        // Create a new AJV validate for inline object types.
+        // This assumes these will never reference other type definitions.
+        const requestAjv = new Ajv();
+        validate = requestAjv.compile(requestType);
+      }
+      if (!validate) {
+        throw new Error(`Unable to get schema for '${requestType}'`);
+      }
+      return validate;
+    }
+    return null;
   }
 
   /** Throw if any routes declared in the API spec have not been implemented. */

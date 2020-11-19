@@ -1,5 +1,6 @@
 import bodyParser from 'body-parser';
 import express from 'express';
+import { assert as assertType, _ } from 'spec.ts';
 import request from 'supertest';
 
 import {API, User} from './api';
@@ -25,7 +26,11 @@ test('TypedRouter', async () => {
   // This is async, so it does return a promise.
   router.get('/users', async () => ({users}));
 
-  router.registerEndpoint('post', '/users', async ({}, user, _request, response) => {
+  router.registerEndpoint('post', '/users', async ({}, user, request, response) => {
+    assertType(user, _ as {age: number; name: string;});
+    assertType(request.params, _ as {});
+    assertType(request.body, _ as {age: number; name: string;});
+
     const newUser = {id: 'id', ...user};
     users.push(newUser);
     response.status(201);
@@ -47,7 +52,12 @@ test('TypedRouter', async () => {
     router.assertAllRoutesRegistered();
   }).toThrowError();
 
-  router.registerEndpoint('put', '/users/:userId', async ({userId}, {age, name}, _request, response) => {
+  router.registerEndpoint('put', '/users/:userId', async (params, {age, name}, request, response) => {
+    assertType(params, _ as {userId: string});
+    assertType(request.params, _ as {userId: string});
+    assertType(request.body, _ as {age?: number; name?: string;});
+
+    const {userId} = params;
     const user = userOr404(userId);
     if (name) {
       user.name = name;
