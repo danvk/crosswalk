@@ -39,33 +39,33 @@ export class TypedRouter<API> {
   }
 
   get<
-    Path extends keyof API,
-    Spec extends SafeKey<API[Path], 'get'> = SafeKey<API[Path], 'get'>
+    Path extends keyof API & string,
+    Spec extends SafeKey<API[Path], 'get'> = SafeKey<API[Path], 'get'>,
   >(
     route: Path,
     handler: (
-      params: Spec extends AnyEndpoint ? ExtractRouteParams<Path & string> : never,
-      request: express.Request,
-      response: express.Response,
+      params: ExtractRouteParams<Path>,
+      request: express.Request<ExtractRouteParams<Path>, SafeKey<Spec, 'response'>>,
+      response: express.Response<SafeKey<Spec, 'response'>>,
     ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>
   ) {
     // TODO: fill in with a more streamlined implementation?
-    this.registerEndpoint('get' as any, route, (params, _, request, response) => handler(params, request, response));
+    this.registerEndpoint('get' as any, route, (params, _, request, response) => handler(params, request as any, response as any));
   }
 
   /** Register a handler on the router for the given path and verb */
   registerEndpoint<
-    Path extends keyof API,
+    Path extends keyof API & string,
     Method extends keyof API[Path] & HTTPVerb,
     Spec extends API[Path][Method] = API[Path][Method]
   >(
     method: Method,
     route: Path,
     handler: (
-      params: Spec extends AnyEndpoint ? ExtractRouteParams<Path & string> : never,
-      body: Spec extends AnyEndpoint ? Spec['request'] : never,
-      request: express.Request,
-      response: express.Response,
+      params: ExtractRouteParams<Path>,
+      body: SafeKey<Spec, 'request'>,
+      request: express.Request<ExtractRouteParams<Path>, SafeKey<Spec, 'response'>, SafeKey<Spec, 'request'>>,
+      response: express.Response<SafeKey<Spec, 'response'>>,
     ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
   ) {
     const {apiSchema} = this;
@@ -120,7 +120,7 @@ export class TypedRouter<API> {
         console.debug(method, route, 'params=', req.params, 'body=', body);
       }
 
-      handler(req.params as any, body, req, response)
+      handler(req.params as any, body, req as any, response)
         .then(responseObject => {
           if (responseObject === null) {
             // nothing to do. This can happen if the response redirected, say.

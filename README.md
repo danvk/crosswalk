@@ -249,6 +249,10 @@ You could also do this as a prepush or precommit hook.
 Because it has a hard dependency on [template literal types][ts41]. These are
 used to [generate types based on Express paths][tweet].
 
+If you get errors about `Type 'any' is not assignable to type 'never'.`, it
+might be because you're using an old version of TypeScript, either in your
+project or in your editor.
+
 **What's with the name?**
 
 A crosswalk is a _safe route_ across a road. Also a nod to [Sidewalk Labs][swl],
@@ -283,8 +287,11 @@ To publish:
 - [ ] Add helper methods for all HTTP verbs
 - [ ] Look into cleaning up generics
 - [ ] Options for request logging
-- [ ] Narrow types of request.params, request.body in handlers
 - [ ] Set up prettier, eslint, CI
+- [ ] Set up better type tests
+- [ ] Add an option for more express-like callbacks (w/ only request, response)
+- [ ] Support fancier paths
+- [x] Narrow types of request.params, request.body in handlers
 - [x] Write unit tests
 - [x] Decide on a name
 - [x] Figure out how to handle `@types` deps (peer deps?)
