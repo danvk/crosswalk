@@ -2,6 +2,7 @@ import { assert as assertType, _ } from 'spec.ts';
 
 import {API, User} from './api';
 import {typedApi, apiUrlMaker, fetchJson} from '..';
+import { Endpoint } from '../api-spec';
 
 describe('typed requests', () => {
   describe('apiUrlMaker', () => {
@@ -26,6 +27,14 @@ describe('typed requests', () => {
 
       // @ts-expect-error
       urlMaker('/users')({notUserId: 'fred'});
+    });
+
+    it('should accept readonly path params', () => {
+      const user = {userId: 'fred'} as const;
+      assertType(user, _ as {readonly userId: "fred"});
+
+      const urlMaker = apiUrlMaker<API>('/api/v0');
+      expect(urlMaker('/users/:userId')(user)).toEqual('/api/v0/users/fred')
     });
   });
 
@@ -64,6 +73,31 @@ describe('typed requests', () => {
       expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
+    });
+
+    it('should accept readonly objects in POST requests', async () => {
+      interface APIWithDeepObject {
+        '/foo': {
+          post: Endpoint<{foo: {bar: string[]}}, {baz: string}>;
+        }
+      }
+
+      const mockFetcher = jest.fn();
+      const api = typedApi<APIWithDeepObject>({fetch: mockFetcher});
+
+      const createFoo = api.post('/foo');
+      const readonlyFoo = {foo: {bar: ['baz', 'quux']}} as const;
+      // @ts-expect-error
+      readonlyFoo.foo.bar[0] = 'foo';
+      mockFetcher.mockReturnValueOnce({baz: 'bar'});
+      const fooResponse = await createFoo({}, readonlyFoo);
+
+      expect(mockFetcher).toHaveBeenCalledTimes(1);
+
+      // It's OK to modify the response.
+      assertType(fooResponse, _ as {baz: string});
+      expect(fooResponse).toEqual({baz: 'bar'});
+      fooResponse.baz = 'foo';
     });
 
     it('should have a reasonable default fetcher', async () => {
