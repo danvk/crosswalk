@@ -143,8 +143,10 @@ const typedRouter = new TypedRouter<API>(app, apiSchema);
 Now if the user hits an API endpoint with an incorrect payload, they'll get a
 friendly error message:
 
-    $ http POST :/user
-    example here
+    $ http POST :/user name="Fred"
+    {
+        error: `data should have required property 'age'`,
+    }
 
 You now have two representations of your API: `api.ts` and `api.schema.json`.
 The recommended way to keep them in sync is to run `typescript-json-schema` as
