@@ -312,6 +312,6 @@ To publish:
 [iots]: https://github.com/gcanti/io-ts
 [demo]: https://github.com/danvk/crosswalk-demo
 [suie]: https://github.com/scottie1984/swagger-ui-express
-[ts41]: https://devblogs.microsoft.com/typescript/announcing-typescript-4-1-rc/
+[ts41]: https://devblogs.microsoft.com/typescript/announcing-typescript-4-1
 [tweet]: https://twitter.com/danvdk/status/1301707026507198464
 [swl]: https://sidewalklabs.com/
