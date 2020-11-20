@@ -2,10 +2,10 @@
 
 import { compile } from "path-to-regexp";
 
-import { ExtractRouteParams, SafeKey, HTTPVerb, Unionize } from "./utils";
+import { ExtractRouteParams, SafeKey, HTTPVerb, Unionize, DeepReadonly } from "./utils";
 
 type ExtractRouteParamsVarArgs<T extends string> =
-  {} extends ExtractRouteParams<T> ? [] : [params: ExtractRouteParams<T>];
+  {} extends ExtractRouteParams<T> ? [] : [params: Readonly<ExtractRouteParams<T>>];
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {
@@ -58,7 +58,7 @@ export function typedApi<API>(options?: Options) {
   ) => {
     type Params = ExtractRouteParams<Path & string>;
     type Endpoint = API[Path][Method];
-    type Request = SafeKey<Endpoint, "request">;
+    type Request = DeepReadonly<SafeKey<Endpoint, "request">>;
     type Response = SafeKey<Endpoint, "response">;
     const makeUrl = urlMaker(endpoint);
     return (queryParams: Params, body: Request): Promise<Response> =>
@@ -79,7 +79,7 @@ export function typedApi<API>(options?: Options) {
     post: <Path extends PostPaths>(endpoint: Path) => {
       type Params = ExtractRouteParams<Path & string>;
       type Endpoint = SafeKey<API[Path], "post">;
-      type Request = SafeKey<Endpoint, "request">;
+      type Request = DeepReadonly<SafeKey<Endpoint, "request">>;
       type Response = SafeKey<Endpoint, "response">;
       return (params: Params, body: Request): Promise<Response> =>
         request(endpoint, "post" as any)(params, body);

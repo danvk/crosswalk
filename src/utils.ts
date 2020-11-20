@@ -15,3 +15,12 @@ export type ExtractRouteParams<T extends string> =
 export type HTTPVerb = 'get' | 'post' | 'put' | 'delete' | 'patch';
 
 export type Unionize<T> = {[k in keyof T]: {k: k, v: T[k]}}[keyof T];
+
+export type Primitive = string | number | boolean | bigint | symbol | undefined | null;
+
+/** Based on ts-essentials, but reduced to only JSON-compatible types */
+export type DeepReadonly<T> = T extends Primitive
+  ? T
+  : T extends {}
+  ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+  : Readonly<T>;
