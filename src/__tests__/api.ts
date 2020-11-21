@@ -1,4 +1,4 @@
-import { Endpoint, GetEndpoint } from "../api-spec";
+import { APISpec, Endpoint, GetEndpoint } from "../api-spec";
 
 export interface User {
   id: string;

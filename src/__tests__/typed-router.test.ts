@@ -23,10 +23,9 @@ test('TypedRouter', async () => {
     age: 41,
   }];
 
-  // This is async, so it does return a promise.
   router.get('/users', async () => ({users}));
 
-  router.registerEndpoint('post', '/users', async ({}, user, request, response) => {
+  router.post('/users', async ({}, user, request, response) => {
     assertType(user, _ as {age: number; name: string;});
     assertType(request.params, _ as {});
     assertType(request.body, _ as {age: number; name: string;});
