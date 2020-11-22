@@ -36,6 +36,7 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Test
-        run: yarn test
+        run: yarn test --coverage
 
-
+      - name: Codecov
+        uses: codecov/codecov-action@v1.0.15
