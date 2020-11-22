@@ -4,7 +4,7 @@ import Ajv from 'ajv';
 import express from 'express';
 
 import {Endpoint, HTTPVerb} from './api-spec';
-import { ExtractRouteParams, PathsForMethod, SafeKey } from './utils';
+import {ExtractRouteParams, PathsForMethod, SafeKey} from './utils';
 
 /** Throw this in a handler to produce an HTTP error response */
 export class HTTPError extends Error {
@@ -22,57 +22,57 @@ type RequestParams = Parameters<express.RequestHandler>;
 
 type AnyEndpoint = Endpoint<any, any>;
 
-type ExpressRequest<Path extends string, Spec> = unknown & express.Request<
-  ExtractRouteParams<Path>,
-  SafeKey<Spec, 'response'>,
-  SafeKey<Spec, 'request'>
->;
+type ExpressRequest<Path extends string, Spec> = unknown &
+  express.Request<
+    ExtractRouteParams<Path>,
+    SafeKey<Spec, 'response'>,
+    SafeKey<Spec, 'request'>
+  >;
 
 type ExpressResponse<Spec> = unknown & express.Response<SafeKey<Spec, 'response'>>;
 
 const registerWithBody = <Method extends HTTPVerb, API>(
-  method: Method, router: TypedRouter<API>
-) =>
-  <
-  Path extends PathsForMethod<API, Method>,
-  Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>,
-  >(
-    route: Path,
-    handler: (
-      params: ExtractRouteParams<Path>,
-      body: SafeKey<Spec, 'request'>,
-      request: ExpressRequest<Path, Spec>,
-      response: ExpressResponse<Spec>,
-    ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>
-  ) => {
-    router.registerEndpoint(method, route as any, handler as any);
-  };
-
-const registerWithoutBody = <Method extends HTTPVerb, API>(
-  method: Method, router: TypedRouter<API>
-) =>
-  <
+  method: Method,
+  router: TypedRouter<API>,
+) => <
   Path extends PathsForMethod<API, Method>,
   Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>
-  >(
-    route: Path,
-    handler: (
-      params: ExtractRouteParams<Path>,
-      request: ExpressRequest<Path, Spec>,
-      response: ExpressResponse<Spec>,
-    ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>
-  ) => {
-    router.registerEndpoint(
-      method,
-      route as any,
-      (params, _, request, response) => handler(params as any, request as any, response as any));
-  };
+>(
+  route: Path,
+  handler: (
+    params: ExtractRouteParams<Path>,
+    body: SafeKey<Spec, 'request'>,
+    request: ExpressRequest<Path, Spec>,
+    response: ExpressResponse<Spec>,
+  ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
+) => {
+  router.registerEndpoint(method, route as any, handler as any);
+};
+
+const registerWithoutBody = <Method extends HTTPVerb, API>(
+  method: Method,
+  router: TypedRouter<API>,
+) => <
+  Path extends PathsForMethod<API, Method>,
+  Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>
+>(
+  route: Path,
+  handler: (
+    params: ExtractRouteParams<Path>,
+    request: ExpressRequest<Path, Spec>,
+    response: ExpressResponse<Spec>,
+  ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
+) => {
+  router.registerEndpoint(method, route as any, (params, _, request, response) =>
+    handler(params as any, request as any, response as any),
+  );
+};
 
 export class TypedRouter<API> {
   router: express.Router;
   apiSchema?: any;
   ajv?: Ajv.Ajv;
-  registrations: {path: string, method: HTTPVerb}[];
+  registrations: {path: string; method: HTTPVerb}[];
 
   constructor(router: express.Router, apiSchema?: any) {
     this.router = router;
@@ -105,7 +105,7 @@ export class TypedRouter<API> {
       body: SafeKey<Spec, 'request'>,
       request: ExpressRequest<Path, Spec>,
       response: ExpressResponse<Spec>,
-    ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>
+    ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
   ) {
     const validate = this.getValidator(route, method);
     this.registrations.push({path: route as string, method});
@@ -138,7 +138,7 @@ export class TypedRouter<API> {
         })
         .catch((error: any) => {
           // With target below ES2015, instanceof doesn't work here.
-          if (error instanceof HTTPError || (error.code)) {
+          if (error instanceof HTTPError || error.code) {
             response.status(error.code).json({error: error.message});
           } else {
             next(error);
@@ -196,10 +196,7 @@ export class TypedRouter<API> {
     }
 
     const expected = new Set<string>();
-    const {
-      required: endpoints,
-      properties: endpointSpecs,
-    } = this.apiSchema;
+    const {required: endpoints, properties: endpointSpecs} = this.apiSchema;
     for (const path of endpoints) {
       const methods = endpointSpecs[path].required;
       for (const method of methods) {
@@ -215,7 +212,7 @@ export class TypedRouter<API> {
     if (expected.size > 0) {
       const missing = Array.from(expected.values()).join('\n');
       throw new Error(
-        `Failed to register these endpoints, which were specified in API JSON Schema:\n${missing}`
+        `Failed to register these endpoints, which were specified in API JSON Schema:\n${missing}`,
       );
     }
   }

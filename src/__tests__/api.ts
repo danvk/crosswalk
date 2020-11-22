@@ -1,4 +1,4 @@
-import { Endpoint, GetEndpoint } from "../api-spec";
+import {Endpoint, GetEndpoint} from '../api-spec';
 
 export interface User {
   id: string;
@@ -21,5 +21,5 @@ export interface API {
     patch: Endpoint<Partial<CreateUserRequest>, User>;
     put: Endpoint<{name?: string; age?: number}, User>;
     delete: Endpoint<{}, User>;
-  }
+  };
 }
