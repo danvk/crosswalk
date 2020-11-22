@@ -39,7 +39,6 @@ type HandlerWithBody<
     response: express.Response<SafeKey<Spec, 'response'>>,
   ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>;
 
-
 type HandlerWithoutBody<
   API,
   Method extends HTTPVerb,
@@ -55,12 +54,27 @@ type HandlerWithoutBody<
     response: express.Response<SafeKey<Spec, 'response'>>,
   ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>;
 
-const registerWithBody = <Method extends HTTPVerb, API>(method: Method, router: TypedRouter<API>) =>
-  <API, Path extends PathsForMethod<API, Method>>(
+const registerWithBody = <Method extends HTTPVerb, API>(
+  method: Method, router: TypedRouter<API>
+) =>
+  <Path extends PathsForMethod<API, Method>>(
     route: Path,
-    handler: HandlerWithBody<API, Method, Path>
+    handler: unknown & HandlerWithBody<API, Method, Path>
   ) => {
     router.registerEndpoint(method, route as any, handler as any);
+  };
+
+const registerWithoutBody = <Method extends HTTPVerb, API>(
+  method: Method, router: TypedRouter<API>
+) =>
+  <Path extends PathsForMethod<API, Method>>(
+    route: Path,
+    handler: unknown & HandlerWithoutBody<API, Method, Path>
+  ) => {
+    router.registerEndpoint(
+      method,
+      route as any,
+      (params, _, request, response) => handler(params as any, request as any, response as any));
   };
 
 export class TypedRouter<API> {
@@ -79,27 +93,13 @@ export class TypedRouter<API> {
     this.registrations = [];
   }
 
-  get<Path extends PathsForMethod<API, 'get'>>(
-    route: Path,
-    handler: HandlerWithoutBody<API, 'get', Path>
-  ) {
-    // TODO: fill in with a more streamlined implementation?
-    this.registerEndpoint(
-      'get' as any, route,
-      (params, _, request, response) => handler(params, request as any, response as any)
-    );
-  }
+  // TODO(danvk): consider replacing get() with a streamlined implementation
+  get = registerWithoutBody<'get', API>('get', this);
+  delete = registerWithoutBody<'delete', API>('delete', this);
 
-  post = registerWithBody<'post', API>('post', this)
-
-  /*
-  post<Path extends PathsForMethod<API, 'post'>>(
-    route: Path,
-    handler: HandlerWithBody<API, 'post', Path>
-  ) {
-    this.registerEndpoint('post' as any, route, handler);
-  }
-  */
+  post = registerWithBody<'post', API>('post', this);
+  patch = registerWithBody<'patch', API>('patch', this);
+  put = registerWithBody<'put', API>('put', this);
 
   /** Register a handler on the router for the given path and verb */
   registerEndpoint<
