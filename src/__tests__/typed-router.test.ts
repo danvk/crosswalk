@@ -6,7 +6,6 @@ import request from 'supertest';
 import {API, User} from './api';
 import apiSchemaJson from './api.schema.json';
 import {HTTPError, TypedRouter} from '../typed-router';
-import { Endpoint, GetEndpoint } from '../api-spec';
 
 test('TypedRouter', async () => {
   const app = express();
