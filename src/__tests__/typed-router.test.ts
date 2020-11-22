@@ -166,14 +166,20 @@ test('invalid registrations should be type errors', () => {
 
 test('autocomplete', () => {
   interface API {
-    '/path/to/:foo/:bar:/baz': {
-      get: GetEndpoint<null>;
-      post: Endpoint<null, null>;
+    '/path/to/:foo/:bar/baz': {
+      get: GetEndpoint<{}>;
+      post: Endpoint<null, {}>;
     }
   }
 
   const app = express();
   const router = new TypedRouter<API>(app);
 
-  router.get('/path/to/:foo/:bar:/baz',
+  router.get('/path/to/:foo/:bar/baz', async ({foo, bar}) => {
+    return {};
+  });
+
+  router.registerEndpoint('post', '/path/to/:foo/:bar/baz', async ({foo}) => {
+    return {};
+  });
 });

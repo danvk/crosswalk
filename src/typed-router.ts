@@ -22,44 +22,24 @@ type RequestParams = Parameters<express.RequestHandler>;
 
 type AnyEndpoint = Endpoint<any, any>;
 
-type HandlerWithBody<
-  API,
-  Method extends HTTPVerb,
-  Path extends PathsForMethod<API, Method>,
-  Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>,
-> =
-  (
-    params: ExtractRouteParams<Path>,
-    body: SafeKey<Spec, 'request'>,
-    request: express.Request<
-      ExtractRouteParams<Path>,
-      SafeKey<Spec, 'response'>,
-      SafeKey<Spec, 'request'>
-    >,
-    response: express.Response<SafeKey<Spec, 'response'>>,
-  ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>;
-
-type HandlerWithoutBody<
-  API,
-  Method extends HTTPVerb,
-  Path extends PathsForMethod<API, Method>,
-  Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>,
-> =
-  (
-    params: ExtractRouteParams<Path>,
-    request: express.Request<
-      ExtractRouteParams<Path>,
-      SafeKey<Spec, 'response'>
-    >,
-    response: express.Response<SafeKey<Spec, 'response'>>,
-  ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>;
-
 const registerWithBody = <Method extends HTTPVerb, API>(
   method: Method, router: TypedRouter<API>
 ) =>
-  <Path extends PathsForMethod<API, Method>>(
+  <
+  Path extends PathsForMethod<API, Method>,
+  Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>,
+  >(
     route: Path,
-    handler: unknown & HandlerWithBody<API, Method, Path>
+    handler: (
+      params: ExtractRouteParams<Path>,
+      body: SafeKey<Spec, 'request'>,
+      request: express.Request<
+        ExtractRouteParams<Path>,
+        SafeKey<Spec, 'response'>,
+        SafeKey<Spec, 'request'>
+      >,
+      response: express.Response<SafeKey<Spec, 'response'>>,
+    ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>
   ) => {
     router.registerEndpoint(method, route as any, handler as any);
   };
@@ -115,10 +95,20 @@ export class TypedRouter<API> {
   registerEndpoint<
     Method extends HTTPVerb,
     Path extends PathsForMethod<API, Method>,
+    Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>
   >(
     method: Method,
     route: Path,
-    handler: HandlerWithBody<API, Method, Path>
+    handler: (
+      params: ExtractRouteParams<Path>,
+      body: SafeKey<Spec, 'request'>,
+      request: express.Request<
+        ExtractRouteParams<Path>,
+        SafeKey<Spec, 'response'>,
+        SafeKey<Spec, 'request'>
+      >,
+      response: express.Response<SafeKey<Spec, 'response'>>,
+    ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>
   ) {
     const validate = this.getValidator(route, method);
     this.registrations.push({path: route as string, method});
