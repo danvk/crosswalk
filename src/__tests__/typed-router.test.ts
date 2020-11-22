@@ -163,25 +163,3 @@ test('invalid registrations should be type errors', () => {
   // @ts-expect-error should be userId, not id
   router.get('/users/:userId', async ({id}) => users[0]);
 });
-
-test('autocomplete', () => {
-  interface API {
-    '/path/to/:foo/:bar/baz': {
-      get: GetEndpoint<{}>;
-      post: Endpoint<null, {}>;
-    }
-  }
-
-  const app = express();
-  const router = new TypedRouter<API>(app);
-
-  router.get('/path/to/:foo/:bar/baz', async ({foo, bar}, req, res) => {
-    req.params.foo;
-    req.res?.json()
-    return {};
-  });
-
-  router.registerEndpoint('post', '/path/to/:foo/:bar/baz', async ({foo}, body, request, response) => {
-    return {};
-  });
-});
