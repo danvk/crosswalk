@@ -1,5 +1,7 @@
 # Crosswalk: safe routes for Express and TypeScript
 
+[![codecov](https://codecov.io/gh/danvk/crosswalk/branch/master/graph/badge.svg?token=L4VL0FB46U)](https://codecov.io/gh/danvk/crosswalk)
+
 This library helps you build type-safe REST APIs using Express using
 TypeScript.
 
@@ -290,9 +292,9 @@ To publish:
 - [ ] Add an option for more express-like callbacks (w/ only request, response)
 - [ ] Support fancier paths
 - [ ] Set up:
-  - [x] prettier
   - [ ] eslint
-  - [ ] CI
+  - [x] prettier
+  - [x] CI
 - [x] Add helper methods for all HTTP verbs
 - [x] Look into cleaning up generics
 - [x] Set up better type tests

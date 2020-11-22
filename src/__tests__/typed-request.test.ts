@@ -75,6 +75,20 @@ describe('typed requests', () => {
       expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
     });
 
+    it('should provide a method-agnostic request method', async () => {
+      const mockFetcher = jest.fn();
+      const api = typedApi<API>({fetch: mockFetcher});
+
+      const createUser = api.request('post', '/users');
+
+      mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});
+      const newUser = await createUser({}, {name: 'Fred', age: 42});
+      assertType(newUser, _ as User);
+      expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
+      expect(mockFetcher).toHaveBeenCalledTimes(1);
+      expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
+    });
+
     it('should accept readonly objects in POST requests', async () => {
       interface APIWithDeepObject {
         '/foo': {
