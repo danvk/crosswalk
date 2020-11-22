@@ -1,8 +1,8 @@
-import { assert as assertType, _ } from 'spec.ts';
+import {assert as assertType, _} from 'spec.ts';
 
 import {API, User} from './api';
 import {typedApi, apiUrlMaker, fetchJson} from '..';
-import { Endpoint } from '../api-spec';
+import {Endpoint} from '../api-spec';
 
 describe('typed requests', () => {
   describe('apiUrlMaker', () => {
@@ -31,10 +31,10 @@ describe('typed requests', () => {
 
     it('should accept readonly path params', () => {
       const user = {userId: 'fred'} as const;
-      assertType(user, _ as {readonly userId: "fred"});
+      assertType(user, _ as {readonly userId: 'fred'});
 
       const urlMaker = apiUrlMaker<API>('/api/v0');
-      expect(urlMaker('/users/:userId')(user)).toEqual('/api/v0/users/fred')
+      expect(urlMaker('/users/:userId')(user)).toEqual('/api/v0/users/fred');
     });
   });
 
@@ -79,7 +79,7 @@ describe('typed requests', () => {
       interface APIWithDeepObject {
         '/foo': {
           post: Endpoint<{foo: {bar: string[]}}, {baz: string}>;
-        }
+        };
       }
 
       const mockFetcher = jest.fn();
@@ -103,22 +103,20 @@ describe('typed requests', () => {
     it('should have a reasonable default fetcher', async () => {
       const fetchMock = jest.fn(() =>
         Promise.resolve({
-          json: () => Promise.resolve({ hello: 'fetch' }),
-        })
+          json: () => Promise.resolve({hello: 'fetch'}),
+        }),
       );
       (global as any).fetch = fetchMock;
       expect(await fetchJson('/api/v0/hello', 'get', {payload: 42})).toEqual({hello: 'fetch'});
       expect(fetchMock).toHaveBeenCalledTimes(1);
-      expect(fetchMock).toHaveBeenCalledWith(
-        '/api/v0/hello', {
-          method: 'get',
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: `{"payload":42}`,
+      expect(fetchMock).toHaveBeenCalledWith('/api/v0/hello', {
+        method: 'get',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
         },
-      )
+        body: `{"payload":42}`,
+      });
     });
   });
 });

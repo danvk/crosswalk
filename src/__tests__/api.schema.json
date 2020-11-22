@@ -1,224 +1,184 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "additionalProperties": false,
-    "definitions": {
-        "Endpoint<Partial<Pick<User,\"name\"|\"age\">>,User>": {
-            "additionalProperties": false,
-            "properties": {
-                "request": {
-                    "$ref": "#/definitions/Partial<Pick<User,\"name\"|\"age\">>"
-                },
-                "response": {
-                    "$ref": "#/definitions/User"
-                }
-            },
-            "required": [
-                "request",
-                "response"
-            ],
-            "type": "object"
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "definitions": {
+    "Endpoint<Partial<Pick<User,\"name\"|\"age\">>,User>": {
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "$ref": "#/definitions/Partial<Pick<User,\"name\"|\"age\">>"
         },
-        "Endpoint<Pick<User,\"name\"|\"age\">,User>": {
-            "additionalProperties": false,
-            "properties": {
-                "request": {
-                    "$ref": "#/definitions/Pick<User,\"name\"|\"age\">"
-                },
-                "response": {
-                    "$ref": "#/definitions/User"
-                }
-            },
-            "required": [
-                "request",
-                "response"
-            ],
-            "type": "object"
-        },
-        "Endpoint<{name?:string|undefined;age?:number|undefined;},User>": {
-            "additionalProperties": false,
-            "properties": {
-                "request": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "age": {
-                            "type": "number"
-                        },
-                        "name": {
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "response": {
-                    "$ref": "#/definitions/User"
-                }
-            },
-            "required": [
-                "request",
-                "response"
-            ],
-            "type": "object"
-        },
-        "Endpoint<{},User>": {
-            "additionalProperties": false,
-            "properties": {
-                "request": {
-                    "properties": {
-                    },
-                    "type": "object"
-                },
-                "response": {
-                    "$ref": "#/definitions/User"
-                }
-            },
-            "required": [
-                "request",
-                "response"
-            ],
-            "type": "object"
-        },
-        "GetEndpoint<User>": {
-            "additionalProperties": false,
-            "properties": {
-                "request": {
-                    "type": "null"
-                },
-                "response": {
-                    "$ref": "#/definitions/User"
-                }
-            },
-            "required": [
-                "request",
-                "response"
-            ],
-            "type": "object"
-        },
-        "GetEndpoint<{users:User[];}>": {
-            "additionalProperties": false,
-            "properties": {
-                "request": {
-                    "type": "null"
-                },
-                "response": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "users": {
-                            "items": {
-                                "$ref": "#/definitions/User"
-                            },
-                            "type": "array"
-                        }
-                    },
-                    "required": [
-                        "users"
-                    ],
-                    "type": "object"
-                }
-            },
-            "required": [
-                "request",
-                "response"
-            ],
-            "type": "object"
-        },
-        "Partial<Pick<User,\"name\"|\"age\">>": {
-            "additionalProperties": false,
-            "properties": {
-                "age": {
-                    "type": "number"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "type": "object"
-        },
-        "Pick<User,\"name\"|\"age\">": {
-            "additionalProperties": false,
-            "properties": {
-                "age": {
-                    "type": "number"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "age",
-                "name"
-            ],
-            "type": "object"
-        },
-        "User": {
-            "additionalProperties": false,
-            "properties": {
-                "age": {
-                    "type": "number"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "age",
-                "id",
-                "name"
-            ],
-            "type": "object"
+        "response": {
+          "$ref": "#/definitions/User"
         }
+      },
+      "required": ["request", "response"],
+      "type": "object"
     },
-    "properties": {
-        "/users": {
-            "additionalProperties": false,
-            "properties": {
-                "get": {
-                    "$ref": "#/definitions/GetEndpoint<{users:User[];}>",
-                    "description": "Get the full list of users"
-                },
-                "post": {
-                    "$ref": "#/definitions/Endpoint<Pick<User,\"name\"|\"age\">,User>",
-                    "description": "Create a new user"
-                }
-            },
-            "required": [
-                "get",
-                "post"
-            ],
-            "type": "object"
+    "Endpoint<Pick<User,\"name\"|\"age\">,User>": {
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "$ref": "#/definitions/Pick<User,\"name\"|\"age\">"
         },
-        "/users/:userId": {
-            "additionalProperties": false,
-            "properties": {
-                "delete": {
-                    "$ref": "#/definitions/Endpoint<{},User>"
-                },
-                "get": {
-                    "$ref": "#/definitions/GetEndpoint<User>"
-                },
-                "patch": {
-                    "$ref": "#/definitions/Endpoint<Partial<Pick<User,\"name\"|\"age\">>,User>",
-                    "description": "Edit an existing user"
-                },
-                "put": {
-                    "$ref": "#/definitions/Endpoint<{name?:string|undefined;age?:number|undefined;},User>"
-                }
-            },
-            "required": [
-                "delete",
-                "get",
-                "patch",
-                "put"
-            ],
-            "type": "object"
+        "response": {
+          "$ref": "#/definitions/User"
         }
+      },
+      "required": ["request", "response"],
+      "type": "object"
     },
-    "required": [
-        "/users",
-        "/users/:userId"
-    ],
-    "type": "object"
+    "Endpoint<{name?:string|undefined;age?:number|undefined;},User>": {
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "additionalProperties": false,
+          "properties": {
+            "age": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "response": {
+          "$ref": "#/definitions/User"
+        }
+      },
+      "required": ["request", "response"],
+      "type": "object"
+    },
+    "Endpoint<{},User>": {
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "properties": {},
+          "type": "object"
+        },
+        "response": {
+          "$ref": "#/definitions/User"
+        }
+      },
+      "required": ["request", "response"],
+      "type": "object"
+    },
+    "GetEndpoint<User>": {
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "type": "null"
+        },
+        "response": {
+          "$ref": "#/definitions/User"
+        }
+      },
+      "required": ["request", "response"],
+      "type": "object"
+    },
+    "GetEndpoint<{users:User[];}>": {
+      "additionalProperties": false,
+      "properties": {
+        "request": {
+          "type": "null"
+        },
+        "response": {
+          "additionalProperties": false,
+          "properties": {
+            "users": {
+              "items": {
+                "$ref": "#/definitions/User"
+              },
+              "type": "array"
+            }
+          },
+          "required": ["users"],
+          "type": "object"
+        }
+      },
+      "required": ["request", "response"],
+      "type": "object"
+    },
+    "Partial<Pick<User,\"name\"|\"age\">>": {
+      "additionalProperties": false,
+      "properties": {
+        "age": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "Pick<User,\"name\"|\"age\">": {
+      "additionalProperties": false,
+      "properties": {
+        "age": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": ["age", "name"],
+      "type": "object"
+    },
+    "User": {
+      "additionalProperties": false,
+      "properties": {
+        "age": {
+          "type": "number"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": ["age", "id", "name"],
+      "type": "object"
+    }
+  },
+  "properties": {
+    "/users": {
+      "additionalProperties": false,
+      "properties": {
+        "get": {
+          "$ref": "#/definitions/GetEndpoint<{users:User[];}>",
+          "description": "Get the full list of users"
+        },
+        "post": {
+          "$ref": "#/definitions/Endpoint<Pick<User,\"name\"|\"age\">,User>",
+          "description": "Create a new user"
+        }
+      },
+      "required": ["get", "post"],
+      "type": "object"
+    },
+    "/users/:userId": {
+      "additionalProperties": false,
+      "properties": {
+        "delete": {
+          "$ref": "#/definitions/Endpoint<{},User>"
+        },
+        "get": {
+          "$ref": "#/definitions/GetEndpoint<User>"
+        },
+        "patch": {
+          "$ref": "#/definitions/Endpoint<Partial<Pick<User,\"name\"|\"age\">>,User>",
+          "description": "Edit an existing user"
+        },
+        "put": {
+          "$ref": "#/definitions/Endpoint<{name?:string|undefined;age?:number|undefined;},User>"
+        }
+      },
+      "required": ["delete", "get", "patch", "put"],
+      "type": "object"
+    }
+  },
+  "required": ["/users", "/users/:userId"],
+  "type": "object"
 }
-

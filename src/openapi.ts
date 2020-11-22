@@ -1,17 +1,17 @@
 import * as pathToRegexp from 'path-to-regexp';
 
-type Schema = { $ref: string };
+type Schema = {$ref: string};
 
 interface BodyParam {
-  in: "body";
+  in: 'body';
   name: string;
   schema: Schema;
 }
 
 interface PathParam {
-  in: "path";
+  in: 'path';
   name: string;
-  type: "string";
+  type: 'string';
   description?: string;
 }
 
@@ -37,17 +37,17 @@ export interface Options {
   };
   host?: string;
   basePath?: string;
-  schemes?: ("http" | "https")[];
+  schemes?: ('http' | 'https')[];
 }
 
-const isObject = <T>(x: T): x is object & T => !!x && typeof x === "object";
+const isObject = <T>(x: T): x is object & T => !!x && typeof x === 'object';
 
 function extractPathParams(path: string): PathParam[] {
   const tokens = pathToRegexp.parse(path);
-  return tokens.filter(isObject).map((tok) => ({
-    name: "" + tok.name,
-    in: "path",
-    type: "string",
+  return tokens.filter(isObject).map(tok => ({
+    name: '' + tok.name,
+    in: 'path',
+    type: 'string',
   }));
 }
 
@@ -56,7 +56,7 @@ function expressPathToOpenApiPath(path: string): string {
   return path.replace(/:([^/]+)/g, '{$1}');
 }
 
-const DEFINITION = "#/definitions/";
+const DEFINITION = '#/definitions/';
 export function followApiRef(spec: any, schema: Schema): [string, unknown] {
   const ref = schema.$ref;
   if (!ref.startsWith(DEFINITION)) {
@@ -73,12 +73,8 @@ export function followApiRef(spec: any, schema: Schema): [string, unknown] {
 
 /** Convert an API spec (generated via typescript-json-schema) to OpenAPI. */
 export function apiSpecToOpenApi(apiSpec: any, options?: Options): any {
-  apiSpec = JSON.parse(JSON.stringify(apiSpec));  // defensive copy
-  const {
-    required: endpoints,
-    properties: endpointSpecs,
-    definitions,
-  } = apiSpec;
+  apiSpec = JSON.parse(JSON.stringify(apiSpec)); // defensive copy
+  const {required: endpoints, properties: endpointSpecs, definitions} = apiSpec;
 
   // Remove endpoints, helpers
   const paths: Record<string, any> = {};
@@ -91,20 +87,20 @@ export function apiSpecToOpenApi(apiSpec: any, options?: Options): any {
     const byVerb = endpointSpecs[endpoint].properties;
     for (const [verb, ref] of Object.entries(byVerb)) {
       const [name, schema] = followApiRef(apiSpec, ref as Schema);
-      const { request, response } = (schema as any).properties;
+      const {request, response} = (schema as any).properties;
 
       const parameters: Param[] = extractPathParams(endpoint);
-      if (request?.type !== "null") {
+      if (request?.type !== 'null') {
         parameters.push({
-          name: "body",
-          in: "body",
+          name: 'body',
+          in: 'body',
           schema: request,
         });
       }
 
       const swagger: SwaggerEndpoint = {
         summary: (ref as any).description,
-        ...(parameters.length && { parameters }),
+        ...(parameters.length && {parameters}),
         responses: {
           // TODO: do I need to break this down by status?
           200: {
@@ -122,11 +118,11 @@ export function apiSpecToOpenApi(apiSpec: any, options?: Options): any {
   });
 
   return {
-    swagger: "2.0",
+    swagger: '2.0',
     info: {
-      title: "Generated API",
-      description: "testing testing",
-      version: "",
+      title: 'Generated API',
+      description: 'testing testing',
+      version: '',
     },
     paths,
     definitions,

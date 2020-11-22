@@ -1,7 +1,7 @@
 // Convert API JSON Schema to Open API format.
 
 import * as fs from 'fs';
-import { apiSpecToOpenApi } from './openapi';
+import {apiSpecToOpenApi} from './openapi';
 
 if (process.argv.length !== 3) {
   console.error('invalid invocation');

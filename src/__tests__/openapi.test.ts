@@ -1,4 +1,4 @@
-import { apiSpecToOpenApi } from '../openapi';
+import {apiSpecToOpenApi} from '../openapi';
 import apiSchemaJson from './api.schema.json';
 
 describe('Open API integration', () => {

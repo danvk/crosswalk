@@ -10,5 +10,5 @@ export type HTTPVerb = 'get' | 'post' | 'put' | 'delete' | 'patch';
 export interface APISpec {
   [path: string]: {
     [method in HTTPVerb]?: Endpoint<any, any>;
-  }
+  };
 }

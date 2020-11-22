@@ -1,6 +1,6 @@
 import bodyParser from 'body-parser';
 import express from 'express';
-import { assert as assertType, _ } from 'spec.ts';
+import {assert as assertType, _} from 'spec.ts';
 import request from 'supertest';
 
 import {API, User} from './api';
@@ -13,22 +13,25 @@ test('TypedRouter', async () => {
 
   const router = new TypedRouter<API>(app, apiSchemaJson);
 
-  let users: User[] = [{
-    id: 'fred',
-    name: 'Fred',
-    age: 42,
-  }, {
-    id: 'wilma',
-    name: 'Wilma',
-    age: 41,
-  }];
+  let users: User[] = [
+    {
+      id: 'fred',
+      name: 'Fred',
+      age: 42,
+    },
+    {
+      id: 'wilma',
+      name: 'Wilma',
+      age: 41,
+    },
+  ];
 
   router.get('/users', async () => ({users}));
 
   router.post('/users', async ({}, user, request, response) => {
-    assertType(user, _ as {age: number; name: string;});
+    assertType(user, _ as {age: number; name: string});
     assertType(request.params, _ as {});
-    assertType(request.body, _ as {age: number; name: string;});
+    assertType(request.body, _ as {age: number; name: string});
 
     const newUser = {id: 'id', ...user};
     users.push(newUser);
@@ -51,21 +54,25 @@ test('TypedRouter', async () => {
     router.assertAllRoutesRegistered();
   }).toThrowError();
 
-  router.registerEndpoint('put', '/users/:userId', async (params, {age, name}, request, response) => {
-    assertType(params, _ as {userId: string});
-    assertType(request.params, _ as {userId: string});
-    assertType(request.body, _ as {age?: number; name?: string;});
+  router.registerEndpoint(
+    'put',
+    '/users/:userId',
+    async (params, {age, name}, request, response) => {
+      assertType(params, _ as {userId: string});
+      assertType(request.params, _ as {userId: string});
+      assertType(request.body, _ as {age?: number; name?: string});
 
-    const {userId} = params;
-    const user = userOr404(userId);
-    if (name) {
-      user.name = name;
-    }
-    if (age) {
-      user.age = age;
-    }
-    return user;
-  });
+      const {userId} = params;
+      const user = userOr404(userId);
+      if (name) {
+        user.name = name;
+      }
+      if (age) {
+        user.age = age;
+      }
+      return user;
+    },
+  );
 
   router.registerEndpoint('delete', '/users/:userId', async ({userId}) => {
     const user = userOr404(userId);
@@ -88,13 +95,18 @@ test('TypedRouter', async () => {
 
   await api.put('/users/pebbles').expect(404);
 
-  const responseNewWilma = await api.put('/users/wilma')
+  const responseNewWilma = await api
+    .put('/users/wilma')
     .send({age: 42})
     .set('Accept', 'application/json')
     .expect(200);
   expect(responseNewWilma.body).toEqual({id: 'wilma', name: 'Wilma', age: 42});
 
-  const pebblesResponse = await api.post('/users').set('Accept', 'application/json').send({name: 'Pebbles', age: 2}).expect(201);
+  const pebblesResponse = await api
+    .post('/users')
+    .set('Accept', 'application/json')
+    .send({name: 'Pebbles', age: 2})
+    .expect(201);
   expect(pebblesResponse.body).toEqual({
     id: 'id',
     name: 'Pebbles',
@@ -106,7 +118,8 @@ test('TypedRouter', async () => {
   await api.get('/users/wilma').expect(404);
 
   // Request validation tests
-  await api.post('/users')
+  await api
+    .post('/users')
     .send({age: 42})
     .set('Accept', 'application/json')
     .expect(400)
@@ -116,25 +129,26 @@ test('TypedRouter', async () => {
       });
     });
 
-  await api.put('/users/fred')
+  await api
+    .put('/users/fred')
     .send({age: '42'})
     .set('Accept', 'application/json')
     .expect(400)
     .expect(response => {
       expect(response.body).toMatchObject({
         error: 'data.age should be number',
-      })
+      });
     });
 
-
-  await api.put('/users/fred')
+  await api
+    .put('/users/fred')
     .send({lastName: 'Flintstone'})
     .set('Accept', 'application/json')
     .expect(400)
     .expect(response => {
       expect(response.body).toMatchObject({
         error: 'data should NOT have additional properties',
-      })
+      });
     });
 
   router.assertAllRoutesRegistered();
