@@ -1,8 +1,9 @@
 /** Type-safe wrapper around fetch() for REST APIs */
 
 import { compile } from "path-to-regexp";
+import { HTTPVerb } from "./api-spec";
 
-import { ExtractRouteParams, SafeKey, HTTPVerb, Unionize, DeepReadonly } from "./utils";
+import { ExtractRouteParams, SafeKey, DeepReadonly, PathsForMethod } from "./utils";
 
 type ExtractRouteParamsVarArgs<T extends string> =
   {} extends ExtractRouteParams<T> ? [] : [params: Readonly<ExtractRouteParams<T>>];
@@ -45,44 +46,34 @@ export function typedApi<API>(options?: Options) {
 
   const urlMaker = apiUrlMaker<API>(prefix);
 
-  type Paths = keyof API & string;
-  type GetPaths = Extract<Unionize<API>, { v: { get: any } }>["k"] & Paths;
-  type PostPaths = Extract<Unionize<API>, { v: { post: any } }>["k"] & Paths;
-
-  const request = <
-    Path extends Paths,
-    Method extends keyof API[Path] & HTTPVerb
-  >(
-    endpoint: Path,
-    method: Method
-  ) => {
-    type Params = ExtractRouteParams<Path & string>;
-    type Endpoint = API[Path][Method];
-    type Request = DeepReadonly<SafeKey<Endpoint, "request">>;
-    type Response = SafeKey<Endpoint, "response">;
-    const makeUrl = urlMaker(endpoint);
-    return (queryParams: Params, body: Request): Promise<Response> =>
-      fetcher((makeUrl as any)(queryParams), method, body) as Promise<Response>;
-  };
-
-  return {
-    request,
-
-    get: <Path extends GetPaths>(endpoint: Path) => {
-      type ParamsList = ExtractRouteParamsVarArgs<Path & string>;
-      type Endpoint = SafeKey<API[Path], "get">;
-      type Response = SafeKey<Endpoint, "response">;
-      return (...params: ParamsList): Promise<Response> =>
-        request(endpoint, "get" as any)(params?.[0] as any, null as any);
-    },
-
-    post: <Path extends PostPaths>(endpoint: Path) => {
+  const requestWithBody = <Method extends HTTPVerb>(method: Method) =>
+    <Path extends PathsForMethod<API, Method>>(endpoint: Path) => {
       type Params = ExtractRouteParams<Path & string>;
-      type Endpoint = SafeKey<API[Path], "post">;
+      type Endpoint = SafeKey<API[Path], Method>;
       type Request = DeepReadonly<SafeKey<Endpoint, "request">>;
       type Response = SafeKey<Endpoint, "response">;
-      return (params: Params, body: Request): Promise<Response> =>
-        request(endpoint, "post" as any)(params, body);
-    },
+      const makeUrl = urlMaker(endpoint);
+      return (queryParams: Params, body: Request): Promise<Response> =>
+        fetcher((makeUrl as any)(queryParams), method, body) as Promise<Response>;
+    };
+
+  const requestWithoutBody = <Method extends HTTPVerb>(method: Method) =>
+    <Path extends PathsForMethod<API, Method>>(endpoint: Path) => {
+      type ParamsList = ExtractRouteParamsVarArgs<Path & string>;
+      type Endpoint = SafeKey<API[Path], Method>;
+      type Response = SafeKey<Endpoint, "response">;
+      return (...params: ParamsList): Promise<Response> =>
+        requestWithBody(method)(endpoint)(params?.[0] as any, null as any);
+    };
+
+  return {
+    get: requestWithoutBody('get'),
+    delete: requestWithoutBody('delete'),
+
+    post: requestWithBody('post'),
+    patch: requestWithBody('patch'),
+    put: requestWithBody('put'),
+
+    request: <Method extends HTTPVerb>(method: Method, path: PathsForMethod<API, Method>) => requestWithBody(method)(path),
   };
 }
