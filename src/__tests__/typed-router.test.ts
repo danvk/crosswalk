@@ -175,11 +175,13 @@ test('autocomplete', () => {
   const app = express();
   const router = new TypedRouter<API>(app);
 
-  router.get('/path/to/:foo/:bar/baz', async ({foo, bar}) => {
+  router.get('/path/to/:foo/:bar/baz', async ({foo, bar}, req, res) => {
+    req.params.foo;
+    req.res?.json()
     return {};
   });
 
-  router.registerEndpoint('post', '/path/to/:foo/:bar/baz', async ({foo}) => {
+  router.registerEndpoint('post', '/path/to/:foo/:bar/baz', async ({foo}, body, request, response) => {
     return {};
   });
 });

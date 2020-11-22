@@ -22,6 +22,14 @@ type RequestParams = Parameters<express.RequestHandler>;
 
 type AnyEndpoint = Endpoint<any, any>;
 
+type ExpressRequest<Path extends string, Spec> = unknown & express.Request<
+  ExtractRouteParams<Path>,
+  SafeKey<Spec, 'response'>,
+  SafeKey<Spec, 'request'>
+>;
+
+type ExpressResponse<Spec> = unknown & express.Response<SafeKey<Spec, 'response'>>;
+
 const registerWithBody = <Method extends HTTPVerb, API>(
   method: Method, router: TypedRouter<API>
 ) =>
@@ -33,12 +41,8 @@ const registerWithBody = <Method extends HTTPVerb, API>(
     handler: (
       params: ExtractRouteParams<Path>,
       body: SafeKey<Spec, 'request'>,
-      request: express.Request<
-        ExtractRouteParams<Path>,
-        SafeKey<Spec, 'response'>,
-        SafeKey<Spec, 'request'>
-      >,
-      response: express.Response<SafeKey<Spec, 'response'>>,
+      request: ExpressRequest<Path, Spec>,
+      response: ExpressResponse<Spec>,
     ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>
   ) => {
     router.registerEndpoint(method, route as any, handler as any);
@@ -54,11 +58,8 @@ const registerWithoutBody = <Method extends HTTPVerb, API>(
     route: Path,
     handler: (
       params: ExtractRouteParams<Path>,
-      request: express.Request<
-        ExtractRouteParams<Path>,
-        SafeKey<Spec, 'response'>
-      >,
-      response: express.Response<SafeKey<Spec, 'response'>>,
+      request: ExpressRequest<Path, Spec>,
+      response: ExpressResponse<Spec>,
     ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>
   ) => {
     router.registerEndpoint(
@@ -102,12 +103,8 @@ export class TypedRouter<API> {
     handler: (
       params: ExtractRouteParams<Path>,
       body: SafeKey<Spec, 'request'>,
-      request: express.Request<
-        ExtractRouteParams<Path>,
-        SafeKey<Spec, 'response'>,
-        SafeKey<Spec, 'request'>
-      >,
-      response: express.Response<SafeKey<Spec, 'response'>>,
+      request: ExpressRequest<Path, Spec>,
+      response: ExpressResponse<Spec>,
     ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>
   ) {
     const validate = this.getValidator(route, method);
