@@ -248,6 +248,23 @@ I recommend adding a check to your continuous integration system that runs
 `typescript-json-schema` and then `git diff` to make sure there are no changes.
 You could also do this as a prepush or precommit hook.
 
+**How do I use middleware with this?**
+
+crosswalk is a thin wrapper around calling `app.get`, `app.post`, etc. Your middleware should work exactly as it did without crosswalk.
+
+**How do I register my API under a prefix?**
+
+Make a new router, wrap it with `TypedRouter`, and mount it wherever you like:
+
+```ts
+const app = express();
+const rawApiRouter = express.Router();
+const apiRouter = new TypedRouter<API>(rawApiRouter, apiJsonSchema);
+// ... register API endpoints ...
+apiRouter.assertAllRoutesRegistered();
+app.use('/api/v0', rawApiRouter);
+```
+
 **Why does this require TypeScript 4.1 or later?**
 
 Because it has a hard dependency on [template literal types][ts41]. These are
