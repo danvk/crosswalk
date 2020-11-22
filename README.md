@@ -286,12 +286,15 @@ To publish:
 
 ## TODO
 
-- [ ] Add helper methods for all HTTP verbs
-- [ ] Look into cleaning up generics
 - [ ] Options for request logging
-- [ ] Set up prettier (doesn't support TS 4.1 yet), eslint, CI
 - [ ] Add an option for more express-like callbacks (w/ only request, response)
 - [ ] Support fancier paths
+- [ ] Set up:
+  - [x] prettier
+  - [ ] eslint
+  - [ ] CI
+- [x] Add helper methods for all HTTP verbs
+- [x] Look into cleaning up generics
 - [x] Set up better type tests
 - [x] Narrow types of request.params, request.body in handlers
 - [x] Write unit tests
