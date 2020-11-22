@@ -6,6 +6,7 @@ import request from 'supertest';
 import {API, User} from './api';
 import apiSchemaJson from './api.schema.json';
 import {HTTPError, TypedRouter} from '../typed-router';
+import { Endpoint, GetEndpoint } from '../api-spec';
 
 test('TypedRouter', async () => {
   const app = express();
@@ -161,4 +162,18 @@ test('invalid registrations should be type errors', () => {
 
   // @ts-expect-error should be userId, not id
   router.get('/users/:userId', async ({id}) => users[0]);
+});
+
+test('autocomplete', () => {
+  interface API {
+    '/path/to/:foo/:bar:/baz': {
+      get: GetEndpoint<null>;
+      post: Endpoint<null, null>;
+    }
+  }
+
+  const app = express();
+  const router = new TypedRouter<API>(app);
+
+  router.get('/path/to/:foo/:bar:/baz',
 });

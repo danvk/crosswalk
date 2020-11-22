@@ -67,9 +67,19 @@ const registerWithBody = <Method extends HTTPVerb, API>(
 const registerWithoutBody = <Method extends HTTPVerb, API>(
   method: Method, router: TypedRouter<API>
 ) =>
-  <Path extends PathsForMethod<API, Method>>(
+  <
+  Path extends PathsForMethod<API, Method>,
+  Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>
+  >(
     route: Path,
-    handler: unknown & HandlerWithoutBody<API, Method, Path>
+    handler: (
+      params: ExtractRouteParams<Path>,
+      request: express.Request<
+        ExtractRouteParams<Path>,
+        SafeKey<Spec, 'response'>
+      >,
+      response: express.Response<SafeKey<Spec, 'response'>>,
+    ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>
   ) => {
     router.registerEndpoint(
       method,
