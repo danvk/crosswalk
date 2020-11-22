@@ -1,5 +1,7 @@
 # Crosswalk: safe routes for Express and TypeScript
 
+[![codecov](https://codecov.io/gh/danvk/crosswalk/branch/master/graph/badge.svg?token=L4VL0FB46U)](https://codecov.io/gh/danvk/crosswalk)
+
 This library helps you build type-safe REST APIs using Express using
 TypeScript.
 
