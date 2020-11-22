@@ -290,9 +290,9 @@ To publish:
 - [ ] Add an option for more express-like callbacks (w/ only request, response)
 - [ ] Support fancier paths
 - [ ] Set up:
-  - [x] prettier
   - [ ] eslint
-  - [ ] CI
+  - [x] prettier
+  - [x] CI
 - [x] Add helper methods for all HTTP verbs
 - [x] Look into cleaning up generics
 - [x] Set up better type tests
