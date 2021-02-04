@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.1
+## 1.2.2
 
 - Suppress invalid HTTP Errors <https://github.com/danvk/crosswalk/issues/6>
 
