@@ -1,10 +1,10 @@
 /** Type-safe wrapper around Express router for REST APIs */
 
 import Ajv from 'ajv';
-import {STATUS_CODES} from 'http';
 import express from 'express';
 
 import {Endpoint, HTTPVerb} from './api-spec';
+import {STATUS_CODES} from './status-codes';
 import {ExtractRouteParams, PathsForMethod, SafeKey} from './utils';
 
 /** Throw this in a handler to produce an HTTP error response */
@@ -139,7 +139,10 @@ export class TypedRouter<API> {
         })
         .catch((error: any) => {
           // With target below ES2015, instanceof doesn't work here.
-          if (error instanceof HTTPError || (error.code && STATUS_CODES[error.code])) {
+          if (
+            error instanceof HTTPError ||
+            (error.code && STATUS_CODES.indexOf(error.code) >= 0)
+          ) {
             response.status(error.code).json({error: error.message});
           } else {
             next(error);
