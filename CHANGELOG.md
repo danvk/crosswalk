@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1
+
+- Suppress invalid HTTP Errors <https://github.com/danvk/crosswalk/issues/6>
+
 ## 1.2
 
 - Add wrappers for all HTTP verbs (`router.post`, `router.patch`, etc.) <https://github.com/danvk/crosswalk/pull/2>

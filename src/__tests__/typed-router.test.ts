@@ -157,7 +157,6 @@ test('TypedRouter', async () => {
 // to test:
 // - types for handlers
 // - returning a non-Promise is an error
-// - HTTPError works as expected
 // - mime type
 // - redirects work as expected
 // - assertComplete works as expected
@@ -175,4 +174,43 @@ test('invalid registrations should be type errors', () => {
 
   // @ts-expect-error should be userId, not id
   router.get('/users/:userId', async ({id}) => users[0]);
+});
+
+test('Throwing HTTPError should set status code', async () => {
+  const app = express();
+  const router = new TypedRouter<API>(app, apiSchemaJson);
+
+  class PGError extends Error {
+    constructor(public code: string) {
+      super();
+    }
+  }
+
+  router.get('/users/:userId', async ({userId}) => {
+    if (userId === 'throw-400') {
+      throw new HTTPError(400, 'Very bad request');
+    } else if (userId === 'throw-pg-error') {
+      // See https://github.com/danvk/crosswalk/issues/6
+      throw new PGError('23505');
+    }
+
+    return {
+      id: '1',
+      name: 'John',
+      age: 34,
+    };
+  });
+
+  const api = request(app);
+  let r = await api.get('/users/fred').expect(200);
+  expect(r.body).toMatchObject({
+    name: 'John',
+    age: 34,
+  });
+
+  r = await api.get('/users/throw-400').expect(400);
+  expect(r.body).toMatchObject({error: 'Very bad request'});
+
+  r = await api.get('/users/throw-pg-error').expect(500);
+  expect(r.body).toEqual({});
 });
