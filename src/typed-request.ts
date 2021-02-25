@@ -22,11 +22,11 @@ export interface Options {
   /** Prefix to add to all API endpoints (e.g. /api/v0) */
   prefix?: string;
   /** Function to use for fetching. Defaults to browser fetch. */
-  fetch?: (url: string, method: HTTPVerb, payload: unknown) => Promise<unknown>;
+  fetch?: (url: string, method: HTTPVerb, payload: unknown, query?: Record<string, unknown>) => Promise<unknown>;
 }
 
-export async function fetchJson(url: string, method: HTTPVerb, payload: unknown) {
-  const response = await fetch(url, {
+export async function fetchJson(url: string, method: HTTPVerb, payload: unknown, query?: Record<string, string>) {
+  const response = await fetch(url + (query ? new URLSearchParams(query) : ''), {
     method,
     headers: {
       Accept: 'application/json',
@@ -52,9 +52,10 @@ export function typedApi<API>(options?: Options) {
     type Endpoint = SafeKey<API[Path], Method>;
     type Request = DeepReadonly<SafeKey<Endpoint, 'request'>>;
     type Response = SafeKey<Endpoint, 'response'>;
+    type Query = SafeKey<Endpoint, 'query'>
     const makeUrl = urlMaker(endpoint);
-    return (queryParams: Params, body: Request): Promise<Response> =>
-      fetcher((makeUrl as any)(queryParams), method, body) as Promise<Response>;
+    return (queryParams: Params, body: Request, query?: Query): Promise<Response> =>
+      fetcher((makeUrl as any)(queryParams), method, body, query ?? null as any) as Promise<Response>;
   };
 
   const requestWithoutBody = <Method extends HTTPVerb>(method: Method) => <
@@ -66,7 +67,7 @@ export function typedApi<API>(options?: Options) {
     type Endpoint = SafeKey<API[Path], Method>;
     type Response = SafeKey<Endpoint, 'response'>;
     return (...params: ParamsList): Promise<Response> =>
-      requestWithBody(method)(endpoint)(params?.[0] as any, null as any);
+      requestWithBody(method)(endpoint)(params?.[0] as any, null as any, null as any);
   };
 
   return {

@@ -50,7 +50,7 @@ describe('typed requests', () => {
       assertType(users, _ as {users: User[]});
       expect(users).toEqual({users: []});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
-      expect(mockFetcher).toHaveBeenCalledWith('/users', 'get', null);
+      expect(mockFetcher).toHaveBeenCalledWith('/users', 'get', null, null);
 
       mockFetcher.mockClear();
       mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});
@@ -58,7 +58,7 @@ describe('typed requests', () => {
       assertType(user, _ as User);
       expect(user).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
-      expect(mockFetcher).toHaveBeenCalledWith('/users/fred', 'get', null);
+      expect(mockFetcher).toHaveBeenCalledWith('/users/fred', 'get', null, null);
     });
 
     it('should generate POST requests', async () => {
@@ -72,7 +72,7 @@ describe('typed requests', () => {
       assertType(newUser, _ as User);
       expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
-      expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
+      expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42}, null);
     });
 
     it('should provide a method-agnostic request method', async () => {
@@ -86,7 +86,7 @@ describe('typed requests', () => {
       assertType(newUser, _ as User);
       expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
-      expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
+      expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42}, null);
     });
 
     it('should accept readonly objects in POST requests', async () => {

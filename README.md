@@ -133,7 +133,7 @@ const fredUrl = getUserUrl({userId: 'fred'});
 To ensure that your users hit API endpoints with the correct payloads, use
 `typescript-json-schema` to convert your API definition to JSON Schema:
 
-    typescript-json-schema --required --strictNullChecks api.ts API --out api.schema.json
+    typescript-json-schema --required --strictNullChecks --noExtraProps api.ts API --out api.schema.json
 
 Then pass this to the `TypeRouter` when you create it in `server.ts`:
 

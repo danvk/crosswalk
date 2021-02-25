@@ -21,13 +21,14 @@ export class HTTPError extends Error {
 
 type RequestParams = Parameters<express.RequestHandler>;
 
-type AnyEndpoint = Endpoint<any, any>;
+type AnyEndpoint = Endpoint<any, any, any>;
 
 type ExpressRequest<Path extends string, Spec> = unknown &
   express.Request<
     ExtractRouteParams<Path>,
     SafeKey<Spec, 'response'>,
-    SafeKey<Spec, 'request'>
+    SafeKey<Spec, 'request'>,
+    SafeKey<Spec, 'query'>
   >;
 
 type ExpressResponse<Spec> = unknown & express.Response<SafeKey<Spec, 'response'>>;
@@ -45,6 +46,7 @@ const registerWithBody = <Method extends HTTPVerb, API>(
     body: SafeKey<Spec, 'request'>,
     request: ExpressRequest<Path, Spec>,
     response: ExpressResponse<Spec>,
+    query: ExpressRequest<Path, Spec>['query']
   ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
 ) => {
   router.registerEndpoint(method, route as any, handler as any);
@@ -62,10 +64,11 @@ const registerWithoutBody = <Method extends HTTPVerb, API>(
     params: ExtractRouteParams<Path>,
     request: ExpressRequest<Path, Spec>,
     response: ExpressResponse<Spec>,
+    query: ExpressRequest<Path, Spec>['query']
   ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
 ) => {
   router.registerEndpoint(method, route as any, (params, _, request, response) =>
-    handler(params as any, request as any, response as any),
+    handler(params as any, request as any, response as any, request.query as any),
   );
 };
 
@@ -106,6 +109,7 @@ export class TypedRouter<API> {
       body: SafeKey<Spec, 'request'>,
       request: ExpressRequest<Path, Spec>,
       response: ExpressResponse<Spec>,
+      query: ExpressRequest<Path, Spec>['query']
     ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
   ) {
     const validate = this.getValidator(route, method);
@@ -127,7 +131,7 @@ export class TypedRouter<API> {
         console.debug(method, route, 'params=', req.params, 'body=', body);
       }
 
-      handler(req.params as any, body, req as any, response)
+      handler(req.params as any, body, req as any, response, req.query as any)
         .then(responseObject => {
           if (responseObject === null) {
             // nothing to do. This can happen if the response redirected, say.

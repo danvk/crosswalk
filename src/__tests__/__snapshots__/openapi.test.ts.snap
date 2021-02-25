@@ -60,6 +60,15 @@ Object {
   "paths": Object {
     "/users": Object {
       "get": Object {
+        "parameters": Array [
+          Object {
+            "in": "query",
+            "name": "name",
+            "schema": Object {
+              "type": "string",
+            },
+          },
+        ],
         "responses": Object {
           "200": Object {
             "schema": Object {

@@ -15,7 +15,14 @@ interface PathParam {
   description?: string;
 }
 
-type Param = PathParam | BodyParam;
+interface QueryParam {
+  in: 'query';
+  name: string;
+  schema: Schema;
+  description?: string;
+}
+
+type Param = PathParam | QueryParam | BodyParam;
 
 interface SwaggerEndpoint {
   summary?: string;
@@ -87,7 +94,7 @@ export function apiSpecToOpenApi(apiSpec: any, options?: Options): any {
     const byVerb = endpointSpecs[endpoint].properties;
     for (const [verb, ref] of Object.entries(byVerb)) {
       const [name, schema] = followApiRef(apiSpec, ref as Schema);
-      const {request, response} = (schema as any).properties;
+      const {request, response, query} = (schema as any).properties;
 
       const parameters: Param[] = extractPathParams(endpoint);
       if (request?.type !== 'null') {
@@ -96,6 +103,16 @@ export function apiSpecToOpenApi(apiSpec: any, options?: Options): any {
           in: 'body',
           schema: request,
         });
+      }
+
+      if (query.properties) {
+        for (const [key, value] of Object.entries<Schema>(query.properties)) {
+          parameters.push({
+            name: key,
+            in: 'query',
+            schema: value,
+          })
+        }
       }
 
       const swagger: SwaggerEndpoint = {

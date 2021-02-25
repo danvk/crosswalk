@@ -26,7 +26,9 @@ test('TypedRouter', async () => {
     },
   ];
 
-  router.get('/users', async () => ({users}));
+  router.get('/users', async (_params, _req, _res, {name}) => ({
+    users: users.filter(user => user.name.includes(name)),
+  }));
 
   router.post('/users', async ({}, user, request, response) => {
     assertType(user, _ as {age: number; name: string});
@@ -85,8 +87,8 @@ test('TypedRouter', async () => {
 
   const api = request(app);
 
-  const responseUsers = await api.get('/users').expect(200);
-  expect(responseUsers.body).toEqual({users});
+  const responseUsers = await api.get('/users?name=red').expect(200);
+  expect(responseUsers.body).toEqual({users: [users[0]]});
 
   const fredResponse = await api.get('/users/fred').expect(200);
   expect(fredResponse.body).toEqual({id: 'fred', name: 'Fred', age: 42});
