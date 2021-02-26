@@ -28,7 +28,7 @@ test('TypedRouter', async () => {
 
   router.get('/random', async () => ({random: 7}));
 
-  router.get('/users', async (_params, _req, _res, {nameIncludes, minAge}) => ({
+  router.get('/users', async (_params, {query: {nameIncludes, minAge}}, _res) => ({
     users: users.filter(
       user =>
         (!nameIncludes || user.name.includes(nameIncludes)) && (!minAge || user.age >= minAge),
@@ -199,7 +199,7 @@ test('Throwing HTTPError should set status code', async () => {
     }
   }
 
-  router.get('/users', async (_params, req, res, query) => {
+  router.get('/users', async () => {
     return {users: [] as User[]};
   });
 
