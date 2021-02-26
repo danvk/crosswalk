@@ -46,9 +46,17 @@ describe('typed requests', () => {
       const getUserById = api.get('/users/:userId');
 
       mockFetcher.mockReturnValueOnce(Promise.resolve({users: []}));
-      const users = await getUsers({}, {name: 'red'});
-      assertType(users, _ as {users: User[]});
-      expect(users).toEqual({users: []});
+      const allUsers = await getUsers();
+      assertType(allUsers, _ as {users: User[]});
+      expect(allUsers).toEqual({users: []});
+      expect(mockFetcher).toHaveBeenCalledTimes(1);
+      expect(mockFetcher).toHaveBeenCalledWith('/users', 'get', null, null);
+
+      mockFetcher.mockClear();
+      mockFetcher.mockReturnValueOnce(Promise.resolve({users: []}));
+      const filteredUsers = await getUsers({}, {name: 'red'});
+      assertType(filteredUsers, _ as {users: User[]});
+      expect(filteredUsers).toEqual({users: []});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/users', 'get', null, {name: 'red'});
 
