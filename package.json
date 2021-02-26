@@ -7,12 +7,10 @@
   "author": "Dan Vanderkam <danvk@sidewalklabs.com>",
   "license": "MIT",
   "scripts": {
-    "postinstall": "yarn install-peers",
-    "prepare": "yarn build",
+    "prepare": "install-peers",
     "test": "jest",
     "lint": "prettier --check src/**/*.ts",
-    "prettier": "prettier --write src/**/*.ts",
-    "build": "tsc"
+    "prettier": "prettier --write src/**/*.ts"
   },
   "repository": {
     "type": "git",
