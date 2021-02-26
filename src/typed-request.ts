@@ -47,7 +47,7 @@ export async function fetchJson(
   payload: unknown,
   query?: Record<string, string>,
 ) {
-  const response = await fetch(url + (query ? new URLSearchParams(query) : ''), {
+  const response = await fetch(url + (query ? '?' + new URLSearchParams(query) : ''), {
     method,
     headers: {
       Accept: 'application/json',

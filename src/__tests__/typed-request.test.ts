@@ -38,6 +38,36 @@ describe('typed requests', () => {
     });
   });
 
+  describe('default fetch implementation', () => {
+    let mockFetch: jest.Mock;
+    beforeEach(() => {
+      mockFetch = jest.fn();
+      global.fetch = mockFetch;
+    });
+
+    it('should have correct request data', async () => {
+      const api = typedApi<API>();
+      const getUsers = api.get('/users');
+
+      mockFetch.mockReturnValueOnce(
+        Promise.resolve({json: () => Promise.resolve({users: []})}),
+      );
+
+      const users = await getUsers({}, {minAge: 42});
+      assertType(users, _ as {users: User[]});
+      expect(users).toEqual({users: []});
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledWith('/users?minAge=42', {
+        method: 'get',
+        body: 'null',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+    });
+  });
+
   describe('typed API', () => {
     it('should generate GET requests', async () => {
       const mockFetcher = jest.fn();
