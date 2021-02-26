@@ -111,7 +111,7 @@ export function apiSpecToOpenApi(apiSpec: any, options?: Options): any {
             name: key,
             in: 'query',
             schema: value,
-          })
+          });
         }
       }
 

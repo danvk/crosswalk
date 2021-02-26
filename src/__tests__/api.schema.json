@@ -119,13 +119,16 @@
             ],
             "type": "object"
         },
-        "GetEndpoint<{users:User[];},{name?:string|undefined;}>": {
+        "GetEndpoint<{users:User[];},{nameIncludes?:string|undefined;minAge?:number|undefined;}>": {
             "additionalProperties": false,
             "properties": {
                 "query": {
                     "additionalProperties": false,
                     "properties": {
-                        "name": {
+                        "minAge": {
+                            "type": "number"
+                        },
+                        "nameIncludes": {
                             "type": "string"
                         }
                     },
@@ -211,7 +214,7 @@
             "additionalProperties": false,
             "properties": {
                 "get": {
-                    "$ref": "#/definitions/GetEndpoint<{users:User[];},{name?:string|undefined;}>",
+                    "$ref": "#/definitions/GetEndpoint<{users:User[];},{nameIncludes?:string|undefined;minAge?:number|undefined;}>",
                     "description": "Get the full list of users"
                 },
                 "post": {

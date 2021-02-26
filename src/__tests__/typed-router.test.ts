@@ -26,8 +26,12 @@ test('TypedRouter', async () => {
     },
   ];
 
-  router.get('/users', async (_params, _req, _res, {name}) => ({
-    users: name ? users.filter(user => user.name.includes(name)) : users,
+  router.get('/users', async (_params, _req, _res, {nameIncludes, minAge}) => ({
+    users: users.filter(
+      user =>
+        (nameIncludes ? user.name.includes(nameIncludes) : true) &&
+        (minAge ? user.age >= minAge : true),
+    ),
   }));
 
   router.post('/users', async ({}, user, request, response) => {
@@ -90,8 +94,11 @@ test('TypedRouter', async () => {
   const responseAllUsers = await api.get('/users').expect(200);
   expect(responseAllUsers.body).toEqual({users});
 
-  const responseUsers = await api.get('/users?name=red').expect(200);
-  expect(responseUsers.body).toEqual({users: [users[0]]});
+  const responseNameIncludes = await api.get('/users?nameIncludes=red').expect(200);
+  expect(responseNameIncludes.body).toEqual({users: [users[0]]});
+
+  const responseMinAge = await api.get('/users?minAge=42');
+  expect(responseMinAge.body).toEqual({users: [users[0]]});
 
   const fredResponse = await api.get('/users/fred').expect(200);
   expect(fredResponse.body).toEqual({id: 'fred', name: 'Fred', age: 42});
@@ -217,7 +224,10 @@ test('Throwing HTTPError should set status code', async () => {
     age: 34,
   });
 
-  r = await api.get('/users?height=5.5').expect(400);
+  r = await api.get('/users?minAge=Fred').expect(400);
+  expect(r.body).toMatchObject({error: 'data.minAge should be number'});
+
+  r = await api.get('/users?maxAge=5').expect(400);
   expect(r.body).toMatchObject({error: 'data should NOT have additional properties'});
 
   r = await api.get('/users/throw-400').expect(400);

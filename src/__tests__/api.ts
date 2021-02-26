@@ -11,7 +11,7 @@ export type CreateUserRequest = Pick<User, 'name' | 'age'>;
 export interface API {
   '/users': {
     /** Get the full list of users */
-    get: GetEndpoint<{users: User[]}, {name?: string}>;
+    get: GetEndpoint<{users: User[]}, {nameIncludes?: string; minAge?: number}>;
     /** Create a new user */
     post: Endpoint<CreateUserRequest, User>;
   };

@@ -63,7 +63,14 @@ Object {
         "parameters": Array [
           Object {
             "in": "query",
-            "name": "name",
+            "name": "minAge",
+            "schema": Object {
+              "type": "number",
+            },
+          },
+          Object {
+            "in": "query",
+            "name": "nameIncludes",
             "schema": Object {
               "type": "string",
             },
