@@ -28,7 +28,7 @@ export interface Options {
     url: string,
     method: HTTPVerb,
     payload: unknown,
-    query?: Record<string, unknown>,
+    query?: Record<string, string>,
   ) => Promise<unknown>;
 }
 
