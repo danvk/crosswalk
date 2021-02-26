@@ -31,8 +31,7 @@ test('TypedRouter', async () => {
   router.get('/users', async (_params, _req, _res, {nameIncludes, minAge}) => ({
     users: users.filter(
       user =>
-        (nameIncludes ? user.name.includes(nameIncludes) : true) &&
-        (minAge ? user.age >= minAge : true),
+        (!nameIncludes || user.name.includes(nameIncludes)) && (!minAge || user.age >= minAge),
     ),
   }));
 

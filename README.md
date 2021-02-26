@@ -44,7 +44,7 @@ import type {Endpoint, GetEndpoint} from 'crosswalk/dist/api-spec';
 
 export interface API {
   '/users': {
-    get: GetEndpoint<UsersResponse>;
+    get: GetEndpoint<UsersResponse, {nameIncludes: string}>;
     post: Endpoint<CreateUserRequest, User>;
   };
   '/users/:userId': {
@@ -60,7 +60,7 @@ import {API} from './api';
 import {TypedRouter} from 'crosswalk';
 
 export function registerAPI(router: TypedRouter<API>) {
-  router.get('/users', async () => users;
+  router.get('/users', async ({}, req, res, {nameIncludes}) => filterUsersByName(users, nameIncludes));
   router.post('/users', async ({}, userInput) => createUser(userInput));
   router.get('/users/:userId', async ({userId}) => getUserById(userId));
 }
@@ -81,6 +81,7 @@ There are a few things you get by doing this:
 - A definition of your API's shape in one place using TypeScript's type system.
 - A check that you've only implemented endpoints that are in the API definition.
 - Types for route parameters (via TypeScript 4.1's template literal types)
+- Types for query parameters (and automatic coercion of non-string parameters)
 - A check that each endpoint's implementation returns a Promise for the
   expected response type.
 
