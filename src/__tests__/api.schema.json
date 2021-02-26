@@ -93,11 +93,17 @@
             ],
             "type": "object"
         },
-        "GetEndpoint<User,null>": {
+        "GetEndpoint<User,{firstName?:string|undefined;}>": {
             "additionalProperties": false,
             "properties": {
                 "query": {
-                    "type": "null"
+                    "additionalProperties": false,
+                    "properties": {
+                        "firstName": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
                 },
                 "request": {
                     "type": "null"
@@ -113,7 +119,7 @@
             ],
             "type": "object"
         },
-        "GetEndpoint<{users:User[];},{name:string;}>": {
+        "GetEndpoint<{users:User[];},{name?:string|undefined;}>": {
             "additionalProperties": false,
             "properties": {
                 "query": {
@@ -123,9 +129,6 @@
                             "type": "string"
                         }
                     },
-                    "required": [
-                        "name"
-                    ],
                     "type": "object"
                 },
                 "request": {
@@ -208,7 +211,7 @@
             "additionalProperties": false,
             "properties": {
                 "get": {
-                    "$ref": "#/definitions/GetEndpoint<{users:User[];},{name:string;}>",
+                    "$ref": "#/definitions/GetEndpoint<{users:User[];},{name?:string|undefined;}>",
                     "description": "Get the full list of users"
                 },
                 "post": {
@@ -229,7 +232,7 @@
                     "$ref": "#/definitions/Endpoint<{},User,null>"
                 },
                 "get": {
-                    "$ref": "#/definitions/GetEndpoint<User,null>"
+                    "$ref": "#/definitions/GetEndpoint<User,{firstName?:string|undefined;}>"
                 },
                 "patch": {
                     "$ref": "#/definitions/Endpoint<Partial<Pick<User,\"name\"|\"age\">>,User,null>",

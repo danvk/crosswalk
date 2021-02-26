@@ -46,11 +46,11 @@ describe('typed requests', () => {
       const getUserById = api.get('/users/:userId');
 
       mockFetcher.mockReturnValueOnce(Promise.resolve({users: []}));
-      const users = await getUsers();
+      const users = await getUsers({}, {name: 'red'});
       assertType(users, _ as {users: User[]});
       expect(users).toEqual({users: []});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
-      expect(mockFetcher).toHaveBeenCalledWith('/users', 'get', null, null);
+      expect(mockFetcher).toHaveBeenCalledWith('/users', 'get', null, {"name": "red"});
 
       mockFetcher.mockClear();
       mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});

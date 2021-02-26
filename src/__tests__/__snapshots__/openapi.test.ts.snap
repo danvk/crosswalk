@@ -143,6 +143,13 @@ Object {
             "name": "userId",
             "type": "string",
           },
+          Object {
+            "in": "query",
+            "name": "firstName",
+            "schema": Object {
+              "type": "string",
+            },
+          },
         ],
         "responses": Object {
           "200": Object {

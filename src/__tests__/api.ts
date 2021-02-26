@@ -11,12 +11,12 @@ export type CreateUserRequest = Pick<User, 'name' | 'age'>;
 export interface API {
   '/users': {
     /** Get the full list of users */
-    get: GetEndpoint<{users: User[]}, {name: string}>;
+    get: GetEndpoint<{users: User[]}, {name?: string}>;
     /** Create a new user */
     post: Endpoint<CreateUserRequest, User>;
   };
   '/users/:userId': {
-    get: GetEndpoint<User>;
+    get: GetEndpoint<User, {firstName?: string}>;
     /** Edit an existing user */
     patch: Endpoint<Partial<CreateUserRequest>, User>;
     put: Endpoint<{name?: string; age?: number}, User>;

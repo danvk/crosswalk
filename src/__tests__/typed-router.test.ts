@@ -27,7 +27,7 @@ test('TypedRouter', async () => {
   ];
 
   router.get('/users', async (_params, _req, _res, {name}) => ({
-    users: users.filter(user => user.name.includes(name)),
+    users: name ? users.filter(user => user.name.includes(name)) : users,
   }));
 
   router.post('/users', async ({}, user, request, response) => {
@@ -86,6 +86,9 @@ test('TypedRouter', async () => {
   });
 
   const api = request(app);
+
+  const responseAllUsers = await api.get('/users').expect(200);
+  expect(responseAllUsers.body).toEqual({users});
 
   const responseUsers = await api.get('/users?name=red').expect(200);
   expect(responseUsers.body).toEqual({users: [users[0]]});
@@ -188,6 +191,10 @@ test('Throwing HTTPError should set status code', async () => {
     }
   }
 
+  router.get('/users', async (_params, req, res, query) => {
+    return {users: [] as User[]};
+  });
+
   router.get('/users/:userId', async ({userId}) => {
     if (userId === 'throw-400') {
       throw new HTTPError(400, 'Very bad request');
@@ -209,6 +216,9 @@ test('Throwing HTTPError should set status code', async () => {
     name: 'John',
     age: 34,
   });
+
+  r = await api.get('/users?height=5.5').expect(400);
+  expect(r.body).toMatchObject({error: 'data should NOT have additional properties'});
 
   r = await api.get('/users/throw-400').expect(400);
   expect(r.body).toMatchObject({error: 'Very bad request'});
