@@ -42,9 +42,18 @@ describe('typed requests', () => {
     it('should generate GET requests', async () => {
       const mockFetcher = jest.fn();
       const api = typedApi<API>({fetch: mockFetcher});
+      const getRandom = api.get('/random');
       const getUsers = api.get('/users');
       const getUserById = api.get('/users/:userId');
 
+      mockFetcher.mockReturnValueOnce(Promise.resolve({random: 7}));
+      const random = await getRandom();
+      assertType(random, _ as {random: number});
+      expect(random).toEqual({random: 7});
+      expect(mockFetcher).toHaveBeenCalledTimes(1);
+      expect(mockFetcher).toHaveBeenCalledWith('/random', 'get', null, null);
+
+      mockFetcher.mockClear();
       mockFetcher.mockReturnValueOnce(Promise.resolve({users: []}));
       const allUsers = await getUsers();
       assertType(allUsers, _ as {users: User[]});

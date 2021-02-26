@@ -58,6 +58,27 @@ Object {
     "version": "",
   },
   "paths": Object {
+    "/random": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "random": Object {
+                  "type": "number",
+                },
+              },
+              "required": Array [
+                "random",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "summary": "Get a random number",
+      },
+    },
     "/users": Object {
       "get": Object {
         "parameters": Array [

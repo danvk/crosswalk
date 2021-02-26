@@ -26,6 +26,8 @@ test('TypedRouter', async () => {
     },
   ];
 
+  router.get('/random', async () => ({random: 7}));
+
   router.get('/users', async (_params, _req, _res, {nameIncludes, minAge}) => ({
     users: users.filter(
       user =>

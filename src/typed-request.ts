@@ -5,17 +5,26 @@ import {HTTPVerb} from './api-spec';
 
 import {ExtractRouteParams, SafeKey, DeepReadonly, PathsForMethod} from './utils';
 
-type IfMatches<Left, Right, Empty, NonEmpty> = Right extends Left ? Empty : NonEmpty;
-
-type ExtractRouteParamsVarArgs<T extends string> = {} extends ExtractRouteParams<T>
-  ? []
-  : [params: Readonly<ExtractRouteParams<T>>];
+// No Query Params -> Only take in path params
+// No Path Params -> Only take nothing OR blank path params and optional query
+// Both Query and Path Params -> Take both with query being optional
+// prettier-ignore
+type ParamVarArgs<Params, Query> = DeepReadonly<
+  null extends Query
+    ? {} extends Params
+      ? []
+      : [params: Params]
+    : {} extends Params
+      ? [params?: {}, query?: Query]
+      : [params: Params, query?: Query]
+>;
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {
   return <Path extends keyof API>(endpoint: Path & string) => {
+    type Params = ExtractRouteParams<Path & string>;
     const toPath = compile(endpoint);
-    return (...paramsList: ExtractRouteParamsVarArgs<Path & string>) =>
+    return (...paramsList: ParamVarArgs<Params, null>) =>
       prefix + toPath(paramsList[0] as any);
   };
 }
@@ -85,11 +94,7 @@ export function typedApi<API>(options?: Options) {
     type Response = SafeKey<Endpoint, 'response'>;
     type Query = SafeKey<Endpoint, 'query'>;
 
-    type ParamList = DeepReadonly<
-      IfMatches<Query, null, [Params], IfMatches<Params, {}, [{}?, Query?], [Params, Query?]>>
-    >;
-
-    return (...params: ParamList): Promise<Response> =>
+    return (...params: ParamVarArgs<Params, Query>): Promise<Response> =>
       requestWithBody(method)(endpoint)(params?.[0] as any, null as any, params?.[1] as any);
   };
 

@@ -119,6 +119,35 @@
             ],
             "type": "object"
         },
+        "GetEndpoint<{random:number;},null>": {
+            "additionalProperties": false,
+            "properties": {
+                "query": {
+                    "type": "null"
+                },
+                "request": {
+                    "type": "null"
+                },
+                "response": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "random": {
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "random"
+                    ],
+                    "type": "object"
+                }
+            },
+            "required": [
+                "query",
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
         "GetEndpoint<{users:User[];},{nameIncludes?:string|undefined;minAge?:number|undefined;}>": {
             "additionalProperties": false,
             "properties": {
@@ -210,6 +239,19 @@
         }
     },
     "properties": {
+        "/random": {
+            "additionalProperties": false,
+            "properties": {
+                "get": {
+                    "$ref": "#/definitions/GetEndpoint<{random:number;},null>",
+                    "description": "Get a random number"
+                }
+            },
+            "required": [
+                "get"
+            ],
+            "type": "object"
+        },
         "/users": {
             "additionalProperties": false,
             "properties": {
@@ -255,6 +297,7 @@
         }
     },
     "required": [
+        "/random",
         "/users",
         "/users/:userId"
     ],
