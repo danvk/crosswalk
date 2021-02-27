@@ -8,8 +8,11 @@ import {QueryUnion} from '../typed-request';
 describe('typed requests', () => {
   describe('apiUrlMaker', () => {
     it('should provide a union of query params available to all methods for a given endpoint', () => {
-      assertType(_ as QueryUnion<API, '/users'>, _ as {nameIncludes?: string; minAge?: number} | {suffix?: string})
-    })
+      assertType(
+        _ as QueryUnion<API, '/users'>,
+        _ as {nameIncludes?: string; minAge?: number} | {suffix?: string},
+      );
+    });
 
     it('should generate URLs without path params', () => {
       const urlMaker = apiUrlMaker<API>();
@@ -44,9 +47,11 @@ describe('typed requests', () => {
 
     it('should generate URLs with query params', () => {
       const urlMaker = apiUrlMaker<API>();
-      expect(urlMaker('/users')({}, {nameIncludes: 'Fre', minAge: 40})).toEqual('/users?nameIncludes=Fre&minAge=40')
-      expect(urlMaker('/users')({}, {suffix: 'Jr.'})).toEqual('/users?suffix=Jr.')
-    })
+      expect(urlMaker('/users')({}, {nameIncludes: 'Fre', minAge: 40})).toEqual(
+        '/users?nameIncludes=Fre&minAge=40',
+      );
+      expect(urlMaker('/users')({}, {suffix: 'Jr.'})).toEqual('/users?suffix=Jr.');
+    });
   });
 
   describe('default fetch implementation', () => {
@@ -130,11 +135,7 @@ describe('typed requests', () => {
       assertType(newUser, _ as User);
       expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
-      expect(mockFetcher).toHaveBeenCalledWith(
-        '/users',
-        'post',
-        {name: 'Fred', age: 42}
-      );
+      expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
     });
 
     it('should provide a method-agnostic request method', async () => {
@@ -148,11 +149,7 @@ describe('typed requests', () => {
       assertType(newUser, _ as User);
       expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
-      expect(mockFetcher).toHaveBeenCalledWith(
-        '/users',
-        'post',
-        {name: 'Fred', age: 42}
-      );
+      expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
     });
 
     it('should accept readonly objects in POST requests', async () => {
