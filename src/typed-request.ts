@@ -15,17 +15,32 @@ type ParamVarArgs<Params, Query> = DeepReadonly<
       ? []
       : [params: Params]
     : {} extends Params
-      ? [params?: {}, query?: Query]
+      ? [params?: Record<string, never>, query?: Query]
       : [params: Params, query?: Query]
 >;
+
+type QueryForMethod<Endpoint, Method extends HTTPVerb> = SafeKey<
+  SafeKey<Endpoint, Method>,
+  'query'
+>;
+
+export type QueryUnion<API, Path extends keyof API> =
+  | QueryForMethod<API[Path], 'get'>
+  | QueryForMethod<API[Path], 'post'>
+  | QueryForMethod<API[Path], 'put'>
+  | QueryForMethod<API[Path], 'delete'>
+  | QueryForMethod<API[Path], 'patch'>;
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {
   return <Path extends keyof API>(endpoint: Path & string) => {
     type Params = ExtractRouteParams<Path & string>;
+    type Query = QueryUnion<API, Path>;
     const toPath = compile(endpoint);
-    return (...paramsList: ParamVarArgs<Params, null>) =>
-      prefix + toPath(paramsList[0] as any);
+    return (...paramsList: ParamVarArgs<Params, Query>) =>
+      prefix +
+      toPath(paramsList[0] as any) +
+      (paramsList[1] ? '?' + new URLSearchParams(paramsList[1]) : '');
   };
 }
 
@@ -45,9 +60,8 @@ export async function fetchJson(
   url: string,
   method: HTTPVerb,
   payload: unknown,
-  query?: Record<string, string>,
 ) {
-  const response = await fetch(url + (query ? '?' + new URLSearchParams(query) : ''), {
+  const response = await fetch(url, {
     method,
     headers: {
       Accept: 'application/json',
@@ -77,10 +91,9 @@ export function typedApi<API>(options?: Options) {
     const makeUrl = urlMaker(endpoint);
     return (params: Params, body: Request, query?: Query): Promise<Response> =>
       fetcher(
-        (makeUrl as any)(params),
+        (makeUrl as any)(params, query),
         method,
-        body,
-        query ?? (null as any),
+        body
       ) as Promise<Response>;
   };
 

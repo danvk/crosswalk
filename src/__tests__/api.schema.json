@@ -22,11 +22,17 @@
             ],
             "type": "object"
         },
-        "Endpoint<Pick<User,\"name\"|\"age\">,User,null>": {
+        "Endpoint<Pick<User,\"name\"|\"age\">,User,{suffix?:string|undefined;}>": {
             "additionalProperties": false,
             "properties": {
                 "query": {
-                    "type": "null"
+                    "additionalProperties": false,
+                    "properties": {
+                        "suffix": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
                 },
                 "request": {
                     "$ref": "#/definitions/Pick<User,\"name\"|\"age\">"
@@ -228,6 +234,9 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "suffix": {
+                    "type": "string"
                 }
             },
             "required": [
@@ -260,7 +269,7 @@
                     "description": "Get the full list of users"
                 },
                 "post": {
-                    "$ref": "#/definitions/Endpoint<Pick<User,\"name\"|\"age\">,User,null>",
+                    "$ref": "#/definitions/Endpoint<Pick<User,\"name\"|\"age\">,User,{suffix?:string|undefined;}>",
                     "description": "Create a new user"
                 }
             },

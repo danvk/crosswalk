@@ -3,6 +3,7 @@ import {Endpoint, GetEndpoint} from '../api-spec';
 export interface User {
   id: string;
   name: string;
+  suffix?: string;
   age: number;
 }
 
@@ -17,7 +18,7 @@ export interface API {
     /** Get the full list of users */
     get: GetEndpoint<{users: User[]}, {nameIncludes?: string; minAge?: number}>;
     /** Create a new user */
-    post: Endpoint<CreateUserRequest, User>;
+    post: Endpoint<CreateUserRequest, User, {suffix?: string}>;
   };
   '/users/:userId': {
     get: GetEndpoint<User, {firstName?: string}>;

@@ -3,9 +3,14 @@ import {assert as assertType, _} from 'spec.ts';
 import {API, User} from './api';
 import {typedApi, apiUrlMaker, fetchJson} from '..';
 import {Endpoint} from '../api-spec';
+import {QueryUnion} from '../typed-request';
 
 describe('typed requests', () => {
   describe('apiUrlMaker', () => {
+    it('should provide a union of query params available to all methods for a given endpoint', () => {
+      assertType(_ as QueryUnion<API, '/users'>, _ as {nameIncludes?: string; minAge?: number} | {suffix?: string})
+    })
+
     it('should generate URLs without path params', () => {
       const urlMaker = apiUrlMaker<API>();
       expect(urlMaker('/users')()).toEqual('/users');
@@ -36,6 +41,12 @@ describe('typed requests', () => {
       const urlMaker = apiUrlMaker<API>('/api/v0');
       expect(urlMaker('/users/:userId')(user)).toEqual('/api/v0/users/fred');
     });
+
+    it('should generate URLs with query params', () => {
+      const urlMaker = apiUrlMaker<API>();
+      expect(urlMaker('/users')({}, {nameIncludes: 'Fre', minAge: 40})).toEqual('/users?nameIncludes=Fre&minAge=40')
+      expect(urlMaker('/users')({}, {suffix: 'Jr.'})).toEqual('/users?suffix=Jr.')
+    })
   });
 
   describe('default fetch implementation', () => {
@@ -81,7 +92,7 @@ describe('typed requests', () => {
       assertType(random, _ as {random: number});
       expect(random).toEqual({random: 7});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
-      expect(mockFetcher).toHaveBeenCalledWith('/random', 'get', null, null);
+      expect(mockFetcher).toHaveBeenCalledWith('/random', 'get', null);
 
       mockFetcher.mockClear();
       mockFetcher.mockReturnValueOnce(Promise.resolve({users: []}));
@@ -89,7 +100,7 @@ describe('typed requests', () => {
       assertType(allUsers, _ as {users: User[]});
       expect(allUsers).toEqual({users: []});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
-      expect(mockFetcher).toHaveBeenCalledWith('/users', 'get', null, null);
+      expect(mockFetcher).toHaveBeenCalledWith('/users', 'get', null);
 
       mockFetcher.mockClear();
       mockFetcher.mockReturnValueOnce(Promise.resolve({users: []}));
@@ -97,7 +108,7 @@ describe('typed requests', () => {
       assertType(filteredUsers, _ as {users: User[]});
       expect(filteredUsers).toEqual({users: []});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
-      expect(mockFetcher).toHaveBeenCalledWith('/users', 'get', null, {nameIncludes: 'red'});
+      expect(mockFetcher).toHaveBeenCalledWith('/users?nameIncludes=red', 'get', null);
 
       mockFetcher.mockClear();
       mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});
@@ -105,7 +116,7 @@ describe('typed requests', () => {
       assertType(user, _ as User);
       expect(user).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
-      expect(mockFetcher).toHaveBeenCalledWith('/users/fred', 'get', null, null);
+      expect(mockFetcher).toHaveBeenCalledWith('/users/fred', 'get', null);
     });
 
     it('should generate POST requests', async () => {
@@ -122,8 +133,7 @@ describe('typed requests', () => {
       expect(mockFetcher).toHaveBeenCalledWith(
         '/users',
         'post',
-        {name: 'Fred', age: 42},
-        null,
+        {name: 'Fred', age: 42}
       );
     });
 
@@ -141,8 +151,7 @@ describe('typed requests', () => {
       expect(mockFetcher).toHaveBeenCalledWith(
         '/users',
         'post',
-        {name: 'Fred', age: 42},
-        null,
+        {name: 'Fred', age: 42}
       );
     });
 

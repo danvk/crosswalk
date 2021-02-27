@@ -43,6 +43,9 @@ Object {
         "name": Object {
           "type": "string",
         },
+        "suffix": Object {
+          "type": "string",
+        },
       },
       "required": Array [
         "age",
@@ -125,6 +128,13 @@ Object {
             "name": "body",
             "schema": Object {
               "$ref": "#/definitions/Pick<User,\\"name\\"|\\"age\\">",
+            },
+          },
+          Object {
+            "in": "query",
+            "name": "suffix",
+            "schema": Object {
+              "type": "string",
             },
           },
         ],
