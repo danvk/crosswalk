@@ -132,6 +132,13 @@ Object {
           },
           Object {
             "in": "query",
+            "name": "nameIncludes",
+            "schema": Object {
+              "type": "string",
+            },
+          },
+          Object {
+            "in": "query",
             "name": "suffix",
             "schema": Object {
               "type": "string",

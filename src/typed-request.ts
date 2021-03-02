@@ -19,29 +19,47 @@ type ParamVarArgs<Params, Query> = DeepReadonly<
       : [params: Params, query?: Query]
 >;
 
-type QueryForMethod<Endpoint, Method extends HTTPVerb> = SafeKey<
+type QueryForMethod<Endpoint, Method extends keyof Endpoint> = SafeKey<
   SafeKey<Endpoint, Method>,
   'query'
 >;
 
-export type QueryUnion<API, Path extends keyof API> =
-  | QueryForMethod<API[Path], 'get'>
-  | QueryForMethod<API[Path], 'post'>
-  | QueryForMethod<API[Path], 'put'>
-  | QueryForMethod<API[Path], 'delete'>
-  | QueryForMethod<API[Path], 'patch'>;
+type QueryIntersection<API, Path extends keyof API, P = API[Path]> = Pick<
+  SafeKey<P[keyof P], 'query'>,
+  keyof SafeKey<P[keyof P], 'query'>
+>;
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {
-  return <Path extends keyof API>(endpoint: Path & string) => {
-    type Params = ExtractRouteParams<Path & string>;
-    type Query = QueryUnion<API, Path>;
+  /** Using overloading here instead of conditional return types because from my testing and Googling they are broken when used as return types */
+  /** If a method is not provided we use the intersection (only common) of query params for all methods at the given path */
+  function createUrlMakerForEndpoint<
+    Path extends keyof API,
+    Params = ExtractRouteParams<Path & string>,
+    Query = QueryIntersection<API, Path>
+  >(endpoint: Path & string): (...params: ParamVarArgs<Params, Query>) => string;
+  /** If a method is provided we use the query params for the given method */
+  function createUrlMakerForEndpoint<
+    Path extends keyof API,
+    Method extends keyof API[Path],
+    Params = ExtractRouteParams<Path & string>,
+    Query = QueryForMethod<API[Path], Method>
+  >(
+    endpoint: Path & string,
+    method: Method,
+  ): (...params: ParamVarArgs<Params, Query>) => string;
+  function createUrlMakerForEndpoint<Path extends keyof API, Method extends keyof API[Path]>(
+    endpoint: Path & string,
+    _method?: Method,
+  ) {
     const toPath = compile(endpoint);
-    return (...paramsList: ParamVarArgs<Params, Query>) =>
+    return (...paramsList: Record<any, any>[]) =>
       prefix +
-      toPath(paramsList[0] as any) +
+      toPath(paramsList[0]) +
       (paramsList[1] ? '?' + new URLSearchParams(paramsList[1]) : '');
-  };
+  }
+
+  return createUrlMakerForEndpoint;
 }
 
 export interface Options {
@@ -56,11 +74,7 @@ export interface Options {
   ) => Promise<unknown>;
 }
 
-export async function fetchJson(
-  url: string,
-  method: HTTPVerb,
-  payload: unknown,
-) {
+export async function fetchJson(url: string, method: HTTPVerb, payload: unknown) {
   const response = await fetch(url, {
     method,
     headers: {
@@ -90,11 +104,7 @@ export function typedApi<API>(options?: Options) {
     type Query = SafeKey<Endpoint, 'query'>;
     const makeUrl = urlMaker(endpoint);
     return (params: Params, body: Request, query?: Query): Promise<Response> =>
-      fetcher(
-        (makeUrl as any)(params, query),
-        method,
-        body
-      ) as Promise<Response>;
+      fetcher((makeUrl as any)(params, query), method, body) as Promise<Response>;
   };
 
   const requestWithoutBody = <Method extends HTTPVerb>(method: Method) => <

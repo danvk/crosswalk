@@ -3,14 +3,24 @@ import {assert as assertType, _} from 'spec.ts';
 import {API, User} from './api';
 import {typedApi, apiUrlMaker, fetchJson} from '..';
 import {Endpoint} from '../api-spec';
-import {QueryUnion} from '../typed-request';
 
 describe('typed requests', () => {
   describe('apiUrlMaker', () => {
-    it('should provide a union of query params available to all methods for a given endpoint', () => {
+    it('should provide an intersection of query params available to all methods for a given endpoint', () => {
+      const urlMaker = apiUrlMaker<API>();
+      const getUsers = urlMaker('/users');
       assertType(
-        _ as QueryUnion<API, '/users'>,
-        _ as {nameIncludes?: string; minAge?: number} | {suffix?: string},
+        _ as typeof getUsers,
+        _ as (
+          params?: Readonly<Record<string, never>>,
+          query?: Readonly<{nameIncludes?: string}>,
+        ) => string,
+      );
+
+      const getUser = urlMaker('/users/:userId');
+      assertType(
+        _ as typeof getUser,
+        _ as (params: Readonly<{userId: string}>, query?: {}) => string,
       );
     });
 
@@ -47,10 +57,13 @@ describe('typed requests', () => {
 
     it('should generate URLs with query params', () => {
       const urlMaker = apiUrlMaker<API>();
-      expect(urlMaker('/users')({}, {nameIncludes: 'Fre', minAge: 40})).toEqual(
+      expect(urlMaker('/users', 'get')({}, {nameIncludes: 'Fre', minAge: 40})).toEqual(
         '/users?nameIncludes=Fre&minAge=40',
       );
-      expect(urlMaker('/users')({}, {suffix: 'Jr.'})).toEqual('/users?suffix=Jr.');
+      expect(urlMaker('/users', 'post')({}, {suffix: 'Jr.'})).toEqual('/users?suffix=Jr.');
+
+      // @ts-expect-error suffix is not common to all routes on /users and therefore is not allowed
+      urlMaker('/users')({}, {suffix: 'Jr.'});
     });
   });
 

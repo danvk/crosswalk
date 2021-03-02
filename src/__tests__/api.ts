@@ -18,7 +18,7 @@ export interface API {
     /** Get the full list of users */
     get: GetEndpoint<{users: User[]}, {nameIncludes?: string; minAge?: number}>;
     /** Create a new user */
-    post: Endpoint<CreateUserRequest, User, {suffix?: string}>;
+    post: Endpoint<CreateUserRequest, User, {nameIncludes?: string; suffix?: string}>;
   };
   '/users/:userId': {
     get: GetEndpoint<User, {firstName?: string}>;
