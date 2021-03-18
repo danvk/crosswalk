@@ -22,4 +22,7 @@ export interface API {
     put: Endpoint<{name?: string; age?: number}, User>;
     delete: Endpoint<{}, User>;
   };
+  '/complex': {
+    post: Endpoint<{user: User | null}, User>;
+  }
 }

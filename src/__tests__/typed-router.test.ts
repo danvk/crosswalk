@@ -82,6 +82,10 @@ test('TypedRouter', async () => {
   router.registerEndpoint('patch', '/users/:userId', async () => {
     throw new Error('Not implemented');
   });
+  router.post('/complex', async ({}, body) => {
+    assertType(body.user, _ as User | null);
+    throw new Error('Not implemented');
+  });
 
   const api = request(app);
 
