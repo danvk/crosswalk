@@ -82,6 +82,13 @@ test('TypedRouter', async () => {
   router.registerEndpoint('patch', '/users/:userId', async () => {
     throw new Error('Not implemented');
   });
+  router.post('/complex', async ({}, body) => {
+    assertType(body.user, _ as User | null);
+    return users[0];
+  });
+  router.patch('/complex', async ({}, body) => {
+    return users[0];
+  });
 
   const api = request(app);
 
@@ -149,6 +156,64 @@ test('TypedRouter', async () => {
       expect(response.body).toMatchObject({
         error: 'data should NOT have additional properties',
       });
+    });
+
+  await api
+    .post('/complex')
+    .send({user: 'not a user'})
+    .set('Accept', 'application/json')
+    .expect(400)
+    .expect(response => {
+      expect(response.body.error).toMatchInlineSnapshot(
+        `"data.user should be object, data.user should be null, data.user should match some schema in anyOf"`,
+      );
+    });
+
+  await api.post('/complex').send({user: null}).set('Accept', 'application/json').expect(200);
+
+  await api
+    .post('/complex')
+    .send({user: {id: 'id', name: 'name'}})
+    .set('Accept', 'application/json')
+    .expect(400)
+    .expect(response => {
+      expect(response.body.error).toMatchInlineSnapshot(
+        `"data.user should have required property 'age', data.user should be null, data.user should match some schema in anyOf"`,
+      );
+    });
+
+  await api
+    .post('/complex')
+    .send({user: {id: 'id', name: 'name', age: 42}})
+    .set('Accept', 'application/json')
+    .expect(200);
+
+  await api
+    .patch('/complex')
+    .send({id: 'id', name: 'name', age: 42})
+    .set('Accept', 'application/json')
+    .expect(200);
+
+  await api
+    .patch('/complex')
+    .send({id: 'id', name: 'name'})
+    .set('Accept', 'application/json')
+    .expect(400)
+    .expect(response => {
+      expect(response.body.error).toMatchInlineSnapshot(
+        `"data should have required property 'age'"`,
+      );
+    });
+
+  await api
+    .patch('/complex')
+    .send({name: 'name', age: 42})
+    .set('Accept', 'application/json')
+    .expect(400)
+    .expect(response => {
+      expect(response.body.error).toMatchInlineSnapshot(
+        `"data should have required property 'id'"`,
+      );
     });
 
   router.assertAllRoutesRegistered();
