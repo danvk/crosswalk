@@ -11,7 +11,7 @@
     "test": "jest",
     "lint": "prettier --check src/**/*.ts",
     "prettier": "prettier --write src/**/*.ts",
-    "update-test-schema": "typescript-json-schema --required --strictNullChecks src/__tests__/api.ts API --out src/__tests__/api.schema.json"
+    "update-test-schema": "typescript-json-schema --required --noExtraProps --strictNullChecks src/__tests__/api.ts API --out src/__tests__/api.schema.json"
   },
   "repository": {
     "type": "git",

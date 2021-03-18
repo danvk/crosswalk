@@ -170,9 +170,6 @@ export class TypedRouter<API> {
       requestType = requestType.$ref; // allow either references or inline types
     } else if (requestType.type && requestType.type === 'null') {
       requestType = null; // no request body, no validation
-    } else if (requestType.allOf) {
-      // TODO(danvk): figure out how to make ajv understand these.
-      throw new Error('Intersection types in APIs are not supported yet.');
     }
 
     if (requestType && this.ajv) {
@@ -183,7 +180,11 @@ export class TypedRouter<API> {
         // Create a new AJV validate for inline object types.
         // This assumes these will never reference other type definitions.
         const requestAjv = new Ajv();
-        validate = requestAjv.compile(requestType);
+        validate = requestAjv.compile({
+          '$schema': apiSchema.$schema,
+          definitions: apiSchema.definitions,
+          ...requestType
+        });
       }
       if (!validate) {
         throw new Error(`Unable to get schema for '${requestType}'`);

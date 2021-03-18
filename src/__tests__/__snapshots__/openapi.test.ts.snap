@@ -4,6 +4,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
 Object {
   "definitions": Object {
     "Partial<Pick<User,\\"name\\"|\\"age\\">>": Object {
+      "additionalProperties": false,
       "properties": Object {
         "age": Object {
           "type": "number",
@@ -15,6 +16,7 @@ Object {
       "type": "object",
     },
     "Pick<User,\\"name\\"|\\"age\\">": Object {
+      "additionalProperties": false,
       "properties": Object {
         "age": Object {
           "type": "number",
@@ -30,6 +32,7 @@ Object {
       "type": "object",
     },
     "User": Object {
+      "additionalProperties": false,
       "properties": Object {
         "age": Object {
           "type": "number",
@@ -62,6 +65,7 @@ Object {
             "in": "body",
             "name": "body",
             "schema": Object {
+              "additionalProperties": false,
               "properties": Object {
                 "user": Object {
                   "anyOf": Array [
@@ -96,6 +100,7 @@ Object {
         "responses": Object {
           "200": Object {
             "schema": Object {
+              "additionalProperties": false,
               "properties": Object {
                 "users": Object {
                   "items": Object {
@@ -211,6 +216,7 @@ Object {
             "in": "body",
             "name": "body",
             "schema": Object {
+              "additionalProperties": false,
               "properties": Object {
                 "age": Object {
                   "type": "number",
