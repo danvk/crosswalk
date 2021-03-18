@@ -23,6 +23,7 @@ export interface API {
     delete: Endpoint<{}, User>;
   };
   '/complex': {
+    // This endpoint references an interface from an inline type, see issue #10.
     post: Endpoint<{user: User | null}, User>;
   }
 }

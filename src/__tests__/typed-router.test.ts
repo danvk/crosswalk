@@ -84,7 +84,7 @@ test('TypedRouter', async () => {
   });
   router.post('/complex', async ({}, body) => {
     assertType(body.user, _ as User | null);
-    throw new Error('Not implemented');
+    return users[0];
   });
 
   const api = request(app);
@@ -154,6 +154,36 @@ test('TypedRouter', async () => {
         error: 'data should NOT have additional properties',
       });
     });
+
+  await api
+    .post('/complex')
+    .send({user: 'not a user'})
+    .set('Accept', 'application/json')
+    .expect(400)
+    .expect(response => {
+      expect(response.body.error).toMatchInlineSnapshot(
+        `"data.user should be object, data.user should be null, data.user should match some schema in anyOf"`,
+      );
+    });
+
+  await api.post('/complex').send({user: null}).set('Accept', 'application/json').expect(200);
+
+  await api
+    .post('/complex')
+    .send({user: {id: 'id', name: 'name'}})
+    .set('Accept', 'application/json')
+    .expect(400)
+    .expect(response => {
+      expect(response.body.error).toMatchInlineSnapshot(
+        `"data.user should have required property 'age', data.user should be null, data.user should match some schema in anyOf"`,
+      );
+    });
+
+  await api
+    .post('/complex')
+    .send({user: {id: 'id', name: 'name', age: 42}})
+    .set('Accept', 'application/json')
+    .expect(200);
 
   router.assertAllRoutesRegistered();
 });
