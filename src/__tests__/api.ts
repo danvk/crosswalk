@@ -25,5 +25,7 @@ export interface API {
   '/complex': {
     // This endpoint references an interface from an inline type, see issue #10.
     post: Endpoint<{user: User | null}, User>;
+    // This endpoint is used to test that intersection types work as expected.
+    patch: Endpoint<CreateUserRequest & {id: string}, User>;
   }
 }

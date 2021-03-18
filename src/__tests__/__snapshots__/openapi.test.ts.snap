@@ -59,6 +59,42 @@ Object {
   },
   "paths": Object {
     "/complex": Object {
+      "patch": Object {
+        "parameters": Array [
+          Object {
+            "in": "body",
+            "name": "body",
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "age": Object {
+                  "type": "number",
+                },
+                "id": Object {
+                  "type": "string",
+                },
+                "name": Object {
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "age",
+                "id",
+                "name",
+              ],
+              "type": "object",
+            },
+          },
+        ],
+        "responses": Object {
+          "200": Object {
+            "schema": Object {
+              "$ref": "#/definitions/User",
+            },
+          },
+        },
+        "summary": undefined,
+      },
       "post": Object {
         "parameters": Array [
           Object {

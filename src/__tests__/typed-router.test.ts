@@ -86,6 +86,9 @@ test('TypedRouter', async () => {
     assertType(body.user, _ as User | null);
     return users[0];
   });
+  router.patch('/complex', async ({}, body) => {
+    return users[0];
+  });
 
   const api = request(app);
 
@@ -184,6 +187,34 @@ test('TypedRouter', async () => {
     .send({user: {id: 'id', name: 'name', age: 42}})
     .set('Accept', 'application/json')
     .expect(200);
+
+  await api
+    .patch('/complex')
+    .send({id: 'id', name: 'name', age: 42})
+    .set('Accept', 'application/json')
+    .expect(200);
+
+  await api
+    .patch('/complex')
+    .send({id: 'id', name: 'name'})
+    .set('Accept', 'application/json')
+    .expect(400)
+    .expect(response => {
+      expect(response.body.error).toMatchInlineSnapshot(
+        `"data should have required property 'age'"`,
+      );
+    });
+
+  await api
+    .patch('/complex')
+    .send({name: 'name', age: 42})
+    .set('Accept', 'application/json')
+    .expect(400)
+    .expect(response => {
+      expect(response.body.error).toMatchInlineSnapshot(
+        `"data should have required property 'id'"`,
+      );
+    });
 
   router.assertAllRoutesRegistered();
 });
