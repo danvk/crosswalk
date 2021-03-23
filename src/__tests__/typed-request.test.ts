@@ -2,7 +2,7 @@ import {assert as assertType, _} from 'spec.ts';
 
 import {API, User} from './api';
 import {typedApi, apiUrlMaker, fetchJson} from '..';
-import {Endpoint} from '../api-spec';
+import {Endpoint, GetEndpoint} from '../api-spec';
 
 describe('typed requests', () => {
   describe('apiUrlMaker', () => {
@@ -22,6 +22,33 @@ describe('typed requests', () => {
         _ as typeof getUser,
         _ as (params: Readonly<{userId: string}>, query?: {}) => string,
       );
+    });
+
+    it('should intersect query params as expected', () => {
+      interface API {
+        '/endpoint': {
+          get: GetEndpoint<{}, {a?: string; b?: 'b1' | 'b2'}>;
+          post: Endpoint<{}, {}, {b?: 'b2' | 'b3'; c?: string}>;
+        };
+      }
+
+      const urlMaker = apiUrlMaker<API>('/api');
+      const endpointUrl = urlMaker('/endpoint');
+      // @ts-expect-error
+      endpointUrl({}, {a: 'a', b: 'b'}); // should be an error, we don't know that "a" is OK.
+
+      // @ts-expect-error
+      expect(endpointUrl({}, {b: 'b1'})).toEqual('/api/endpoint?b=b1'); // 'b1' only works for get
+
+      // 'b2' is safe for each method
+      expect(endpointUrl({}, {b: 'b2'})).toEqual('/api/endpoint?b=b2');
+
+      // @ts-expect-error
+      expect(endpointUrl({}, {b: 'b3'})).toEqual('/api/endpoint?b=b3'); // 'b3' only works for post
+
+      expect(urlMaker('/endpoint', 'get')({}, {a: 'a', b: 'b1'})).toEqual(
+        '/api/endpoint?a=a&b=b1',
+      ); // fine, we're using get.
     });
 
     it('should generate URLs without path params', () => {

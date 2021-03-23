@@ -20,12 +20,19 @@ type ParamVarArgs<Params, Query> = DeepReadonly<
 >;
 
 type QueryForMethod<Endpoint, Method extends keyof Endpoint> = SafeKey<
-  SafeKey<Endpoint, Method>,
+  Endpoint[Method],
   'query'
 >;
 
+type MergedQueryParams<API, Path extends keyof API> = {
+  [K in keyof API[Path]]: (x: SafeKey<API[Path][K], 'query'>) => void;
+}[keyof API[Path]] extends (x: infer I) => void
+  ? {[K in keyof I]: I[K]}
+  : never;
+
 type QueryIntersection<API, Path extends keyof API, P = API[Path]> = Pick<
-  SafeKey<P[keyof P], 'query'>,
+  MergedQueryParams<API, Path>,
+  // @ts-expect-error Unable to do this generically but actually does work. TS issue?
   keyof SafeKey<P[keyof P], 'query'>
 >;
 
