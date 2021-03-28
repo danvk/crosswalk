@@ -162,7 +162,11 @@ export class TypedRouter<API> {
   }
 
   /** Get a validation function for request bodies for the endpoint, or null if not applicable. */
-  getValidator(route: string, method: HTTPVerb, property: 'request' | 'query'): Ajv.ValidateFunction | null {
+  getValidator(
+    route: string,
+    method: HTTPVerb,
+    property: 'request' | 'query',
+  ): Ajv.ValidateFunction | null {
     const {apiSchema} = this;
     if (!apiSchema) {
       return null;
@@ -192,7 +196,7 @@ export class TypedRouter<API> {
       } else {
         // Create a new AJV validate for inline object types.
         // This assumes these will never reference other type definitions.
-        const requestAjv = new Ajv({ coerceTypes: property === 'query' });
+        const requestAjv = new Ajv({coerceTypes: property === 'query'});
         validate = requestAjv.compile(validateType);
       }
       if (!validate) {

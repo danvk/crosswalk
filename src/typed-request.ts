@@ -21,16 +21,18 @@ type PlaceholderEmpty = null | {[pathParam: string]: never};
 //   Query param is mandatory if there are non-optional query params
 type ParamVarArgs<Params, Query> = DeepReadonly<
   [Query] extends [never]
-      // This must have arisen from an impossible intersection of query types.
-      ? [error: '❌ Must specify an HTTP method (get, post, etc.) to apiUrlMaker for this endpoint', _: never]
-  : [Query] extends [null]
+    ? // This must have arisen from an impossible intersection of query types.
+      [
+        error: '❌ Must specify an HTTP method (get, post, etc.) to apiUrlMaker for this endpoint',
+        _: never,
+      ]
+    : [Query] extends [null]
     ? [{}] extends [Params]
-      ? []  // no path params, no query
-      : [params: Params]  // path params, no query allowed
+      ? [] // no path params, no query
+      : [params: Params] // path params, no query allowed
     : [{}, {}] extends [Params, Query]
-    ?
-    // No path params, optional query params; zero arg call is OK
-    [params?: PlaceholderEmpty, query?: Query]
+    ? // No path params, optional query params; zero arg call is OK
+      [params?: PlaceholderEmpty, query?: Query]
     : [
         params: [{}] extends Params ? PlaceholderEmpty : Params,
         ...query: [{}] extends [Query] ? [query?: Query] : [query: Query]
@@ -49,23 +51,14 @@ type SafeQueryTypesForMethod<
   M extends keyof Endpoint,
   Q extends QueryTypes<Endpoint, M> = QueryTypes<Endpoint, M>,
   V extends ValueIntersection<Q> = ValueIntersection<Q>,
-  P extends LoosePick<V, keyof Q[M]> = LoosePick<V, keyof Q[M]>,
-> = [V] extends [never] ? null : [keyof Q[M]] extends [never] ? never : P extends V ? SimplifyType<P> : never;
-
-// import {API as TestAPI} from './__tests__/api';
-interface TestAPI {
-  '/path': {
-    get: {query: {mandatory: string}};
-    post: {query: {mandatory2: string}};
-  }
-}
-type M = 'get' | 'post';
-type T = SafeQueryTypesForMethod<TestAPI['/path'], M>;
-type Q = QueryTypes<TestAPI['/path'], M>;
-type V = ValueIntersection<Q>;
-type QM = Q[M];
-type K = keyof Q[M];
-type P = LoosePick<V, K>;
+  P extends LoosePick<V, keyof Q[M]> = LoosePick<V, keyof Q[M]>
+> = [V] extends [never]
+  ? null
+  : [keyof Q[M]] extends [never]
+  ? never
+  : P extends V
+  ? SimplifyType<P>
+  : never;
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {
@@ -80,7 +73,7 @@ export function apiUrlMaker<API>(prefix = '') {
     AllMethods extends keyof P = keyof P,
     Method extends AllMethods = Args extends [any, infer M] ? M : AllMethods,
     Params = ExtractRouteParams<Path & string>,
-    Query = SafeQueryTypesForMethod<P, Method>,
+    Query = SafeQueryTypesForMethod<P, Method>
   >(...[endpoint, _method]: Args): (...params: ParamVarArgs<Params, Query>) => string {
     const toPath = compile(endpoint as string);
     return (...paramsList: readonly any[]) =>
@@ -96,11 +89,7 @@ export interface Options {
   /** Prefix to add to all API endpoints (e.g. /api/v0) */
   prefix?: string;
   /** Function to use for fetching. Defaults to browser fetch. */
-  fetch?: (
-    url: string,
-    method: HTTPVerb,
-    payload: unknown,
-  ) => Promise<unknown>;
+  fetch?: (url: string, method: HTTPVerb, payload: unknown) => Promise<unknown>;
 }
 
 export async function fetchJson(url: string, method: HTTPVerb, payload: unknown) {
@@ -147,7 +136,11 @@ export function typedApi<API>(options?: Options) {
     type Query = SafeKey<Endpoint, 'query'>;
 
     return (...params: ParamVarArgs<Params, Query>): Promise<Response> =>
-      requestWithBody(method)(endpoint)((params as any)?.[0], null as any, (params as any)?.[1]);
+      requestWithBody(method)(endpoint)(
+        (params as any)?.[0],
+        null as any,
+        (params as any)?.[1],
+      );
   };
 
   return {

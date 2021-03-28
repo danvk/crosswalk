@@ -9,8 +9,8 @@
   "scripts": {
     "prepare": "install-peers",
     "test": "jest",
-    "lint": "prettier --check src/**/*.ts",
-    "prettier": "prettier --write src/**/*.ts"
+    "lint": "prettier --check 'src/**/*.ts'",
+    "prettier": "prettier --write 'src/**/*.ts'"
   },
   "repository": {
     "type": "git",
