@@ -194,9 +194,9 @@ export class TypedRouter<API> {
         // Create a new AJV validate for inline object types.
         const requestAjv = new Ajv({coerceTypes: property === 'query'});
         validate = requestAjv.compile({
-          '$schema': apiSchema.$schema,
+          $schema: apiSchema.$schema,
           definitions: apiSchema.definitions,
-          ...validateType
+          ...validateType,
         });
       }
       if (!validate) {

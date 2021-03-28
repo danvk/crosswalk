@@ -83,10 +83,8 @@ export function apiUrlMaker<API>(prefix = '') {
     const toPath = compile(endpoint as string);
     return (...paramsList: readonly any[]) => {
       const queryString = paramsList[1] ? '' + new URLSearchParams(paramsList[1]) : '';
-      return prefix +
-        toPath(paramsList[0]) +
-        (queryString ? '?' + queryString : '');
-    }
+      return prefix + toPath(paramsList[0]) + (queryString ? '?' + queryString : '');
+    };
   }
 
   return createUrlMakerForEndpoint;
