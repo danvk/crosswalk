@@ -193,6 +193,24 @@ describe('typed requests', () => {
       );
       expect(urlMakerEither(null, {a: 'a', b: 'b', c: 'c'})).toEqual('/path?a=a&b=b&c=c');
     });
+
+    it('should ignore query strings for endpoints without them', () => {
+      interface TestAPI {
+        '/path': {
+          get: GetEndpoint<{names: string[]}>;
+          post: Endpoint<{name: string}, {name: string}>;
+        };
+        '/path/:pathId': {
+          get: GetEndpoint<{name: string}>;
+          post: Endpoint<{name: string}, {name: string}>;
+        }
+      }
+
+      const urlMaker = apiUrlMaker<TestAPI>()('/path');
+      expect(urlMaker()).toEqual('/path');
+      const urlMakerId = apiUrlMaker<TestAPI>()('/path/:pathId');
+      expect(urlMakerId({pathId: 'foo'})).toEqual('/path/foo');
+    });
   });
 
   describe('default fetch implementation', () => {

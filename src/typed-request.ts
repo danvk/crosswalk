@@ -1,7 +1,7 @@
 /** Type-safe wrapper around fetch() for REST APIs */
 
 import {compile} from 'path-to-regexp';
-import {HTTPVerb} from './api-spec';
+import {Endpoint, GetEndpoint, HTTPVerb} from './api-spec';
 
 import {
   ExtractRouteParams,
@@ -56,7 +56,7 @@ type SafeQueryTypesForMethod<
   Q extends QueryTypes<Endpoint, M> = QueryTypes<Endpoint, M>,
   V extends ValueIntersection<Q> = ValueIntersection<Q>,
   P extends LoosePick<V, keyof Q[M]> = LoosePick<V, keyof Q[M]>
-> = [V] extends [never]
+> = [V] extends [never | null]
   ? null
   : [keyof Q[M]] extends [never]
   ? never
@@ -79,12 +79,15 @@ export function apiUrlMaker<API>(prefix = '') {
     Method extends AllMethods = Args extends [any, infer M] ? M : AllMethods,
     Params = ExtractRouteParams<Path & string>,
     Query = SafeQueryTypesForMethod<P, Method>
-  >(...[endpoint, _method]: Args): (...params: ParamVarArgs<Params, Query>) => string {
+  >(...[endpoint, _method]: Args) {
     const toPath = compile(endpoint as string);
-    return (...paramsList: readonly any[]) => {
-      const queryString = paramsList[1] ? '' + new URLSearchParams(paramsList[1]) : '';
-      return prefix + toPath(paramsList[0]) + (queryString ? '?' + queryString : '');
+    const fn = (...paramsList: ParamVarArgs<Params, Query>): string => {
+      const params = paramsList as any;
+      const queryString = params[1] ? '' + new URLSearchParams(params[1]) : '';
+      return prefix + toPath(params[0]) + (queryString ? '?' + queryString : '');
     };
+
+    return fn;
   }
 
   return createUrlMakerForEndpoint;
