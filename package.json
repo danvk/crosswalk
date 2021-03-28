@@ -1,6 +1,6 @@
 {
   "name": "crosswalk",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "Type-safe express routing with TypeScript",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,8 @@
     "prepare": "install-peers",
     "test": "jest",
     "lint": "prettier --check 'src/**/*.ts'",
-    "prettier": "prettier --write 'src/**/*.ts'"
+    "prettier": "prettier --write 'src/**/*.ts'",
+    "update-test-schema": "typescript-json-schema --required --noExtraProps --strictNullChecks src/__tests__/api.ts API --out src/__tests__/api.schema.json"
   },
   "repository": {
     "type": "git",

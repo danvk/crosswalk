@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3
+
+- Support more complex inline types in handlers, e.g. `Endpoint<{user: User|null}, User>`.
+  This also adds support for intersection types.
+  See <https://github.com/danvk/crosswalk/issues/10>
+
 ## 1.2.2
 
 - Suppress invalid HTTP Errors <https://github.com/danvk/crosswalk/issues/6>

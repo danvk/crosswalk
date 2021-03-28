@@ -22,6 +22,43 @@
             ],
             "type": "object"
         },
+        "Endpoint<Pick<User,\"name\"|\"age\">&{id:string;},User,null>": {
+            "additionalProperties": false,
+            "properties": {
+                "query": {
+                    "type": "null"
+                },
+                "request": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "age": {
+                            "type": "number"
+                        },
+                        "id": {
+                            "type": "string"
+                        },
+                        "name": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "age",
+                        "id",
+                        "name"
+                    ],
+                    "type": "object"
+                },
+                "response": {
+                    "$ref": "#/definitions/User"
+                }
+            },
+            "required": [
+                "query",
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
         "Endpoint<Pick<User,\"name\"|\"age\">,User,{nameIncludes?:string|undefined;suffix?:string|undefined;}>": {
             "additionalProperties": false,
             "properties": {
@@ -67,6 +104,42 @@
                             "type": "string"
                         }
                     },
+                    "type": "object"
+                },
+                "response": {
+                    "$ref": "#/definitions/User"
+                }
+            },
+            "required": [
+                "query",
+                "request",
+                "response"
+            ],
+            "type": "object"
+        },
+        "Endpoint<{user:User|null;},User,null>": {
+            "additionalProperties": false,
+            "properties": {
+                "query": {
+                    "type": "null"
+                },
+                "request": {
+                    "additionalProperties": false,
+                    "properties": {
+                        "user": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/definitions/User"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    "required": [
+                        "user"
+                    ],
                     "type": "object"
                 },
                 "response": {
@@ -251,6 +324,22 @@
         }
     },
     "properties": {
+        "/complex": {
+            "additionalProperties": false,
+            "properties": {
+                "patch": {
+                    "$ref": "#/definitions/Endpoint<Pick<User,\"name\"|\"age\">&{id:string;},User,null>"
+                },
+                "post": {
+                    "$ref": "#/definitions/Endpoint<{user:User|null;},User,null>"
+                }
+            },
+            "required": [
+                "patch",
+                "post"
+            ],
+            "type": "object"
+        },
         "/random": {
             "additionalProperties": false,
             "properties": {
@@ -309,6 +398,7 @@
         }
     },
     "required": [
+        "/complex",
         "/random",
         "/users",
         "/users/:userId"
