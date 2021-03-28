@@ -23,13 +23,8 @@ type ParamVarArgs<Params, Query> = DeepReadonly<
         [params: Params, query: Query]
 >;
 
-type QueryForMethod<Endpoint, Method extends keyof Endpoint> = SafeKey<
-  Endpoint[Method],
-  'query'
->;
-
-type QueryTypes<API, Path extends keyof API, P = API[Path]> = {
-  [M in keyof P]: SafeKey<P[M], 'query'>
+type QueryTypes<P, Methods extends keyof P> = {
+  [M in Methods]: SafeKey<P[M], 'query'>
 };
 
 // This is the intersection of all the value types for an object,
@@ -41,42 +36,29 @@ type ValueIntersection<O extends object> = {
 
 type Simplify<T> = {[K in keyof T]: T[K]};
 
-type QueryTypeForAnyMethod<API, Path extends keyof API>
-  = Simplify<ValueIntersection<QueryTypes<API, Path>>>;
+type QueryTypeForMethod<Endpoint, M extends keyof Endpoint>
+  = Simplify<ValueIntersection<QueryTypes<Endpoint, M>>>;
 
-import {API as TestAPI} from './__tests__/api';
-type T1 = Simplify<ValueIntersection<QueryTypes<TestAPI, '/random'>>>;
-type T2 = Readonly<Simplify<ValueIntersection<QueryTypes<TestAPI, '/users'>>>>;
-type T3 = Simplify<ValueIntersection<QueryTypes<TestAPI, '/users/:userId'>>>;
+// import {API as TestAPI} from './__tests__/api';
+// type T1 = Simplify<ValueIntersection<QueryTypes<TestAPI, '/random'>>>;
+// type T2 = Readonly<Simplify<ValueIntersection<QueryTypes<TestAPI, '/users'>>>>;
+// type T3 = Simplify<ValueIntersection<QueryTypes<TestAPI, '/users/:userId'>>>;
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {
-  /** Using overloading here instead of conditional return types because from my testing and Googling they are broken when used as return types */
-
-  /** If a method is not provided we use the intersection (only common) of query params for all methods at the given path */
-  function createUrlMakerForEndpoint<
-    Path extends keyof API,
-    Params = ExtractRouteParams<Path & string>,
-    Query = QueryTypeForAnyMethod<API, Path>
-  >(endpoint: Path & string): (...params: ParamVarArgs<Params, Query>) => string;
-
   /** If a method is provided we use the query params for the given method */
   function createUrlMakerForEndpoint<
-    Path extends keyof API,
-    Method extends keyof API[Path],
+    Args extends [endpoint: keyof API, method?: AllMethods],
+    Path extends Args[0] = Args[0],
+    AllMethods extends keyof API[Path] = keyof API[Path],
+    Method extends AllMethods = Args extends [any, infer M] ? M : AllMethods,
     Params = ExtractRouteParams<Path & string>,
-    Query = QueryForMethod<API[Path], Method>
+    Query = QueryTypeForMethod<API[Path], Method>,
   >(
-    endpoint: Path & string,
-    method: Method,
-  ): (...params: ParamVarArgs<Params, Query>) => string;
-
-  function createUrlMakerForEndpoint<Path extends keyof API, Method extends keyof API[Path]>(
-    endpoint: Path & string,
-    _method?: Method,
-  ) {
-    const toPath = compile(endpoint);
-    return (...paramsList: Record<string, string>[]) =>
+    ...[endpoint, _method]: Args
+  ): (...params: ParamVarArgs<Params, Query>) => string {
+    const toPath = compile(endpoint as string);
+    return (...paramsList: readonly any[]) =>
       prefix +
       toPath(paramsList[0]) +
       (paramsList[1] ? '?' + new URLSearchParams(paramsList[1]) : '');
