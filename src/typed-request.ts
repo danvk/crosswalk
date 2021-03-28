@@ -21,12 +21,16 @@ type PlaceholderEmpty = null | {[pathParam: string]: never};
 //   Query param is mandatory if there are non-optional query params
 type ParamVarArgs<Params, Query> = DeepReadonly<
   [Query] extends [never]
+      // This must have arisen from an impossible intersection of query types.
+      ? [error: '❌ Must specify an HTTP method (get, post, etc.) to apiUrlMaker for this endpoint', _: never]
+  : [Query] extends [null]
     ? [{}] extends [Params]
       ? []  // no path params, no query
       : [params: Params]  // path params, no query allowed
     : [{}, {}] extends [Params, Query]
-    ? // No path params, optional query params; zero arg call is OK
-      [params?: PlaceholderEmpty, query?: Query]
+    ?
+    // No path params, optional query params; zero arg call is OK
+    [params?: PlaceholderEmpty, query?: Query]
     : [
         params: [{}] extends Params ? PlaceholderEmpty : Params,
         ...query: [{}] extends [Query] ? [query?: Query] : [query: Query]
@@ -37,9 +41,31 @@ type QueryTypes<P, Methods extends keyof P> = {
   [M in Methods]: SafeKey<P[M], 'query'>;
 };
 
-type QueryTypeForMethod<Endpoint, M extends keyof Endpoint> = SimplifyType<
-  ValueIntersection<QueryTypes<Endpoint, M>>
->;
+// Like Pick<T, K>, but doesn't require that K extends keyof T
+type LoosePick<T, K> = Pick<T, K & keyof T>;
+
+type SafeQueryTypesForMethod<
+  Endpoint,
+  M extends keyof Endpoint,
+  Q extends QueryTypes<Endpoint, M> = QueryTypes<Endpoint, M>,
+  V extends ValueIntersection<Q> = ValueIntersection<Q>,
+  P extends LoosePick<V, keyof Q[M]> = LoosePick<V, keyof Q[M]>,
+> = [V] extends [never] ? null : [keyof Q[M]] extends [never] ? never : P extends V ? SimplifyType<P> : never;
+
+// import {API as TestAPI} from './__tests__/api';
+interface TestAPI {
+  '/path': {
+    get: {query: {mandatory: string}};
+    post: {query: {mandatory2: string}};
+  }
+}
+type M = 'get' | 'post';
+type T = SafeQueryTypesForMethod<TestAPI['/path'], M>;
+type Q = QueryTypes<TestAPI['/path'], M>;
+type V = ValueIntersection<Q>;
+type QM = Q[M];
+type K = keyof Q[M];
+type P = LoosePick<V, K>;
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {
@@ -54,7 +80,7 @@ export function apiUrlMaker<API>(prefix = '') {
     AllMethods extends keyof P = keyof P,
     Method extends AllMethods = Args extends [any, infer M] ? M : AllMethods,
     Params = ExtractRouteParams<Path & string>,
-    Query = QueryTypeForMethod<P, Method>
+    Query = SafeQueryTypesForMethod<P, Method>,
   >(...[endpoint, _method]: Args): (...params: ParamVarArgs<Params, Query>) => string {
     const toPath = compile(endpoint as string);
     return (...paramsList: readonly any[]) =>
@@ -121,7 +147,7 @@ export function typedApi<API>(options?: Options) {
     type Query = SafeKey<Endpoint, 'query'>;
 
     return (...params: ParamVarArgs<Params, Query>): Promise<Response> =>
-      requestWithBody(method)(endpoint)(params?.[0] as any, null as any, params?.[1] as any);
+      requestWithBody(method)(endpoint)((params as any)?.[0], null as any, (params as any)?.[1]);
   };
 
   return {
