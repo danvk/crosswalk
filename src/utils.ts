@@ -16,14 +16,6 @@ export type ExtractRouteParams<T extends string> = string extends T
 // See https://effectivetypescript.com/2020/05/12/unionize-objectify/
 export type Unionize<T> = {[k in keyof T]: {k: k; v: T[k]}}[keyof T];
 
-type KVPair = {k: PropertyKey; v: unknown};
-export type Objectify<T extends KVPair> = {
-  [k in T['k']]: Extract<T, {k: k}>['v'];
-};
-
-type RemoveNeverValue<T extends KVPair> = T extends [{v: never}] ? never : T;
-export type FilterNevers<T> = Objectify<RemoveNeverValue<Unionize<T>>>;
-
 export type Primitive = string | number | boolean | bigint | symbol | undefined | null;
 
 /** Based on ts-essentials, but reduced to only JSON-compatible types */

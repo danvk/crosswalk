@@ -46,6 +46,10 @@ type QueryTypes<P, Methods extends keyof P> = {
 // Like Pick<T, K>, but doesn't require that K extends keyof T
 type LoosePick<T, K> = Pick<T, K & keyof T>;
 
+// This tries to determine which query parameters are required to generate a URL.
+// This is easy for a single method, but somewhat involved if we don't know the method.
+// In that case, we try to calculate the intersection of the query parameter types for all
+// methods as if they were "closed" aka "exact" types.
 type SafeQueryTypesForMethod<
   Endpoint,
   M extends keyof Endpoint,
@@ -64,7 +68,8 @@ type SafeQueryTypesForMethod<
 export function apiUrlMaker<API>(prefix = '') {
   /**
    * If a method is provided we use the query params for the given method.
-   * If not, the query params correspond to the intersection of all methods for the endpoint.
+   * If not, the query params correspond to the intersection of all methods for the endpoint,
+   * interpreted as "exact" types (i.e. no unspecified properties allowed).
    */
   function createUrlMakerForEndpoint<
     Args extends [endpoint: keyof API, method?: AllMethods],
@@ -76,10 +81,12 @@ export function apiUrlMaker<API>(prefix = '') {
     Query = SafeQueryTypesForMethod<P, Method>
   >(...[endpoint, _method]: Args): (...params: ParamVarArgs<Params, Query>) => string {
     const toPath = compile(endpoint as string);
-    return (...paramsList: readonly any[]) =>
-      prefix +
-      toPath(paramsList[0]) +
-      (paramsList[1] ? '?' + new URLSearchParams(paramsList[1]) : '');
+    return (...paramsList: readonly any[]) => {
+      const queryString = paramsList[1] ? '' + new URLSearchParams(paramsList[1]) : '';
+      return prefix +
+        toPath(paramsList[0]) +
+        (queryString ? '?' + queryString : '');
+    }
   }
 
   return createUrlMakerForEndpoint;

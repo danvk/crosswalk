@@ -48,6 +48,12 @@ describe('typed requests', () => {
       // @ts-expect-error
       expect(endpointUrl({}, {b: 'b3'})).toEqual('/api/endpoint?b=b3'); // 'b3' only works for post
 
+      // No parameter forms are OK, too, since there are no mandatory query params
+      expect(endpointUrl()).toEqual('/api/endpoint');
+      expect(endpointUrl(null)).toEqual('/api/endpoint');
+      expect(endpointUrl({})).toEqual('/api/endpoint');
+      expect(endpointUrl(null, {})).toEqual('/api/endpoint');
+
       expect(urlMaker('/endpoint', 'get')({}, {a: 'a', b: 'b1'})).toEqual(
         '/api/endpoint?a=a&b=b1',
       ); // fine, we're using get.
