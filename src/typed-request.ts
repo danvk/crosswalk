@@ -5,10 +5,11 @@ import {HTTPVerb} from './api-spec';
 
 import {ExtractRouteParams, SafeKey, DeepReadonly, PathsForMethod} from './utils';
 
-// No Query Params -> Only take in path params
-// No Path Params -> Only take nothing OR blank path params and optional query
-// Both Query and Path Params -> Take both with query being optional
-// prettier-ignore
+// No query or path params -> don't take any arguments
+// No query params -> only take path params (one argument)
+// No path params ->
+//   Either null or {} is permitted as the path argument.
+//   Query param is mandatory if there are non-optional query params
 type ParamVarArgs<Params, Query> = DeepReadonly<
   [Query] extends [never]
     ? [{}] extends [Params]
@@ -38,11 +39,6 @@ type Simplify<T> = {[K in keyof T]: T[K]};
 
 type QueryTypeForMethod<Endpoint, M extends keyof Endpoint>
   = Simplify<ValueIntersection<QueryTypes<Endpoint, M>>>;
-
-// import {API as TestAPI} from './__tests__/api';
-// type T1 = Simplify<ValueIntersection<QueryTypes<TestAPI, '/random'>>>;
-// type T2 = Readonly<Simplify<ValueIntersection<QueryTypes<TestAPI, '/users'>>>>;
-// type T3 = Simplify<ValueIntersection<QueryTypes<TestAPI, '/users/:userId'>>>;
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {

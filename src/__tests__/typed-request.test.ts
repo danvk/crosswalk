@@ -1,4 +1,4 @@
-import {assert as assertType, _} from 'spec.ts';
+import {assert, assert as assertType, _} from 'spec.ts';
 
 import {API, User} from './api';
 import {typedApi, apiUrlMaker, fetchJson} from '..';
@@ -99,6 +99,53 @@ describe('typed requests', () => {
 
       // @ts-expect-error suffix is not common to all routes on /users and therefore is not allowed
       urlMaker('/users')(null, {suffix: 'Jr.'});
+    });
+
+    it('should generate URLs with mandatory query params', () => {
+      interface TestAPI {
+        '/path': {
+          get: GetEndpoint<{}, {mandatory: string}>;
+          post: Endpoint<{}, {}, {mandatory2: string}>;
+        }
+      }
+
+      const urlMakerEither = apiUrlMaker<TestAPI>()('/path');
+      assert(
+        _ as typeof urlMakerEither,
+        _ as (
+          params: null | {readonly [pathParam: string]: never},
+          query: {
+            readonly mandatory: string;
+            readonly mandatory2: string;
+          }
+        ) => string,
+      )
+      expect(urlMakerEither(null, {mandatory: 'a', mandatory2: 'b'}))
+          .toEqual('/path?mandatory=a&mandatory2=b');
+
+      const urlMakerGet = apiUrlMaker<TestAPI>()('/path', 'get');
+      assert(
+        _ as typeof urlMakerGet,
+        _ as (
+          params: null | {readonly [pathParam: string]: never},
+          query: {
+            readonly mandatory: string;
+          }
+        ) => string,
+      );
+      expect(urlMakerGet(null, {mandatory: 'a'})).toEqual('/path?mandatory=a');
+
+      const urlMakerPost = apiUrlMaker<TestAPI>()('/path', 'post');
+      assert(
+        _ as typeof urlMakerPost,
+        _ as (
+          params: null | {readonly [pathParam: string]: never},
+          query: {
+            readonly mandatory2: string;
+          }
+        ) => string,
+      );
+      expect(urlMakerPost(null, {mandatory2: 'b'})).toEqual('/path?mandatory2=b');
     });
   });
 
