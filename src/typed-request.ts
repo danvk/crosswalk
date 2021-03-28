@@ -3,7 +3,14 @@
 import {compile} from 'path-to-regexp';
 import {HTTPVerb} from './api-spec';
 
-import {ExtractRouteParams, SafeKey, DeepReadonly, PathsForMethod} from './utils';
+import {
+  ExtractRouteParams,
+  SafeKey,
+  DeepReadonly,
+  PathsForMethod,
+  ValueIntersection,
+  SimplifyType,
+} from './utils';
 
 // No query or path params -> don't take any arguments
 // No query params -> only take path params (one argument)
@@ -16,29 +23,21 @@ type ParamVarArgs<Params, Query> = DeepReadonly<
       ? []
       : [params: Params]
     : [{}] extends [Params]
-      ? [{}] extends [Query] ?
-        [params?: null | {[pathParam: string]: never}, query?: Query] :
-        [params: null | {[pathParam: string]: never}, query: Query]
-      : [{}] extends [Query] ?
-        [params: Params, query?: Query] :
-        [params: Params, query: Query]
+    ? [{}] extends [Query]
+      ? [params?: null | {[pathParam: string]: never}, query?: Query]
+      : [params: null | {[pathParam: string]: never}, query: Query]
+    : [{}] extends [Query]
+    ? [params: Params, query?: Query]
+    : [params: Params, query: Query]
 >;
 
 type QueryTypes<P, Methods extends keyof P> = {
-  [M in Methods]: SafeKey<P[M], 'query'>
+  [M in Methods]: SafeKey<P[M], 'query'>;
 };
 
-// This is the intersection of all the value types for an object,
-// e.g. {a: A; b: B; c: C;} --> A & B & C
-// See https://stackoverflow.com/a/66445507/388951
-type ValueIntersection<O extends object> = {
-  [K in keyof O]: (x: O[K]) => void
-}[keyof O] extends (x: infer I) => void ? I : never;
-
-type Simplify<T> = {[K in keyof T]: T[K]};
-
-type QueryTypeForMethod<Endpoint, M extends keyof Endpoint>
-  = Simplify<ValueIntersection<QueryTypes<Endpoint, M>>>;
+type QueryTypeForMethod<Endpoint, M extends keyof Endpoint> = SimplifyType<
+  ValueIntersection<QueryTypes<Endpoint, M>>
+>;
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {
@@ -49,10 +48,8 @@ export function apiUrlMaker<API>(prefix = '') {
     AllMethods extends keyof API[Path] = keyof API[Path],
     Method extends AllMethods = Args extends [any, infer M] ? M : AllMethods,
     Params = ExtractRouteParams<Path & string>,
-    Query = QueryTypeForMethod<API[Path], Method>,
-  >(
-    ...[endpoint, _method]: Args
-  ): (...params: ParamVarArgs<Params, Query>) => string {
+    Query = QueryTypeForMethod<API[Path], Method>
+  >(...[endpoint, _method]: Args): (...params: ParamVarArgs<Params, Query>) => string {
     const toPath = compile(endpoint as string);
     return (...paramsList: readonly any[]) =>
       prefix +
