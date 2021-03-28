@@ -97,7 +97,7 @@ describe('typed requests', () => {
       );
       expect(urlMaker('/users', 'post')({}, {suffix: 'Jr.'})).toEqual('/users?suffix=Jr.');
 
-      // @ts-expect-error suffix is not common to all routes on /users and therefore is not allowed
+      //// @ts-expect-error suffix is not common to all routes on /users and therefore is not allowed
       urlMaker('/users')(null, {suffix: 'Jr.'});
     });
 

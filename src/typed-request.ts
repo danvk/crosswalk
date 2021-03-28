@@ -12,6 +12,8 @@ import {
   SimplifyType,
 } from './utils';
 
+type PlaceholderEmpty = null | {[pathParam: string]: never};
+
 // No query or path params -> don't take any arguments
 // No query params -> only take path params (one argument)
 // No path params ->
@@ -20,15 +22,15 @@ import {
 type ParamVarArgs<Params, Query> = DeepReadonly<
   [Query] extends [never]
     ? [{}] extends [Params]
-      ? []
-      : [params: Params]
-    : [{}] extends [Params]
-    ? [{}] extends [Query]
-      ? [params?: null | {[pathParam: string]: never}, query?: Query]
-      : [params: null | {[pathParam: string]: never}, query: Query]
-    : [{}] extends [Query]
-    ? [params: Params, query?: Query]
-    : [params: Params, query: Query]
+      ? []  // no path params, no query
+      : [params: Params]  // path params, no query allowed
+    : [{}, {}] extends [Params, Query]
+    ? // No path params, optional query params; zero arg call is OK
+      [params?: PlaceholderEmpty, query?: Query]
+    : [
+        params: [{}] extends Params ? PlaceholderEmpty : Params,
+        ...query: [{}] extends [Query] ? [query?: Query] : [query: Query]
+      ]
 >;
 
 type QueryTypes<P, Methods extends keyof P> = {
@@ -41,14 +43,18 @@ type QueryTypeForMethod<Endpoint, M extends keyof Endpoint> = SimplifyType<
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {
-  /** If a method is provided we use the query params for the given method */
+  /**
+   * If a method is provided we use the query params for the given method.
+   * If not, the query params correspond to the intersection of all methods for the endpoint.
+   */
   function createUrlMakerForEndpoint<
     Args extends [endpoint: keyof API, method?: AllMethods],
     Path extends Args[0] = Args[0],
-    AllMethods extends keyof API[Path] = keyof API[Path],
+    P extends API[Path] = API[Path],
+    AllMethods extends keyof P = keyof P,
     Method extends AllMethods = Args extends [any, infer M] ? M : AllMethods,
     Params = ExtractRouteParams<Path & string>,
-    Query = QueryTypeForMethod<API[Path], Method>
+    Query = QueryTypeForMethod<P, Method>
   >(...[endpoint, _method]: Args): (...params: ParamVarArgs<Params, Query>) => string {
     const toPath = compile(endpoint as string);
     return (...paramsList: readonly any[]) =>
@@ -68,7 +74,6 @@ export interface Options {
     url: string,
     method: HTTPVerb,
     payload: unknown,
-    query?: Record<string, string>,
   ) => Promise<unknown>;
 }
 
