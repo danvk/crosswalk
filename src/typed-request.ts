@@ -10,13 +10,17 @@ import {ExtractRouteParams, SafeKey, DeepReadonly, PathsForMethod} from './utils
 // Both Query and Path Params -> Take both with query being optional
 // prettier-ignore
 type ParamVarArgs<Params, Query> = DeepReadonly<
-  null extends Query
-    ? {} extends Params
+  [Query] extends [never]
+    ? [{}] extends [Params]
       ? []
       : [params: Params]
-    : {} extends Params
-      ? [params?: Record<string, never>, query?: Query]
-      : [params: Params, query?: Query]
+    : [{}] extends [Params]
+      ? [{}] extends [Query] ?
+        [params?: null | {[pathParam: string]: never}, query?: Query] :
+        [params: null | {[pathParam: string]: never}, query: Query]
+      : [{}] extends [Query] ?
+        [params: Params, query?: Query] :
+        [params: Params, query: Query]
 >;
 
 type QueryForMethod<Endpoint, Method extends keyof Endpoint> = SafeKey<
@@ -24,27 +28,38 @@ type QueryForMethod<Endpoint, Method extends keyof Endpoint> = SafeKey<
   'query'
 >;
 
-type MergedQueryParams<API, Path extends keyof API> = {
-  [K in keyof API[Path]]: (x: SafeKey<API[Path][K], 'query'>) => void;
-}[keyof API[Path]] extends (x: infer I) => void
-  ? {[K in keyof I]: I[K]}
-  : never;
+type QueryTypes<API, Path extends keyof API, P = API[Path]> = {
+  [M in keyof P]: SafeKey<P[M], 'query'>
+};
 
-type QueryIntersection<API, Path extends keyof API, P = API[Path]> = Pick<
-  MergedQueryParams<API, Path>,
-  // @ts-expect-error Unable to do this generically but actually does work. TS issue?
-  keyof SafeKey<P[keyof P], 'query'>
->;
+// This is the intersection of all the value types for an object,
+// e.g. {a: A; b: B; c: C;} --> A & B & C
+// See https://stackoverflow.com/a/66445507/388951
+type ValueIntersection<O extends object> = {
+  [K in keyof O]: (x: O[K]) => void
+}[keyof O] extends (x: infer I) => void ? I : never;
+
+type Simplify<T> = {[K in keyof T]: T[K]};
+
+type QueryTypeForAnyMethod<API, Path extends keyof API>
+  = Simplify<ValueIntersection<QueryTypes<API, Path>>>;
+
+import {API as TestAPI} from './__tests__/api';
+type T1 = Simplify<ValueIntersection<QueryTypes<TestAPI, '/random'>>>;
+type T2 = Readonly<Simplify<ValueIntersection<QueryTypes<TestAPI, '/users'>>>>;
+type T3 = Simplify<ValueIntersection<QueryTypes<TestAPI, '/users/:userId'>>>;
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {
   /** Using overloading here instead of conditional return types because from my testing and Googling they are broken when used as return types */
+
   /** If a method is not provided we use the intersection (only common) of query params for all methods at the given path */
   function createUrlMakerForEndpoint<
     Path extends keyof API,
     Params = ExtractRouteParams<Path & string>,
-    Query = QueryIntersection<API, Path>
+    Query = QueryTypeForAnyMethod<API, Path>
   >(endpoint: Path & string): (...params: ParamVarArgs<Params, Query>) => string;
+
   /** If a method is provided we use the query params for the given method */
   function createUrlMakerForEndpoint<
     Path extends keyof API,
@@ -55,12 +70,13 @@ export function apiUrlMaker<API>(prefix = '') {
     endpoint: Path & string,
     method: Method,
   ): (...params: ParamVarArgs<Params, Query>) => string;
+
   function createUrlMakerForEndpoint<Path extends keyof API, Method extends keyof API[Path]>(
     endpoint: Path & string,
     _method?: Method,
   ) {
     const toPath = compile(endpoint);
-    return (...paramsList: Record<any, any>[]) =>
+    return (...paramsList: Record<string, string>[]) =>
       prefix +
       toPath(paramsList[0]) +
       (paramsList[1] ? '?' + new URLSearchParams(paramsList[1]) : '');

@@ -12,16 +12,24 @@ describe('typed requests', () => {
       assertType(
         _ as typeof getUsers,
         _ as (
-          params?: Readonly<Record<string, never>>,
-          query?: Readonly<{nameIncludes?: string}>,
+          params?: null | {readonly [pathParam: string]: never},
+          query?: Readonly<{
+            // XXX this feels wrong
+            minAge?: number | undefined;
+            nameIncludes?: string;
+            suffix?: string;
+          }>,
         ) => string,
       );
 
       const getUser = urlMaker('/users/:userId');
       assertType(
         _ as typeof getUser,
-        _ as (params: Readonly<{userId: string}>, query?: {}) => string,
+        _ as (params: Readonly<{userId: string}>) => string,
       );
+
+      // @ts-expect-error
+      getUser({userId: 'fred'}, {nameIncludes: 'fred'});
     });
 
     it('should intersect query params as expected', () => {
@@ -90,7 +98,7 @@ describe('typed requests', () => {
       expect(urlMaker('/users', 'post')({}, {suffix: 'Jr.'})).toEqual('/users?suffix=Jr.');
 
       // @ts-expect-error suffix is not common to all routes on /users and therefore is not allowed
-      urlMaker('/users')({}, {suffix: 'Jr.'});
+      urlMaker('/users')(null, {suffix: 'Jr.'});
     });
   });
 
