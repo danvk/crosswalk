@@ -203,7 +203,7 @@ describe('typed requests', () => {
         '/path/:pathId': {
           get: GetEndpoint<{name: string}>;
           post: Endpoint<{name: string}, {name: string}>;
-        }
+        };
       }
 
       const urlMaker = apiUrlMaker<TestAPI>()('/path');
