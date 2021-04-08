@@ -3,12 +3,7 @@
 import {compile} from 'path-to-regexp';
 import {HTTPVerb} from './api-spec';
 
-import {
-  ExtractRouteParams,
-  SafeKey,
-  DeepReadonly,
-  PathsForMethod,
-} from './utils';
+import {ExtractRouteParams, SafeKey, DeepReadonly, PathsForMethod} from './utils';
 
 // This allows null or {}, but not {key: 'value'}.
 // This comes up when there are no path parameters, but there are/may be query params.
@@ -34,8 +29,10 @@ type ParamVarArgs<Params, Query> = DeepReadonly<
 >;
 
 // If there's an explicit query param, use it. Otherwise assume GET.
-type QueryType<Endpoint, M extends undefined | keyof Endpoint> =
-  SafeKey<SafeKey<Endpoint, M extends undefined ? 'get' : M>, 'query'>;
+type QueryType<Endpoint, M extends undefined | keyof Endpoint> = SafeKey<
+  SafeKey<Endpoint, M extends undefined ? 'get' : M>,
+  'query'
+>;
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {
