@@ -28,8 +28,8 @@ describe('typed requests', () => {
           params: {readonly userId: string},
           query?: Readonly<{
             firstName?: string;
-          }>
-        ) => string
+          }>,
+        ) => string,
       );
 
       // @ts-expect-error
@@ -137,7 +137,7 @@ describe('typed requests', () => {
           params: null | {readonly [pathParam: string]: never},
           query: Readonly<{
             mandatory: string;
-          }>
+          }>,
         ) => string,
       );
 

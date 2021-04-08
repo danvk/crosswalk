@@ -1,7 +1,7 @@
 /** Type-safe wrapper around fetch() for REST APIs */
 
 import {compile} from 'path-to-regexp';
-import { HTTPVerb} from './api-spec';
+import {HTTPVerb} from './api-spec';
 
 import {
   ExtractRouteParams,
@@ -47,7 +47,7 @@ export function apiUrlMaker<API>(prefix = '') {
     Args extends [endpoint: keyof API, method?: AllMethods],
     Path extends Args[0] = Args[0],
     P extends API[Path] = API[Path],
-    AllMethods extends keyof P = keyof P,
+    AllMethods extends keyof P = keyof P
   >(...[endpoint, _method]: Args) {
     const toPath = compile(endpoint as string);
     type Method = Args[1];
