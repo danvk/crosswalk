@@ -35,6 +35,6 @@ export interface API {
   };
   '/search': {
     // This endpoint has mandatory query parameters
-    get: GetEndpoint<{users: User[]}, {query: string, numResults?: number}>;
-  }
+    get: GetEndpoint<{users: User[]}, {query: string; numResults?: number}>;
+  };
 }
