@@ -31,15 +31,3 @@ export type PathsForMethod<API, Method extends HTTPVerb> = Extract<
 >['k'] &
   keyof API &
   string;
-
-// This is the intersection of all the value types for an object,
-// e.g. {a: A; b: B; c: C;} --> A & B & C
-// See https://stackoverflow.com/a/66445507/388951
-export type ValueIntersection<O extends object> = {
-  [K in keyof O]: (x: O[K]) => void;
-}[keyof O] extends (x: infer I) => void
-  ? I
-  : never;
-
-// This collapses a type into a more normalized / compact form for display.
-export type SimplifyType<T> = {[K in keyof T]: T[K]};

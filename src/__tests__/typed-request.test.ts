@@ -9,7 +9,7 @@ type PlaceholderEmpty = null | {readonly [pathParam: string]: never};
 
 describe('typed requests', () => {
   describe('apiUrlMaker', () => {
-    it('should provide an intersection of query params available to all methods for a given endpoint', () => {
+    it('should assume GET when there are multiple methods for an endpoint', () => {
       const urlMaker = apiUrlMaker<API>();
       const getUsers = urlMaker('/users');
       assertType(
@@ -39,7 +39,7 @@ describe('typed requests', () => {
       getUser({userId: 'fred'}, {nameIncludes: 'fred'});
     });
 
-    it('should intersect query params as expected', () => {
+    it('should assume GET with query param types that intersect', () => {
       interface API {
         '/endpoint': {
           get: GetEndpoint<{}, {a?: string; b?: 'b1' | 'b2'}>;
@@ -120,7 +120,7 @@ describe('typed requests', () => {
       );
       expect(urlMaker('/users', 'post')({}, {suffix: 'Jr.'})).toEqual('/users?suffix=Jr.');
 
-      // @ts-expect-error suffix is not common to all routes on /users and therefore is not allowed
+      // @ts-expect-error suffix isn't available on GET so it isn't allowed w/o an explicit verb.
       urlMaker('/users')(null, {suffix: 'Jr.'});
     });
 
@@ -144,7 +144,15 @@ describe('typed requests', () => {
         ) => string,
       );
 
-      // mandatory2 is only allowed on POST, and we assume GET.
+      // Failing to specify a mandatory query parameter is an error.
+      // @ts-expect-error
+      urlMakerAssumesGet();
+      // @ts-expect-error
+      urlMakerAssumesGet({});
+      // @ts-expect-error
+      urlMakerAssumesGet({}, {});
+
+      // mandatory2 is only allowed on POST, but we assume GET.
       // @ts-expect-error
       expect(urlMakerAssumesGet(null, {mandatory: 'a', mandatory2: 'b'})).toEqual(
         '/path?mandatory=a&mandatory2=b',
@@ -185,10 +193,10 @@ describe('typed requests', () => {
         };
       }
 
-      // Even though "a" is allowed for both methods, mandatory2 is not.
-      const urlMakerEither = apiUrlMaker<TestAPI>()('/path');
+      // "a" is mandatory for GET. Since we assume GET, it should be mandatory here, too.
+      const urlMakerAssumesGet = apiUrlMaker<TestAPI>()('/path');
       assert(
-        _ as typeof urlMakerEither,
+        _ as typeof urlMakerAssumesGet,
         _ as (
           params: PlaceholderEmpty,
           query: {
@@ -197,15 +205,16 @@ describe('typed requests', () => {
         ) => string,
       );
 
+      // Excess property checking applies here so mandatory2 is not allowed.
       // @ts-expect-error
-      expect(urlMakerEither(null, {a: 'a', mandatory2: 'b'})).toEqual(
+      expect(urlMakerAssumesGet(null, {a: 'a', mandatory2: 'b'})).toEqual(
         '/path?a=a&mandatory2=b',
       );
       // @ts-expect-error
-      expect(urlMakerEither(null)).toEqual('/path');
+      expect(urlMakerAssumesGet(null)).toEqual('/path');
     });
 
-    it('should turn mixed optional/required query params into required', () => {
+    it('should handle mixed optional/required query params', () => {
       interface TestAPI {
         '/path': {
           get: GetEndpoint<{}, {a: string; b?: string; c?: string}>;
@@ -264,6 +273,9 @@ describe('typed requests', () => {
       expect(urlMaker()).toEqual('/path');
       const urlMakerId = apiUrlMaker<TestAPI>()('/path/:pathId');
       expect(urlMakerId({pathId: 'foo'})).toEqual('/path/foo');
+
+      // @ts-expect-error
+      urlMakerId({pathId: 'foo'}, {q: 'param'});
     });
   });
 
