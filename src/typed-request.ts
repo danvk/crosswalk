@@ -98,8 +98,9 @@ export function typedApi<API>(options?: Options) {
     type Request = DeepReadonly<SafeKey<Endpoint, 'request'>>;
     type Response = SafeKey<Endpoint, 'response'>;
     type Query = SafeKey<Endpoint, 'query'>;
+    type Args = [params: Params, body: Request, ...queryArgs: ([Query] extends [{}] ? [] : [query?: Query])];
     const makeUrl = urlMaker(endpoint);
-    return (params: Params, body: Request, query?: Query): Promise<Response> =>
+    return (...[params, body, query]: Args): Promise<Response> =>
       fetcher((makeUrl as any)(params, query), method, body) as Promise<Response>;
   };
 
@@ -114,10 +115,10 @@ export function typedApi<API>(options?: Options) {
     type Query = SafeKey<Endpoint, 'query'>;
 
     return (...params: ParamVarArgs<Params, Query>): Promise<Response> =>
-      requestWithBody(method)(endpoint)(
-        (params as any)?.[0],
+      (requestWithBody(method)(endpoint) as any)(
+        params?.[0],
         null as any,
-        (params as any)?.[1],
+        params?.[1]
       );
   };
 

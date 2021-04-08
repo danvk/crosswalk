@@ -363,6 +363,25 @@ describe('typed requests', () => {
       expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
     });
 
+    it('should generate GET requests with mandatory query parameters', async () => {
+      const mockFetcher = jest.fn();
+      const api = typedApi<API>({fetch: mockFetcher});
+      const getSearch = api.get('/search');
+
+      mockFetcher.mockReturnValue(Promise.resolve({users: []}));
+
+      // @ts-expect-error
+      getSearch();
+      // @ts-expect-error
+      getSearch(null);
+
+      const users = await getSearch(null, {query: 'fred'});
+      assertType(users, _ as {users: User[]});
+      expect(users).toEqual({users: []});
+      expect(mockFetcher).toHaveBeenCalledTimes(3);
+      expect(mockFetcher).toHaveBeenLastCalledWith('/search?query=fred', 'get', null);
+    });
+
     it('should provide a method-agnostic request method', async () => {
       const mockFetcher = jest.fn();
       const api = typedApi<API>({fetch: mockFetcher});

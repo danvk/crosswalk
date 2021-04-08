@@ -33,4 +33,8 @@ export interface API {
     // This endpoint is used to test that intersection types work as expected.
     patch: Endpoint<CreateUserRequest & {id: string}, User>;
   };
+  '/search': {
+    // This endpoint has mandatory query parameters
+    get: GetEndpoint<{users: User[]}, {query: string, numResults?: number}>;
+  }
 }
