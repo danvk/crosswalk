@@ -304,32 +304,6 @@ To publish:
     yarn tsc
     yarn publish
 
-## TODO
-
-- [ ] Options for request logging
-- [ ] Add an option for more express-like callbacks (w/ only request, response)
-- [ ] Support fancier paths
-- [ ] Set up:
-  - [ ] eslint
-  - [x] prettier
-  - [x] CI
-- [x] Add helper methods for all HTTP verbs
-- [x] Look into cleaning up generics
-- [x] Set up better type tests
-- [x] Narrow types of request.params, request.body in handlers
-- [x] Write unit tests
-- [x] Decide on a name
-- [x] Figure out how to handle `@types` deps (peer deps?)
-- [x] Decide on a parameter ordering for methods
-- [x] Should TypedRouter be a class ~or a function~?
-- [x] Plug into cityci
-- [x] Add a check that all endpoints are implemented
-- [x] Make a demo project, maybe TODO or based on GraphQL demo
-- [x] Add helpers for constructing URLs
-- [x] Look into generating API docs, e.g. w/ Swagger
-- [x] Make the runtime validation part optional
-- [x] Plug in TS 4.1 template literal types
-
 [tsjs]: https://github.com/YousefED/typescript-json-schema
 [ajv]: https://ajv.js.org/
 [1]: https://effectivetypescript.com/2020/07/27/safe-queryselector/
