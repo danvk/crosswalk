@@ -15,12 +15,22 @@ describe('typed requests', () => {
           params?: null | {readonly [pathParam: string]: never},
           query?: Readonly<{
             nameIncludes?: string;
+            minAge?: number;
           }>,
         ) => string,
       );
 
+      // If no method is specified, assume GET
       const getUser = urlMaker('/users/:userId');
-      assertType(_ as typeof getUser, _ as (params: {readonly userId: string}) => string);
+      assertType(
+        _ as typeof getUser,
+        _ as (
+          params: {readonly userId: string},
+          query?: Readonly<{
+            firstName?: string;
+          }>
+        ) => string
+      );
 
       // @ts-expect-error
       getUser({userId: 'fred'}, {nameIncludes: 'fred'});
@@ -36,17 +46,16 @@ describe('typed requests', () => {
 
       const urlMaker = apiUrlMaker<API>('/api');
       const endpointUrl = urlMaker('/endpoint');
-      // @ts-expect-error
-      endpointUrl({}, {a: 'a', b: 'b'}); // should be an error, we don't know that "a" is OK.
+      // OK, assumes GET
+      endpointUrl({}, {a: 'a', b: 'b1'});
 
+      // OK, assumes GET and 'b1' works for get
+      expect(endpointUrl({}, {b: 'b1'})).toEqual('/api/endpoint?b=b1');
       // @ts-expect-error
-      expect(endpointUrl({}, {b: 'b1'})).toEqual('/api/endpoint?b=b1'); // 'b1' only works for get
+      expect(endpointUrl({}, {b: 'b3'})).toEqual('/api/endpoint?b=b3'); // 'b3' only works for post
 
       // 'b2' is safe for each method
       expect(endpointUrl({}, {b: 'b2'})).toEqual('/api/endpoint?b=b2');
-
-      // @ts-expect-error
-      expect(endpointUrl({}, {b: 'b3'})).toEqual('/api/endpoint?b=b3'); // 'b3' only works for post
 
       // No parameter forms are OK, too, since there are no mandatory query params
       expect(endpointUrl()).toEqual('/api/endpoint');
@@ -54,9 +63,20 @@ describe('typed requests', () => {
       expect(endpointUrl({})).toEqual('/api/endpoint');
       expect(endpointUrl(null, {})).toEqual('/api/endpoint');
 
+      // It's fine to specify GET explicitly
       expect(urlMaker('/endpoint', 'get')({}, {a: 'a', b: 'b1'})).toEqual(
         '/api/endpoint?a=a&b=b1',
-      ); // fine, we're using get.
+      );
+
+      // It's also fine to specify POST explicitly
+      // @ts-expect-error
+      expect(urlMaker('/endpoint', 'post')({}, {a: 'a', b: 'b1'})).toEqual(
+        '/api/endpoint?a=a&b=b1',
+      ); // b1 is only allowed for GET
+
+      expect(urlMaker('/endpoint', 'post')({}, {c: 'c', b: 'b3'})).toEqual(
+        '/api/endpoint?c=c&b=b3',
+      );
     });
 
     it('should generate URLs without path params', () => {
@@ -109,19 +129,25 @@ describe('typed requests', () => {
         };
       }
 
-      const urlMakerEither = apiUrlMaker<TestAPI>()('/path');
+      // With no HTTP method specified, assume GET
+      const urlMakerAssumesGet = apiUrlMaker<TestAPI>()('/path');
       assert(
-        _ as typeof urlMakerEither,
+        _ as typeof urlMakerAssumesGet,
         _ as (
-          error: '❌ Must specify an HTTP method (get, post, etc.) to apiUrlMaker for this endpoint',
-          _: never,
+          params: null | {readonly [pathParam: string]: never},
+          query: Readonly<{
+            mandatory: string;
+          }>
         ) => string,
       );
+
+      // mandatory2 is only allowed on POST, and we assume GET.
       // @ts-expect-error
-      expect(urlMakerEither(null, {mandatory: 'a', mandatory2: 'b'})).toEqual(
+      expect(urlMakerAssumesGet(null, {mandatory: 'a', mandatory2: 'b'})).toEqual(
         '/path?mandatory=a&mandatory2=b',
       );
 
+      // It's fine to specify GET explicitly.
       const urlMakerGet = apiUrlMaker<TestAPI>()('/path', 'get');
       assert(
         _ as typeof urlMakerGet,
@@ -134,6 +160,7 @@ describe('typed requests', () => {
       );
       expect(urlMakerGet(null, {mandatory: 'a'})).toEqual('/path?mandatory=a');
 
+      // It's also fine to specify POST explicitly.
       const urlMakerPost = apiUrlMaker<TestAPI>()('/path', 'post');
       assert(
         _ as typeof urlMakerPost,
@@ -160,14 +187,19 @@ describe('typed requests', () => {
       assert(
         _ as typeof urlMakerEither,
         _ as (
-          error: '❌ Must specify an HTTP method (get, post, etc.) to apiUrlMaker for this endpoint',
-          _: never,
+          params: null | {readonly [pathParam: string]: never},
+          query: {
+            readonly a: string;
+          },
         ) => string,
       );
+
       // @ts-expect-error
       expect(urlMakerEither(null, {a: 'a', mandatory2: 'b'})).toEqual(
         '/path?a=a&mandatory2=b',
       );
+      // @ts-expect-error
+      expect(urlMakerEither(null)).toEqual('/path');
     });
 
     it('should turn mixed optional/required query params into required', () => {
@@ -178,20 +210,39 @@ describe('typed requests', () => {
         };
       }
 
-      // a and b should be required unless we know whether we're using get or post.
-      const urlMakerEither = apiUrlMaker<TestAPI>()('/path');
+      // No explicit method means "assume get".
+      const urlMakerAssumesGet = apiUrlMaker<TestAPI>()('/path');
       assert(
-        _ as typeof urlMakerEither,
+        _ as typeof urlMakerAssumesGet,
         _ as (
           params: null | {readonly [pathParam: string]: never},
           query: {
             readonly a: string;
-            readonly b: string;
+            readonly b?: string;
             readonly c?: string;
           },
         ) => string,
       );
-      expect(urlMakerEither(null, {a: 'a', b: 'b', c: 'c'})).toEqual('/path?a=a&b=b&c=c');
+      expect(urlMakerAssumesGet(null, {a: 'a', b: 'b', c: 'c'})).toEqual('/path?a=a&b=b&c=c');
+    });
+
+    it('should fail to produce URLs without a method when there is no GET', () => {
+      interface TestAPI {
+        '/path': {
+          put: GetEndpoint<{}, {a: string; b?: string; c?: string}>;
+          post: Endpoint<{}, {}, {a?: string; b: string; c?: string}>;
+        };
+      }
+
+      // No explicit method means "assume get", but there is no GET.
+      // Ideal behavior here would be to error if any method has mandatory query params.
+      const urlMakerAssumesGet = apiUrlMaker<TestAPI>()('/path');
+      expect(urlMakerAssumesGet()).toEqual('/path');
+
+      const urlMakerPut = apiUrlMaker<TestAPI>()('/path', 'put');
+      // @ts-expect-error
+      expect(urlMakerPut()).toEqual('/path');
+      expect(urlMakerPut(null, {a: 'a'})).toEqual('/path?a=a');
     });
 
     it('should ignore query strings for endpoints without them', () => {

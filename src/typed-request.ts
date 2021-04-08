@@ -1,14 +1,13 @@
 /** Type-safe wrapper around fetch() for REST APIs */
 
 import {compile} from 'path-to-regexp';
-import {Endpoint, GetEndpoint, HTTPVerb} from './api-spec';
+import { HTTPVerb} from './api-spec';
 
 import {
   ExtractRouteParams,
   SafeKey,
   DeepReadonly,
   PathsForMethod,
-  ValueIntersection,
   SimplifyType,
 } from './utils';
 
@@ -20,13 +19,7 @@ type PlaceholderEmpty = null | {[pathParam: string]: never};
 //   Either null or {} is permitted as the path argument.
 //   Query param is mandatory if there are non-optional query params
 type ParamVarArgs<Params, Query> = DeepReadonly<
-  [Query] extends [never]
-    ? // This must have arisen from an impossible intersection of query types.
-      [
-        error: '❌ Must specify an HTTP method (get, post, etc.) to apiUrlMaker for this endpoint',
-        _: never,
-      ]
-    : [Query] extends [null]
+  [Query] extends [null]
     ? [{}] extends [Params]
       ? [] // no path params, no query
       : [params: Params] // path params, no query allowed
@@ -39,30 +32,9 @@ type ParamVarArgs<Params, Query> = DeepReadonly<
       ]
 >;
 
-type QueryTypes<P, Methods extends keyof P> = {
-  [M in Methods]: SafeKey<P[M], 'query'>;
-};
-
-// Like Pick<T, K>, but doesn't require that K extends keyof T
-type LoosePick<T, K> = Pick<T, K & keyof T>;
-
-// This tries to determine which query parameters are required to generate a URL.
-// This is easy for a single method, but somewhat involved if we don't know the method.
-// In that case, we try to calculate the intersection of the query parameter types for all
-// methods as if they were "closed" aka "exact" types.
-type SafeQueryTypesForMethod<
-  Endpoint,
-  M extends keyof Endpoint,
-  Q extends QueryTypes<Endpoint, M> = QueryTypes<Endpoint, M>,
-  V extends ValueIntersection<Q> = ValueIntersection<Q>,
-  P extends LoosePick<V, keyof Q[M]> = LoosePick<V, keyof Q[M]>
-> = [V] extends [never | null]
-  ? null
-  : [keyof Q[M]] extends [never]
-  ? never
-  : P extends V
-  ? SimplifyType<P>
-  : never;
+type QueryType<Endpoint, M extends undefined | keyof Endpoint> = [M] extends [undefined]
+  ? SafeKey<SafeKey<Endpoint, 'get'>, 'query'>
+  : SafeKey<SafeKey<Endpoint, Exclude<M, undefined>>, 'query'>;
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {
@@ -76,11 +48,11 @@ export function apiUrlMaker<API>(prefix = '') {
     Path extends Args[0] = Args[0],
     P extends API[Path] = API[Path],
     AllMethods extends keyof P = keyof P,
-    Method extends AllMethods = Args extends [any, infer M] ? M : AllMethods,
-    Params = ExtractRouteParams<Path & string>,
-    Query = SafeQueryTypesForMethod<P, Method>
   >(...[endpoint, _method]: Args) {
     const toPath = compile(endpoint as string);
+    type Method = Args[1];
+    type Params = ExtractRouteParams<Path & string>;
+    type Query = QueryType<P, Method>;
     const fn = (...paramsList: ParamVarArgs<Params, Query>): string => {
       const params = paramsList as any;
       const queryString = params[1] ? '' + new URLSearchParams(params[1]) : '';
