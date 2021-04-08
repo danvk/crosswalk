@@ -44,7 +44,7 @@ import type {Endpoint, GetEndpoint} from 'crosswalk/dist/api-spec';
 
 export interface API {
   '/users': {
-    get: GetEndpoint<UsersResponse, {nameIncludes: string}>;
+    get: GetEndpoint<UsersResponse, {query?: string}>;  // Response/query parameter types
     post: Endpoint<CreateUserRequest, User>;
   };
   '/users/:userId': {
@@ -60,7 +60,7 @@ import {API} from './api';
 import {TypedRouter} from 'crosswalk';
 
 export function registerAPI(router: TypedRouter<API>) {
-  router.get('/users', async ({}, req, res, {nameIncludes}) => filterUsersByName(users, nameIncludes));
+  router.get('/users', async ({}, req, res, {query}) => filterUsersByName(users, query));
   router.post('/users', async ({}, userInput) => createUser(userInput));
   router.get('/users/:userId', async ({userId}) => getUserById(userId));
 }
@@ -124,9 +124,12 @@ parameters will be type checked. No more `/path/to/undefined/null`!
 ```ts
 import {apiUrlMaker} from 'crosswalk';
 const urlMaker = apiUrlMaker<API>('/api/v0');
-const getUserUrl = urlMaker('/users/:userId');
-const fredUrl = getUserUrl({userId: 'fred'});
+const getUserByIdUrl = urlMaker('/users/:userId');
+const fredUrl = getUserByIdUrl({userId: 'fred'});
 // /api/v0/users/fred
+const userUrl = urlMaker('/users');
+const fredSearchUrl = userUrl(null, {query: 'fred'});
+// /api/v0/users?query=fred
 ```
 
 ## Runtime request validation
