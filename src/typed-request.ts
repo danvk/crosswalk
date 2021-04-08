@@ -8,9 +8,10 @@ import {
   SafeKey,
   DeepReadonly,
   PathsForMethod,
-  SimplifyType,
 } from './utils';
 
+// This allows null or {}, but not {key: 'value'}.
+// This comes up when there are no path parameters, but there are/may be query params.
 type PlaceholderEmpty = null | {[pathParam: string]: never};
 
 // No query or path params -> don't take any arguments
@@ -32,9 +33,9 @@ type ParamVarArgs<Params, Query> = DeepReadonly<
       ]
 >;
 
-type QueryType<Endpoint, M extends undefined | keyof Endpoint> = [M] extends [undefined]
-  ? SafeKey<SafeKey<Endpoint, 'get'>, 'query'>
-  : SafeKey<SafeKey<Endpoint, Exclude<M, undefined>>, 'query'>;
+// If there's an explicit query param, use it. Otherwise assume GET.
+type QueryType<Endpoint, M extends undefined | keyof Endpoint> =
+  SafeKey<SafeKey<Endpoint, M extends undefined ? 'get' : M>, 'query'>;
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {

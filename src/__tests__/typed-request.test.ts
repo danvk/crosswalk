@@ -4,6 +4,9 @@ import {API, User} from './api';
 import {typedApi, apiUrlMaker, fetchJson} from '..';
 import {Endpoint, GetEndpoint} from '../api-spec';
 
+// See comment in typed-request.ts
+type PlaceholderEmpty = null | {readonly [pathParam: string]: never};
+
 describe('typed requests', () => {
   describe('apiUrlMaker', () => {
     it('should provide an intersection of query params available to all methods for a given endpoint', () => {
@@ -12,7 +15,7 @@ describe('typed requests', () => {
       assertType(
         _ as typeof getUsers,
         _ as (
-          params?: null | {readonly [pathParam: string]: never},
+          params?: PlaceholderEmpty,
           query?: Readonly<{
             nameIncludes?: string;
             minAge?: number;
@@ -134,7 +137,7 @@ describe('typed requests', () => {
       assert(
         _ as typeof urlMakerAssumesGet,
         _ as (
-          params: null | {readonly [pathParam: string]: never},
+          params: PlaceholderEmpty,
           query: Readonly<{
             mandatory: string;
           }>,
@@ -152,7 +155,7 @@ describe('typed requests', () => {
       assert(
         _ as typeof urlMakerGet,
         _ as (
-          params: null | {readonly [pathParam: string]: never},
+          params: PlaceholderEmpty,
           query: {
             readonly mandatory: string;
           },
@@ -165,7 +168,7 @@ describe('typed requests', () => {
       assert(
         _ as typeof urlMakerPost,
         _ as (
-          params: null | {readonly [pathParam: string]: never},
+          params: PlaceholderEmpty,
           query: {
             readonly mandatory2: string;
           },
@@ -187,7 +190,7 @@ describe('typed requests', () => {
       assert(
         _ as typeof urlMakerEither,
         _ as (
-          params: null | {readonly [pathParam: string]: never},
+          params: PlaceholderEmpty,
           query: {
             readonly a: string;
           },
@@ -215,7 +218,7 @@ describe('typed requests', () => {
       assert(
         _ as typeof urlMakerAssumesGet,
         _ as (
-          params: null | {readonly [pathParam: string]: never},
+          params: PlaceholderEmpty,
           query: {
             readonly a: string;
             readonly b?: string;
