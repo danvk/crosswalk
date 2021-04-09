@@ -1,4 +1,4 @@
-import {assert, assert as assertType, _} from 'spec.ts';
+import {assert as assertType, _} from 'spec.ts';
 
 import {API, User} from './api';
 import {typedApi, apiUrlMaker, fetchJson} from '..';
@@ -134,7 +134,7 @@ describe('typed requests', () => {
 
       // With no HTTP method specified, assume GET
       const urlMakerAssumesGet = apiUrlMaker<TestAPI>()('/path');
-      assert(
+      assertType(
         _ as typeof urlMakerAssumesGet,
         _ as (
           params: PlaceholderEmpty,
@@ -160,7 +160,7 @@ describe('typed requests', () => {
 
       // It's fine to specify GET explicitly.
       const urlMakerGet = apiUrlMaker<TestAPI>()('/path', 'get');
-      assert(
+      assertType(
         _ as typeof urlMakerGet,
         _ as (
           params: PlaceholderEmpty,
@@ -173,7 +173,7 @@ describe('typed requests', () => {
 
       // It's also fine to specify POST explicitly.
       const urlMakerPost = apiUrlMaker<TestAPI>()('/path', 'post');
-      assert(
+      assertType(
         _ as typeof urlMakerPost,
         _ as (
           params: PlaceholderEmpty,
@@ -195,7 +195,7 @@ describe('typed requests', () => {
 
       // "a" is mandatory for GET. Since we assume GET, it should be mandatory here, too.
       const urlMakerAssumesGet = apiUrlMaker<TestAPI>()('/path');
-      assert(
+      assertType(
         _ as typeof urlMakerAssumesGet,
         _ as (
           params: PlaceholderEmpty,
@@ -224,7 +224,7 @@ describe('typed requests', () => {
 
       // No explicit method means "assume get".
       const urlMakerAssumesGet = apiUrlMaker<TestAPI>()('/path');
-      assert(
+      assertType(
         _ as typeof urlMakerAssumesGet,
         _ as (
           params: PlaceholderEmpty,

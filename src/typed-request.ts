@@ -36,31 +36,25 @@ type QueryType<Endpoint, M extends undefined | keyof Endpoint> = SafeKey<
 
 /** Utility for safely constructing API URLs */
 export function apiUrlMaker<API>(prefix = '') {
-  /**
-   * If a method is provided we use the query params for the given method.
-   * If not, the query params correspond to the intersection of all methods for the endpoint,
-   * interpreted as "exact" types (i.e. no unspecified properties allowed).
-   */
-  function createUrlMakerForEndpoint<
+  /** This assumes GET for the type of the query params unless another method is specified. */
+  return <
     Args extends [endpoint: keyof API, method?: AllMethods],
     Path extends Args[0] = Args[0],
     P extends API[Path] = API[Path],
     AllMethods extends keyof P = keyof P
-  >(...[endpoint, _method]: Args) {
+  >(
+    ...[endpoint, _method]: Args
+  ) => {
     const toPath = compile(endpoint as string);
     type Method = Args[1];
     type Params = ExtractRouteParams<Path & string>;
     type Query = QueryType<P, Method>;
-    const fn = (...paramsList: ParamVarArgs<Params, Query>): string => {
+    return (...paramsList: ParamVarArgs<Params, Query>): string => {
       const params = paramsList as any;
       const queryString = params[1] ? '' + new URLSearchParams(params[1]) : '';
       return prefix + toPath(params[0]) + (queryString ? '?' + queryString : '');
     };
-
-    return fn;
-  }
-
-  return createUrlMakerForEndpoint;
+  };
 }
 
 export interface Options {
@@ -103,7 +97,7 @@ export function typedApi<API>(options?: Options) {
       body: Request,
       ...queryArgs: [Query] extends [{}] ? [] : [query?: Query]
     ];
-    const makeUrl = urlMaker(endpoint);
+    const makeUrl = urlMaker(endpoint, method as any);
     return (...[params, body, query]: Args): Promise<Response> =>
       fetcher((makeUrl as any)(params, query), method, body) as Promise<Response>;
   };
