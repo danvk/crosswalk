@@ -315,7 +315,8 @@ test('Throwing HTTPError should set status code', async () => {
 test('Custom 400 handler', async () => {
   const app = express();
   const router = new TypedRouter<API>(app, apiSchemaJson, {
-    invalidRequestHandler({response, errors, ajv}) {
+    invalidRequestHandler({which, response, errors, ajv}) {
+      expect(which).toEqual('body');
       const err = ajv.errorsText(errors);
       response.status(418).send(`Bad request, not a teapot: ${err}`);
     },

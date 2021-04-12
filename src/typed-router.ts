@@ -71,10 +71,15 @@ const registerWithoutBody = <Method extends HTTPVerb, API>(
 };
 
 export interface InvalidRequestHandlerArgs {
+  /** Which part of the request was invalid (request body or query parameters)? */
+  which: 'body' | 'query';
   request: express.Request;
   response: express.Response;
+  /** The invalid payload object */
   payload: unknown;
+  /** Ajv validator that found the problem. */
   ajv: Ajv.Ajv;
+  /** List of errors with the payload, as reported by Ajv. */
   errors: Ajv.ErrorObject[];
 }
 
@@ -145,6 +150,7 @@ export class TypedRouter<API> {
 
       if (bodyValidate && !bodyValidate(body)) {
         return this.handleInvalidRequest({
+          which: 'body',
           request: req,
           response,
           ajv: this.ajv!,
@@ -155,6 +161,7 @@ export class TypedRouter<API> {
 
       if (queryValidate && !queryValidate(query)) {
         return this.handleInvalidRequest({
+          which: 'query',
           request: req,
           response,
           ajv: this.ajv!,
