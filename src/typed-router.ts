@@ -70,19 +70,46 @@ const registerWithoutBody = <Method extends HTTPVerb, API>(
   );
 };
 
+export interface InvalidRequestHandlerArgs {
+  request: express.Request;
+  response: express.Response;
+  payload: unknown;
+  ajv: Ajv.Ajv;
+  errors: Ajv.ErrorObject[];
+}
+
+export function defaultInvalidRequestHandler({
+  response,
+  payload,
+  ajv,
+  errors,
+}: InvalidRequestHandlerArgs) {
+  response.status(400).json({
+    error: ajv.errorsText(errors),
+    errors,
+    invalidRequest: payload,
+  });
+}
+
+export interface TypedRouterOptions {
+  invalidRequestHandler: (obj: InvalidRequestHandlerArgs) => void;
+}
+
 export class TypedRouter<API> {
   router: express.Router;
   apiSchema?: any;
   ajv?: Ajv.Ajv;
   registrations: {path: string; method: HTTPVerb}[];
+  handleInvalidRequest: TypedRouterOptions['invalidRequestHandler'];
 
-  constructor(router: express.Router, apiSchema?: any) {
+  constructor(router: express.Router, apiSchema?: any, options?: TypedRouterOptions) {
     this.router = router;
     if (apiSchema) {
       this.apiSchema = apiSchema;
       this.ajv = new Ajv({allErrors: true});
       this.ajv.addSchema(apiSchema);
     }
+    this.handleInvalidRequest = options?.invalidRequestHandler ?? defaultInvalidRequestHandler;
     this.registrations = [];
   }
 
@@ -117,18 +144,22 @@ export class TypedRouter<API> {
       const {body, query} = req;
 
       if (bodyValidate && !bodyValidate(body)) {
-        return response.status(400).json({
-          error: this.ajv!.errorsText(bodyValidate.errors),
-          errors: bodyValidate.errors,
-          invalidRequest: body,
+        return this.handleInvalidRequest({
+          request: req,
+          response,
+          ajv: this.ajv!,
+          payload: body,
+          errors: bodyValidate.errors!,
         });
       }
 
       if (queryValidate && !queryValidate(query)) {
-        return response.status(400).json({
-          error: this.ajv!.errorsText(queryValidate.errors),
-          errors: queryValidate.errors,
-          invalidRequest: query,
+        return this.handleInvalidRequest({
+          request: req,
+          response,
+          ajv: this.ajv!,
+          payload: query,
+          errors: queryValidate.errors!,
         });
       }
 
