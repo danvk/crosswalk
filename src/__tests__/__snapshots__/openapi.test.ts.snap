@@ -43,6 +43,9 @@ Object {
         "name": Object {
           "type": "string",
         },
+        "suffix": Object {
+          "type": "string",
+        },
       },
       "required": Array [
         "age",
@@ -131,8 +134,45 @@ Object {
         "summary": undefined,
       },
     },
+    "/random": Object {
+      "get": Object {
+        "responses": Object {
+          "200": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "random": Object {
+                  "type": "number",
+                },
+              },
+              "required": Array [
+                "random",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "summary": "Get a random number",
+      },
+    },
     "/users": Object {
       "get": Object {
+        "parameters": Array [
+          Object {
+            "in": "query",
+            "name": "minAge",
+            "schema": Object {
+              "type": "number",
+            },
+          },
+          Object {
+            "in": "query",
+            "name": "nameIncludes",
+            "schema": Object {
+              "type": "string",
+            },
+          },
+        ],
         "responses": Object {
           "200": Object {
             "schema": Object {
@@ -161,6 +201,20 @@ Object {
             "name": "body",
             "schema": Object {
               "$ref": "#/definitions/Pick<User,\\"name\\"|\\"age\\">",
+            },
+          },
+          Object {
+            "in": "query",
+            "name": "nameIncludes",
+            "schema": Object {
+              "type": "string",
+            },
+          },
+          Object {
+            "in": "query",
+            "name": "suffix",
+            "schema": Object {
+              "type": "string",
             },
           },
         ],
@@ -206,6 +260,13 @@ Object {
             "in": "path",
             "name": "userId",
             "type": "string",
+          },
+          Object {
+            "in": "query",
+            "name": "firstName",
+            "schema": Object {
+              "type": "string",
+            },
           },
         ],
         "responses": Object {

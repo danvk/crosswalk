@@ -13,6 +13,7 @@ export type ExtractRouteParams<T extends string> = string extends T
   ? {[k in Param]: string}
   : {};
 
+// See https://effectivetypescript.com/2020/05/12/unionize-objectify/
 export type Unionize<T> = {[k in keyof T]: {k: k; v: T[k]}}[keyof T];
 
 export type Primitive = string | number | boolean | bigint | symbol | undefined | null;

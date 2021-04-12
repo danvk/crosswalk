@@ -44,7 +44,7 @@ import type {Endpoint, GetEndpoint} from 'crosswalk/dist/api-spec';
 
 export interface API {
   '/users': {
-    get: GetEndpoint<UsersResponse>;
+    get: GetEndpoint<UsersResponse, {query?: string}>;  // Response/query parameter types
     post: Endpoint<CreateUserRequest, User>;
   };
   '/users/:userId': {
@@ -60,7 +60,7 @@ import {API} from './api';
 import {TypedRouter} from 'crosswalk';
 
 export function registerAPI(router: TypedRouter<API>) {
-  router.get('/users', async () => users;
+  router.get('/users', async ({}, req, res, {query}) => filterUsersByName(users, query));
   router.post('/users', async ({}, userInput) => createUser(userInput));
   router.get('/users/:userId', async ({userId}) => getUserById(userId));
 }
@@ -81,6 +81,7 @@ There are a few things you get by doing this:
 - A definition of your API's shape in one place using TypeScript's type system.
 - A check that you've only implemented endpoints that are in the API definition.
 - Types for route parameters (via TypeScript 4.1's template literal types)
+- Types for query parameters (and automatic coercion of non-string parameters)
 - A check that each endpoint's implementation returns a Promise for the
   expected response type.
 
@@ -123,9 +124,12 @@ parameters will be type checked. No more `/path/to/undefined/null`!
 ```ts
 import {apiUrlMaker} from 'crosswalk';
 const urlMaker = apiUrlMaker<API>('/api/v0');
-const getUserUrl = urlMaker('/users/:userId');
-const fredUrl = getUserUrl({userId: 'fred'});
+const getUserByIdUrl = urlMaker('/users/:userId');
+const fredUrl = getUserByIdUrl({userId: 'fred'});
 // /api/v0/users/fred
+const userUrl = urlMaker('/users');
+const fredSearchUrl = userUrl(null, {query: 'fred'});
+// /api/v0/users?query=fred
 ```
 
 ## Runtime request validation
@@ -133,7 +137,7 @@ const fredUrl = getUserUrl({userId: 'fred'});
 To ensure that your users hit API endpoints with the correct payloads, use
 `typescript-json-schema` to convert your API definition to JSON Schema:
 
-    typescript-json-schema --required --strictNullChecks api.ts API --out api.schema.json
+    typescript-json-schema --required --strictNullChecks --noExtraProps api.ts API --out api.schema.json
 
 Then pass this to the `TypeRouter` when you create it in `server.ts`:
 
@@ -302,32 +306,6 @@ To publish:
 
     yarn tsc
     yarn publish
-
-## TODO
-
-- [ ] Options for request logging
-- [ ] Add an option for more express-like callbacks (w/ only request, response)
-- [ ] Support fancier paths
-- [ ] Set up:
-  - [ ] eslint
-  - [x] prettier
-  - [x] CI
-- [x] Add helper methods for all HTTP verbs
-- [x] Look into cleaning up generics
-- [x] Set up better type tests
-- [x] Narrow types of request.params, request.body in handlers
-- [x] Write unit tests
-- [x] Decide on a name
-- [x] Figure out how to handle `@types` deps (peer deps?)
-- [x] Decide on a parameter ordering for methods
-- [x] Should TypedRouter be a class ~or a function~?
-- [x] Plug into cityci
-- [x] Add a check that all endpoints are implemented
-- [x] Make a demo project, maybe TODO or based on GraphQL demo
-- [x] Add helpers for constructing URLs
-- [x] Look into generating API docs, e.g. w/ Swagger
-- [x] Make the runtime validation part optional
-- [x] Plug in TS 4.1 template literal types
 
 [tsjs]: https://github.com/YousefED/typescript-json-schema
 [ajv]: https://ajv.js.org/

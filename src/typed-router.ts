@@ -21,13 +21,14 @@ export class HTTPError extends Error {
 
 type RequestParams = Parameters<express.RequestHandler>;
 
-type AnyEndpoint = Endpoint<any, any>;
+type AnyEndpoint = Endpoint<any, any, any>;
 
 type ExpressRequest<Path extends string, Spec> = unknown &
   express.Request<
     ExtractRouteParams<Path>,
     SafeKey<Spec, 'response'>,
-    SafeKey<Spec, 'request'>
+    SafeKey<Spec, 'request'>,
+    SafeKey<Spec, 'query'>
   >;
 
 type ExpressResponse<Spec> = unknown & express.Response<SafeKey<Spec, 'response'>>;
@@ -108,23 +109,32 @@ export class TypedRouter<API> {
       response: ExpressResponse<Spec>,
     ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
   ) {
-    const validate = this.getValidator(route, method);
+    const bodyValidate = this.getValidator(route, method, 'request');
+    const queryValidate = this.getValidator(route, method, 'query');
     this.registrations.push({path: route as string, method});
 
     this.router[method](route as any, (...[req, response, next]: RequestParams) => {
-      const {body} = req;
+      const {body, query} = req;
 
-      if (validate && !validate(body)) {
+      if (bodyValidate && !bodyValidate(body)) {
         return response.status(400).json({
-          error: this.ajv!.errorsText(validate.errors),
-          errors: validate.errors,
+          error: this.ajv!.errorsText(bodyValidate.errors),
+          errors: bodyValidate.errors,
           invalidRequest: body,
+        });
+      }
+
+      if (queryValidate && !queryValidate(query)) {
+        return response.status(400).json({
+          error: this.ajv!.errorsText(queryValidate.errors),
+          errors: queryValidate.errors,
+          invalidRequest: query,
         });
       }
 
       if (req.app.get('env') === 'test') {
         // eslint-disable-next-line no-console
-        console.debug(method, route, 'params=', req.params, 'body=', body);
+        console.debug(method, route, 'params=', req.params, 'body=', body, 'query=', query);
       }
 
       handler(req.params as any, body, req as any, response)
@@ -152,7 +162,11 @@ export class TypedRouter<API> {
   }
 
   /** Get a validation function for request bodies for the endpoint, or null if not applicable. */
-  getValidator(route: string, method: HTTPVerb): Ajv.ValidateFunction | null {
+  getValidator(
+    route: string,
+    method: HTTPVerb,
+    property: 'request' | 'query',
+  ): Ajv.ValidateFunction | null {
     const {apiSchema} = this;
     if (!apiSchema) {
       return null;
@@ -165,29 +179,28 @@ export class TypedRouter<API> {
     const refSchema: string = apiDef[route].properties[method].$ref;
     const endpoint = refSchema.slice('#/definitions/'.length);
     const endpointTypes = (apiSchema.definitions as any)[endpoint].properties;
-    let requestType = endpointTypes.request;
-    if (requestType.$ref) {
-      requestType = requestType.$ref; // allow either references or inline types
-    } else if (requestType.type && requestType.type === 'null') {
-      requestType = null; // no request body, no validation
+    let validateType = endpointTypes[property];
+    if (validateType.$ref) {
+      validateType = validateType.$ref; // allow either references or inline types
+    } else if (validateType.type && validateType.type === 'null') {
+      validateType = null; // no request body, no validation
     }
 
-    if (requestType && this.ajv) {
+    if (validateType && this.ajv) {
       let validate;
-      if (typeof requestType === 'string') {
-        validate = this.ajv.getSchema(requestType) ?? null;
+      if (typeof validateType === 'string') {
+        validate = this.ajv.getSchema(validateType) ?? null;
       } else {
         // Create a new AJV validate for inline object types.
-        // This assumes these will never reference other type definitions.
-        const requestAjv = new Ajv();
+        const requestAjv = new Ajv({coerceTypes: property === 'query'});
         validate = requestAjv.compile({
-          '$schema': apiSchema.$schema,
+          $schema: apiSchema.$schema,
           definitions: apiSchema.definitions,
-          ...requestType
+          ...validateType,
         });
       }
       if (!validate) {
-        throw new Error(`Unable to get schema for '${requestType}'`);
+        throw new Error(`Unable to get schema for '${validateType}'`);
       }
       return validate;
     }
