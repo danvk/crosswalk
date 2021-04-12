@@ -220,6 +220,30 @@ app.use('/docs', swaggerUI.serve, swaggerUI.setup(apiSpecToOpenApi(apiSchema)));
 Then visit `/docs`. You may need to pass some additional options to
 `apiSpecToOpenApi` to get query execution from the Swagger docs to work.
 
+## Options
+
+The `TypedRouter` class takes the following options.
+
+### invalidRequestHandler
+
+By default, if request validation fails, crosswalk returns a 400 status code and a descriptive
+error. If you'd like to do something else, you may specify your own `invalidRequestHandler`. For
+example, you might like to log the error or omit validation details from the response in prod.
+
+This is the default implementation (`crosswalk.defaultInvalidRequestHandler`):
+
+```ts
+new TypedRouter<API>(app, apiSchema, {
+  handleInvalidRequest({response, payload, ajv, errors}) {
+    response.status(400).json({
+      error: ajv.errorsText(errors),
+      errors,
+      invalidRequest: payload,
+    });
+  }
+});
+```
+
 ## Questions
 
 **GraphQL has types, why not use that?**
