@@ -28,12 +28,21 @@ test('TypedRouter', async () => {
 
   router.get('/random', async () => ({random: 7}));
 
-  router.get('/users', async (_params, {query: {nameIncludes, minAge}}, _res) => ({
-    users: users.filter(
-      user =>
-        (!nameIncludes || user.name.includes(nameIncludes)) && (!minAge || user.age >= minAge),
-    ),
-  }));
+  router.get('/users', async (_params, {query: {nameIncludes, minAge}}, _res) => {
+    if (nameIncludes !== undefined) {
+      expect(typeof nameIncludes).toEqual('string');
+    }
+    if (minAge !== undefined) {
+      expect(typeof minAge).toEqual('number');
+    }
+    return {
+      users: users.filter(
+        user =>
+          (!nameIncludes || user.name.includes(nameIncludes)) &&
+          (!minAge || user.age >= minAge),
+      ),
+    };
+  });
 
   router.post('/users', async ({}, user, request, response) => {
     assertType(user, _ as {age: number; name: string});
