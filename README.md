@@ -302,6 +302,43 @@ If you get errors about `Type 'any' is not assignable to type 'never'.`, it
 might be because you're using an old version of TypeScript, either in your
 project or in your editor.
 
+**Should I set `noExtraProps` with `typescript-json-schema`?**
+
+There are many options you can set when you run [`typescript-json-schema`][tsjs]. You should think
+carefully about these as they have an impact on the runtime behavior of your code.
+
+You should set `strictNullChecks` to whatever it's set to in your `tsconfig.json`. (It should
+really be set to `true`!). This ensures that the runtime checking and static type checking are in
+agreement.
+
+The `noExtraProps` option is more interesting. TypeScript uses a "structural" or "duck" typing
+system. This means that an object may have the declared properties in its type, _but it could have
+others, too_!
+
+```ts
+interface Hero {
+  heroName: string;
+}
+const superman = {
+  heroName: 'Superman',
+  alterEgo: 'Clark Kent',
+};
+
+declare function getHeroDetails(hero: Hero): string;
+getHeroDetails(superman);  // ok!
+```
+
+This is simply the way that TypeScript works, and so it must be the way that crosswalk statically
+enforces your request types. If you're comfortable with this behavior, leave `noExtraProps` off.
+
+If you _do_ specify `noExtraProps`, additional properties on a request will result in the request
+being rejected at runtime with a 400 HTTP response. This has pros and cons. The pros are that it
+will catch more user errors (e.g. misspelling an optional property name) and allows the server to
+be more confident about the shape of its input (`Object.keys` won't produce surprises). The con
+is that your runtime behavior is divergent from the static type checking, so client code that
+passes the type checker might produce failing requests at runtime. Until TypeScript gets
+["exact" types][exact], it will not be able to fully model `noExtraProps` statically.
+
 **What's with the name?**
 
 A crosswalk is a _safe route_ across a road. Also a nod to [Sidewalk Labs][swl],
@@ -341,3 +378,4 @@ To publish:
 [ts41]: https://devblogs.microsoft.com/typescript/announcing-typescript-4-1
 [tweet]: https://twitter.com/danvdk/status/1301707026507198464
 [swl]: https://sidewalklabs.com/
+[exact]: https://github.com/microsoft/TypeScript/issues/12936
