@@ -344,6 +344,12 @@ passes the type checker might produce failing requests at runtime. Until TypeScr
 A crosswalk is a _safe route_ across a road. Also a nod to [Sidewalk Labs][swl],
 where this project was originally developed.
 
+## Related projects
+
+- [GraphQL][] achieves type-safe APIs by ditching the REST structure altogether. If you want to use GraphQL, there are many tools to help, e.g. [Apollo][].
+- [swagger-typescript-api][] starts with a Swagger (OpenAPI) schema as a source of truth and generates TypeScript types from it (crosswalk does the reverse).
+- [blitzjs][] and [trpc][] also give you end-to-end type safety, but without modeling a REST API explicitly in the way that crosswalk does.
+
 ## Development setup
 
 After cloning, run:
@@ -379,3 +385,8 @@ To publish:
 [tweet]: https://twitter.com/danvdk/status/1301707026507198464
 [swl]: https://sidewalklabs.com/
 [exact]: https://github.com/microsoft/TypeScript/issues/12936
+[swagger-typescript-api]: https://github.com/acacode/swagger-typescript-api
+[trpc]: https://github.com/trpc/trpc
+[blitzjs]: https://blitzjs.com/
+[graphql]: https://graphql.org/
+[apollo]: https://www.apollographql.com/
