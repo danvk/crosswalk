@@ -363,6 +363,23 @@ describe('typed requests', () => {
       expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
     });
 
+    it('should generate POST requests with query parameters', async () => {
+      const mockFetcher = jest.fn();
+      const api = typedApi<API>({fetch: mockFetcher});
+
+      const createUser = api.post('/users');
+
+      mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});
+      const newUser = await createUser({}, {name: 'Fred', age: 42}, {suffix: 'sr'});
+      assertType(newUser, _ as User);
+      expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
+      expect(mockFetcher).toHaveBeenCalledTimes(1);
+      expect(mockFetcher).toHaveBeenCalledWith('/users?suffix=sr', 'post', {
+        name: 'Fred',
+        age: 42,
+      });
+    });
+
     it('should generate GET requests with mandatory query parameters', async () => {
       const mockFetcher = jest.fn();
       const api = typedApi<API>({fetch: mockFetcher});
