@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1
+
+- Fix bug where query parameters weren't supported or post/patch/put requests [#22](https://github.com/danvk/crosswalk/pull/22)
+
 ## 1.4
 
 - Type validation for query parameters [#19](https://github.com/danvk/crosswalk/issues/19).
