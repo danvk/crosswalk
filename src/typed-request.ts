@@ -95,7 +95,14 @@ export function typedApi<API>(options?: Options) {
     type Args = [
       params: Params,
       body: Request,
-      ...queryArgs: [Query] extends [{}] ? [] : [query?: Query]
+      // No query params -> don't take a third argument
+      // All optional query params -> third argument is optional
+      // Mandatory query params -> third argument is required
+      ...queryArgs: [Query] extends [null]
+        ? []
+        : [{}] extends [Query]
+        ? [query?: Query]
+        : [query: Query]
     ];
     const makeUrl = urlMaker(endpoint, method as any);
     return (...[params, body, query]: Args): Promise<Response> =>
