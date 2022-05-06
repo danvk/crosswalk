@@ -199,6 +199,32 @@ typedRouter.assertAllRoutesRegistered();
 // will throw unless all endpoints are registered
 ```
 
+### Route-aware middleware
+
+Express middlware runs before you know which route is going to match.
+This means that you can't access route params, or the path that was matched.
+You _can_ access these properties if you register a [`finish`][finish] handler, but by that point
+the request has been served and you can't do anything about it.
+
+crosswalk lets you register middleware that runs after a route has been matched, but before the
+request has been handled. This is often a convenient place to apply access controls.
+
+For example:
+
+```ts
+typedRouter.useRouterMiddleware((req, res, next) => {
+  const {params} = req;
+  if ('userId' in params && params.userId === 'badguy') {
+    res.status(403).send('Forbidden');
+  } else {
+    next();
+  }
+});
+```
+
+You can also access `req.route` in this context.
+For example, `req.route.path` might be `/users/:userId` in the previous example.
+
 ### Generating API docs
 
 You can convert your API definition into Swagger form to get interactive
@@ -390,3 +416,4 @@ To publish:
 [blitzjs]: https://blitzjs.com/
 [graphql]: https://graphql.org/
 [apollo]: https://www.apollographql.com/
+[finish]: https://nodejs.org/api/http.html#http_event_finish
