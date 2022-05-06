@@ -104,6 +104,7 @@ export class TypedRouter<API> {
   router: express.Router;
   apiSchema?: any;
   ajv?: Ajv.Ajv;
+  middlewareFns: express.RequestHandler[];
   registrations: {path: string; method: HTTPVerb}[];
   handleInvalidRequest: TypedRouterOptions['invalidRequestHandler'];
 
@@ -116,6 +117,7 @@ export class TypedRouter<API> {
     }
     this.handleInvalidRequest = options?.invalidRequestHandler ?? defaultInvalidRequestHandler;
     this.registrations = [];
+    this.middlewareFns = [];
   }
 
   // TODO(danvk): consider replacing get() with a streamlined implementation
@@ -145,7 +147,7 @@ export class TypedRouter<API> {
     const queryValidate = this.getValidator(route, method, 'query');
     this.registrations.push({path: route as string, method});
 
-    this.router[method](route as any, (...[req, response, next]: RequestParams) => {
+    let handlerFn = (...[req, response, next]: RequestParams) => {
       const {body, query} = req;
 
       if (bodyValidate && !bodyValidate(body)) {
@@ -196,7 +198,26 @@ export class TypedRouter<API> {
             next(error);
           }
         });
-    });
+    };
+
+    for (let i = this.middlewareFns.length - 1; i >= 0; i--) {
+      const middlewareFn = this.middlewareFns[i];
+      const prevHandlerFn = handlerFn;
+      handlerFn = (req: any, res: any, next: any) => middlewareFn(req, res, () => prevHandlerFn(req, res, next));
+    }
+
+    this.router[method](route as any, handlerFn);
+  }
+
+  useRouterMiddleware(
+    fn: (
+      request: ExpressRequest<keyof API & string, SafeKey<API[keyof API], HTTPVerb>>,
+      response: express.Response,
+      next: express.NextFunction,
+    ) => void,
+  ): this {
+    this.middlewareFns.push(fn as any);
+    return this;
   }
 
   /** Get a validation function for request bodies for the endpoint, or null if not applicable. */

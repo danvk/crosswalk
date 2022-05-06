@@ -331,3 +331,72 @@ test('Custom 400 handler', async () => {
     .expect(418);
   expect(r.text).toMatchInlineSnapshot(`"Bad request, not a teapot: data should be object"`);
 });
+
+test.only('router middleware', async () => {
+  const app = express();
+  const router = new TypedRouter<API>(app, apiSchemaJson);
+
+  let lastCall: any = null;
+  router.useRouterMiddleware((req, res, next) => {
+    const {params} = req;
+    // type is {} | {userId: string}
+    lastCall = {
+      params,
+      path: req.path,
+      route: req.route.path,
+    };
+    if ('userId' in params && params.userId === 'badguy') {
+      res.status(403).send('Forbidden');
+    } else {
+      next();
+    }
+  });
+
+  router.get('/users', async () => {
+    return {users: []};
+  });
+
+  router.get('/users/:userId', async ({userId}) => {
+    return {
+      id: '1',
+      name: 'John',
+      age: 34,
+    };
+  });
+
+  const api = request(app);
+  let r = await api.get('/users/fred').expect(200);
+  expect(r.body).toMatchObject({
+    name: 'John',
+    age: 34,
+  });
+  expect(lastCall).toMatchInlineSnapshot(`
+    Object {
+      "params": Object {
+        "userId": "fred",
+      },
+      "path": "/users/fred",
+      "route": "/users/:userId",
+    }
+  `);
+  await api.get('/users/badguy').expect(403);
+  expect(lastCall).toMatchInlineSnapshot(`
+    Object {
+      "params": Object {
+        "userId": "badguy",
+      },
+      "path": "/users/badguy",
+      "route": "/users/:userId",
+    }
+  `);
+
+  const {body} = await api.get('/users').expect(200);
+  expect(body).toEqual({users: []});
+  expect(lastCall).toMatchInlineSnapshot(`
+    Object {
+      "params": Object {},
+      "path": "/users",
+      "route": "/users",
+    }
+  `);
+});
