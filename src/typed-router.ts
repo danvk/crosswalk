@@ -203,7 +203,8 @@ export class TypedRouter<API> {
     for (let i = this.middlewareFns.length - 1; i >= 0; i--) {
       const middlewareFn = this.middlewareFns[i];
       const prevHandlerFn = handlerFn;
-      handlerFn = (req: any, res: any, next: any) => middlewareFn(req, res, () => prevHandlerFn(req, res, next));
+      handlerFn = (req: any, res: any, next: any) =>
+        middlewareFn(req, res, () => prevHandlerFn(req, res, next));
     }
 
     this.router[method](route as any, handlerFn);
