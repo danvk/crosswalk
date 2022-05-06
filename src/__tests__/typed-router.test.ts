@@ -332,7 +332,7 @@ test('Custom 400 handler', async () => {
   expect(r.text).toMatchInlineSnapshot(`"Bad request, not a teapot: data should be object"`);
 });
 
-test.only('router middleware', async () => {
+test('router middleware', async () => {
   const app = express();
   const router = new TypedRouter<API>(app, apiSchemaJson);
 
