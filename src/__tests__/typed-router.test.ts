@@ -338,13 +338,18 @@ test.only('router middleware', async () => {
 
   let lastCall: any = null;
   router.useRouterMiddleware((req, res, next) => {
-    const {params} = req;
-    // type is {} | {userId: string}
+    // This is called _before_ the next middleware.
     lastCall = {
-      params,
+      params: req.params,
       path: req.path,
       route: req.route.path,
     };
+    next();
+  });
+
+  router.useRouterMiddleware((req, res, next) => {
+    const {params} = req;
+    // type is {} | {userId: string}
     if ('userId' in params && params.userId === 'badguy') {
       res.status(403).send('Forbidden');
     } else {
