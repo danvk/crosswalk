@@ -345,9 +345,7 @@ test.only('router middleware', async () => {
       route: req.route.path,
     };
     next();
-  });
-
-  router.useRouterMiddleware((req, res, next) => {
+  }).useRouterMiddleware((req, res, next) => {
     const {params} = req;
     // type is {} | {userId: string}
     if ('userId' in params && params.userId === 'badguy') {

@@ -209,6 +209,15 @@ export class TypedRouter<API> {
     this.router[method](route as any, handlerFn);
   }
 
+  /**
+   * Add a "route-aware" middleware function.
+   *
+   * This runs after a route has been matched, but before the request body has been validated
+   * and before the request handler function runs. It's convenient to access
+   * req.params and req.route from this sort of middleware, e.g. to apply access controls.
+   *
+   * Like any middleware, this function should either handle the request or call next().
+   */
   useRouterMiddleware(
     fn: (
       request: ExpressRequest<keyof API & string, SafeKey<API[keyof API], HTTPVerb>>,
