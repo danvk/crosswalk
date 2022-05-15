@@ -1,39 +1,29 @@
-import {assert as assertType, _} from 'spec.ts';
-
-import {API, User} from './api';
+import {API} from './api';
 import {typedApi, apiUrlMaker, fetchJson} from '..';
 import {Endpoint, GetEndpoint} from '../api-spec';
-
-// See comment in typed-request.ts
-type PlaceholderEmpty = null | {readonly [pathParam: string]: never};
 
 describe('typed requests', () => {
   describe('apiUrlMaker', () => {
     it('should assume GET when there are multiple methods for an endpoint', () => {
       const urlMaker = apiUrlMaker<API>();
       const getUsers = urlMaker('/users');
-      assertType(
-        _ as typeof getUsers,
-        _ as (
-          params?: PlaceholderEmpty,
-          query?: Readonly<{
-            nameIncludes?: string;
-            minAge?: number;
-          }>,
-        ) => string,
-      );
+      //    ^? const getUsers: (params?: {
+      //           readonly [x: string]: never;
+      //       } | null | undefined, query?: {
+      //           readonly nameIncludes?: string | undefined;
+      //           readonly minAge?: number | undefined;
+      //       } | undefined) => string
+
+      // @ts-expect-error no path parameters are allowed
+      getUsers({param: 'value'})
 
       // If no method is specified, assume GET
       const getUser = urlMaker('/users/:userId');
-      assertType(
-        _ as typeof getUser,
-        _ as (
-          params: {readonly userId: string},
-          query?: Readonly<{
-            firstName?: string;
-          }>,
-        ) => string,
-      );
+      //    ^? const getUser: (params: {
+      //           readonly userId: string;
+      //       }, query?: {
+      //           readonly firstName?: string | undefined;
+      //       } | undefined) => string
 
       // @ts-expect-error second param needs to be firstName, not nameIncludes
       getUser({userId: 'fred'}, {nameIncludes: 'fred'});
@@ -107,7 +97,7 @@ describe('typed requests', () => {
 
     it('should accept readonly path params', () => {
       const user = {userId: 'fred'} as const;
-      assertType(user, _ as {readonly userId: 'fred'});
+      //    ^? const user: { readonly userId: "fred"; }
 
       const urlMaker = apiUrlMaker<API>('/api/v0');
       expect(urlMaker('/users/:userId')(user)).toEqual('/api/v0/users/fred');
@@ -134,15 +124,11 @@ describe('typed requests', () => {
 
       // With no HTTP method specified, assume GET
       const urlMakerAssumesGet = apiUrlMaker<TestAPI>()('/path');
-      assertType(
-        _ as typeof urlMakerAssumesGet,
-        _ as (
-          params: PlaceholderEmpty,
-          query: Readonly<{
-            mandatory: string;
-          }>,
-        ) => string,
-      );
+      //    ^? const urlMakerAssumesGet: (params: {
+      //           readonly [x: string]: never;
+      //       } | null, query: {
+      //           readonly mandatory: string;
+      //       }) => string
 
       // Failing to specify a mandatory query parameter is an error.
       // @ts-expect-error has mandatory query param
@@ -159,28 +145,20 @@ describe('typed requests', () => {
 
       // It's fine to specify GET explicitly.
       const urlMakerGet = apiUrlMaker<TestAPI>()('/path', 'get');
-      assertType(
-        _ as typeof urlMakerGet,
-        _ as (
-          params: PlaceholderEmpty,
-          query: {
-            readonly mandatory: string;
-          },
-        ) => string,
-      );
+      //    ^? const urlMakerGet: (params: {
+      //           readonly [x: string]: never;
+      //       } | null, query: {
+      //           readonly mandatory: string;
+      //       }) => string
       expect(urlMakerGet(null, {mandatory: 'a'})).toEqual('/path?mandatory=a');
 
       // It's also fine to specify POST explicitly.
       const urlMakerPost = apiUrlMaker<TestAPI>()('/path', 'post');
-      assertType(
-        _ as typeof urlMakerPost,
-        _ as (
-          params: PlaceholderEmpty,
-          query: {
-            readonly mandatory2: string;
-          },
-        ) => string,
-      );
+      //    ^? const urlMakerPost: (params: {
+      //           readonly [x: string]: never;
+      //       } | null, query: {
+      //           readonly mandatory2: string;
+      //       }) => string
       expect(urlMakerPost(null, {mandatory2: 'b'})).toEqual('/path?mandatory2=b');
     });
 
@@ -194,15 +172,11 @@ describe('typed requests', () => {
 
       // "a" is mandatory for GET. Since we assume GET, it should be mandatory here, too.
       const urlMakerAssumesGet = apiUrlMaker<TestAPI>()('/path');
-      assertType(
-        _ as typeof urlMakerAssumesGet,
-        _ as (
-          params: PlaceholderEmpty,
-          query: {
-            readonly a: string;
-          },
-        ) => string,
-      );
+      //    ^? const urlMakerAssumesGet: (params: {
+      //           readonly [x: string]: never;
+      //       } | null, query: {
+      //           readonly a: string;
+      //       }) => string
 
       // @ts-expect-error Excess property checking applies here so mandatory2 is not allowed.
       expect(urlMakerAssumesGet(null, {a: 'a', mandatory2: 'b'})).toEqual(
@@ -222,17 +196,13 @@ describe('typed requests', () => {
 
       // No explicit method means "assume get".
       const urlMakerAssumesGet = apiUrlMaker<TestAPI>()('/path');
-      assertType(
-        _ as typeof urlMakerAssumesGet,
-        _ as (
-          params: PlaceholderEmpty,
-          query: {
-            readonly a: string;
-            readonly b?: string;
-            readonly c?: string;
-          },
-        ) => string,
-      );
+      //    ^? const urlMakerAssumesGet: (params: {
+      //           readonly [x: string]: never;
+      //       } | null, query: {
+      //           readonly a: string;
+      //           readonly b?: string | undefined;
+      //           readonly c?: string | undefined;
+      //       }) => string
       expect(urlMakerAssumesGet(null, {a: 'a', b: 'b', c: 'c'})).toEqual('/path?a=a&b=b&c=c');
     });
 
@@ -293,7 +263,7 @@ describe('typed requests', () => {
       );
 
       const users = await getUsers({}, {minAge: 42});
-      assertType(users, _ as {users: User[]});
+      //    ^? const users: { users: User[]; }
       expect(users).toEqual({users: []});
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(mockFetch).toHaveBeenCalledWith('/users?minAge=42', {
@@ -317,7 +287,7 @@ describe('typed requests', () => {
 
       mockFetcher.mockReturnValueOnce(Promise.resolve({random: 7}));
       const random = await getRandom();
-      assertType(random, _ as {random: number});
+      //    ^? const random: { random: number; }
       expect(random).toEqual({random: 7});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/random', 'get', null);
@@ -325,7 +295,7 @@ describe('typed requests', () => {
       mockFetcher.mockClear();
       mockFetcher.mockReturnValueOnce(Promise.resolve({users: []}));
       const allUsers = await getUsers();
-      assertType(allUsers, _ as {users: User[]});
+      //    ^? const allUsers: { users: User[]; }
       expect(allUsers).toEqual({users: []});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/users', 'get', null);
@@ -333,7 +303,7 @@ describe('typed requests', () => {
       mockFetcher.mockClear();
       mockFetcher.mockReturnValueOnce(Promise.resolve({users: []}));
       const filteredUsers = await getUsers({}, {nameIncludes: 'red'});
-      assertType(filteredUsers, _ as {users: User[]});
+      //    ^? const filteredUsers: { users: User[]; }
       expect(filteredUsers).toEqual({users: []});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/users?nameIncludes=red', 'get', null);
@@ -341,7 +311,7 @@ describe('typed requests', () => {
       mockFetcher.mockClear();
       mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});
       const user = await getUserById({userId: 'fred'});
-      assertType(user, _ as User);
+      //    ^? const user: User
       expect(user).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/users/fred', 'get', null);
@@ -355,7 +325,7 @@ describe('typed requests', () => {
 
       mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});
       const newUser = await createUser({}, {name: 'Fred', age: 42});
-      assertType(newUser, _ as User);
+      //    ^? const newUser: User
       expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
@@ -369,7 +339,7 @@ describe('typed requests', () => {
 
       mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});
       const newUser = await createUser({}, {name: 'Fred', age: 42}, {suffix: 'sr'});
-      assertType(newUser, _ as User);
+      //    ^? const newUser: User
       expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/users?suffix=sr', 'post', {
@@ -391,7 +361,7 @@ describe('typed requests', () => {
       getSearch(null);
 
       const users = await getSearch(null, {query: 'fred'});
-      assertType(users, _ as {users: User[]});
+      //    ^? const users: { users: User[]; }
       expect(users).toEqual({users: []});
       expect(mockFetcher).toHaveBeenCalledTimes(3);
       expect(mockFetcher).toHaveBeenLastCalledWith('/search?query=fred', 'get', null);
@@ -405,7 +375,7 @@ describe('typed requests', () => {
 
       mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});
       const newUser = await createUser({}, {name: 'Fred', age: 42});
-      assertType(newUser, _ as User);
+      //    ^? const newUser: User
       expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
@@ -427,11 +397,11 @@ describe('typed requests', () => {
       readonlyFoo.foo.bar[0] = 'foo';
       mockFetcher.mockReturnValueOnce({baz: 'bar'});
       const fooResponse = await createFoo({}, readonlyFoo);
+      //    ^? const fooResponse: { baz: string; }
 
       expect(mockFetcher).toHaveBeenCalledTimes(1);
 
       // It's OK to modify the response.
-      assertType(fooResponse, _ as {baz: string});
       expect(fooResponse).toEqual({baz: 'bar'});
       fooResponse.baz = 'foo';
     });

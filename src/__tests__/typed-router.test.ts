@@ -1,6 +1,5 @@
 import bodyParser from 'body-parser';
 import express from 'express';
-import {assert as assertType, _} from 'spec.ts';
 import request from 'supertest';
 
 import {API, User} from './api';
@@ -45,9 +44,13 @@ test('TypedRouter', async () => {
   });
 
   router.post('/users', async (_, user, request, response) => {
-    assertType(user, _ as {age: number; name: string});
-    assertType(request.params, _ as {});
-    assertType(request.body, _ as {age: number; name: string});
+    const _userForCheck = user;
+    //     ^? const _userForCheck: CreateUserRequest
+    const {params, body} = request;
+    params
+    // ^? const params: {}
+    body
+    // ^? const body: CreateUserRequest
 
     const newUser = {id: 'id', ...user};
     users.push(newUser);
@@ -73,12 +76,18 @@ test('TypedRouter', async () => {
   router.registerEndpoint(
     'put',
     '/users/:userId',
-    async (params, {age, name}, request, _response) => {
-      assertType(params, _ as {userId: string});
-      assertType(request.params, _ as {userId: string});
-      assertType(request.body, _ as {age?: number; name?: string});
+    async (pathParams, {age, name}, request, _response) => {
+      //   ^? (parameter) pathParams: { userId: string; }
+      const {params, body} = request;
+      params
+      // ^? const params: { userId: string; }
+      body
+      // ^? const body: {
+      //        name?: string | undefined;
+      //        age?: number | undefined;
+      //    }
 
-      const {userId} = params;
+      const {userId} = pathParams;
       const user = userOr404(userId);
       if (name) {
         user.name = name;
@@ -99,7 +108,8 @@ test('TypedRouter', async () => {
     throw new Error('Not implemented');
   });
   router.post('/complex', async (_, body) => {
-    assertType(body.user, _ as User | null);
+    body.user;
+    //   ^? (property) user: User | null
     return users[0];
   });
   router.patch('/complex', async (_, _body) => {
