@@ -35,7 +35,7 @@ describe('typed requests', () => {
         ) => string,
       );
 
-      // @ts-expect-error
+      // @ts-expect-error second param needs to be firstName, not nameIncludes
       getUser({userId: 'fred'}, {nameIncludes: 'fred'});
     });
 
@@ -54,8 +54,8 @@ describe('typed requests', () => {
 
       // OK, assumes GET and 'b1' works for get
       expect(endpointUrl({}, {b: 'b1'})).toEqual('/api/endpoint?b=b1');
-      // @ts-expect-error
-      expect(endpointUrl({}, {b: 'b3'})).toEqual('/api/endpoint?b=b3'); // 'b3' only works for post
+      // @ts-expect-error 'b3' only works for post
+      expect(endpointUrl({}, {b: 'b3'})).toEqual('/api/endpoint?b=b3');
 
       // 'b2' is safe for each method
       expect(endpointUrl({}, {b: 'b2'})).toEqual('/api/endpoint?b=b2');
@@ -72,10 +72,10 @@ describe('typed requests', () => {
       );
 
       // It's also fine to specify POST explicitly
-      // @ts-expect-error
+      // @ts-expect-error b1 is only allowed for GET
       expect(urlMaker('/endpoint', 'post')({}, {a: 'a', b: 'b1'})).toEqual(
         '/api/endpoint?a=a&b=b1',
-      ); // b1 is only allowed for GET
+      );
 
       expect(urlMaker('/endpoint', 'post')({}, {c: 'c', b: 'b3'})).toEqual(
         '/api/endpoint?c=c&b=b3',
@@ -97,11 +97,11 @@ describe('typed requests', () => {
       expect(urlMaker('/users/:userId')({userId: 'fred'})).toEqual('/api/v0/users/fred');
 
       expect(() => {
-        // @ts-expect-error
+        // @ts-expect-error needs userId param
         urlMaker('/users/:userId')({notUserId: 'fred'});
       }).toThrowError();
 
-      // @ts-expect-error
+      // @ts-expect-error no params
       urlMaker('/users')({notUserId: 'fred'});
     });
 
@@ -145,15 +145,14 @@ describe('typed requests', () => {
       );
 
       // Failing to specify a mandatory query parameter is an error.
-      // @ts-expect-error
+      // @ts-expect-error has mandatory query param
       urlMakerAssumesGet();
-      // @ts-expect-error
+      // @ts-expect-error has mandatory query param
       urlMakerAssumesGet({});
-      // @ts-expect-error
+      // @ts-expect-error has mandatory query param
       urlMakerAssumesGet({}, {});
 
-      // mandatory2 is only allowed on POST, but we assume GET.
-      // @ts-expect-error
+      // @ts-expect-error mandatory2 is only allowed on POST, but we assume GET.
       expect(urlMakerAssumesGet(null, {mandatory: 'a', mandatory2: 'b'})).toEqual(
         '/path?mandatory=a&mandatory2=b',
       );
@@ -205,12 +204,11 @@ describe('typed requests', () => {
         ) => string,
       );
 
-      // Excess property checking applies here so mandatory2 is not allowed.
-      // @ts-expect-error
+      // @ts-expect-error Excess property checking applies here so mandatory2 is not allowed.
       expect(urlMakerAssumesGet(null, {a: 'a', mandatory2: 'b'})).toEqual(
         '/path?a=a&mandatory2=b',
       );
-      // @ts-expect-error
+      // @ts-expect-error there's a mandatory query parameter (a)
       expect(urlMakerAssumesGet(null)).toEqual('/path');
     });
 
@@ -252,7 +250,7 @@ describe('typed requests', () => {
       expect(urlMakerAssumesGet()).toEqual('/path');
 
       const urlMakerPut = apiUrlMaker<TestAPI>()('/path', 'put');
-      // @ts-expect-error
+      // @ts-expect-error PUT /path has a mandatory query parameter
       expect(urlMakerPut()).toEqual('/path');
       expect(urlMakerPut(null, {a: 'a'})).toEqual('/path?a=a');
     });
@@ -274,7 +272,7 @@ describe('typed requests', () => {
       const urlMakerId = apiUrlMaker<TestAPI>()('/path/:pathId');
       expect(urlMakerId({pathId: 'foo'})).toEqual('/path/foo');
 
-      // @ts-expect-error
+      // @ts-expect-error no query parameters are supported
       urlMakerId({pathId: 'foo'}, {q: 'param'});
     });
   });
@@ -387,9 +385,9 @@ describe('typed requests', () => {
 
       mockFetcher.mockReturnValue(Promise.resolve({users: []}));
 
-      // @ts-expect-error
+      // @ts-expect-error "query" query param is required
       getSearch();
-      // @ts-expect-error
+      // @ts-expect-error "query" query param is required
       getSearch(null);
 
       const users = await getSearch(null, {query: 'fred'});
@@ -425,7 +423,7 @@ describe('typed requests', () => {
 
       const createFoo = api.post('/foo');
       const readonlyFoo = {foo: {bar: ['baz', 'quux']}} as const;
-      // @ts-expect-error
+      // @ts-expect-error cannot assign to readonly property
       readonlyFoo.foo.bar[0] = 'foo';
       mockFetcher.mockReturnValueOnce({baz: 'bar'});
       const fooResponse = await createFoo({}, readonlyFoo);

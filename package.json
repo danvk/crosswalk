@@ -8,8 +8,9 @@
   "license": "MIT",
   "scripts": {
     "test": "jest",
-    "lint": "prettier --check 'src/**/*.ts'",
-    "prettier": "prettier --write 'src/**/*.ts'",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write 'src/**/*.ts'",
+    "format:check": "prettier --check 'src/**/*.ts'",
     "update-test-schema": "typescript-json-schema --required --noExtraProps --strictNullChecks src/__tests__/api.ts API --out src/__tests__/api.schema.json"
   },
   "repository": {
@@ -30,7 +31,10 @@
     "@types/jest": "^26.0.15",
     "@types/supertest": "^2.0.10",
     "@types/swagger-ui-express": "^4.1.2",
+    "@typescript-eslint/eslint-plugin": "^5.22.0",
+    "@typescript-eslint/parser": "^5.22.0",
     "body-parser": "^1.19.0",
+    "eslint": "^8.15.0",
     "express": "^4.17.2",
     "jest": "^26.6.3",
     "prettier": "^2.2.0",
