@@ -15,7 +15,7 @@ describe('typed requests', () => {
       //       } | undefined) => string
 
       // @ts-expect-error no path parameters are allowed
-      getUsers({param: 'value'})
+      getUsers({param: 'value'});
 
       // If no method is specified, assume GET
       const getUser = urlMaker('/users/:userId');

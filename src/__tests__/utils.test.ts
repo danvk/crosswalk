@@ -15,7 +15,7 @@ describe('utils', () => {
         bar: ['baz', 'quux'],
       },
     };
-    user
+    user;
     // ^? const user: { foo: { bar: string[]; }; }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

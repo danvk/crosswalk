@@ -47,9 +47,9 @@ test('TypedRouter', async () => {
     const _userForCheck = user;
     //     ^? const _userForCheck: CreateUserRequest
     const {params, body} = request;
-    params
+    params;
     // ^? const params: {}
-    body
+    body;
     // ^? const body: CreateUserRequest
 
     const newUser = {id: 'id', ...user};
@@ -79,9 +79,9 @@ test('TypedRouter', async () => {
     async (pathParams, {age, name}, request, _response) => {
       //   ^? (parameter) pathParams: { userId: string; }
       const {params, body} = request;
-      params
+      params;
       // ^? const params: { userId: string; }
-      body
+      body;
       // ^? const body: {
       //        name?: string | undefined;
       //        age?: number | undefined;
