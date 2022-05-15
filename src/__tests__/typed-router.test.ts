@@ -359,7 +359,7 @@ test('router middleware', async () => {
     })
     .useRouterMiddleware((req, res, next) => {
       const {params} = req;
-      // type is {} | {userId: string}
+      //     ^? const params: {} | { userId: string; }
       if ('userId' in params && params.userId === 'badguy') {
         res.status(403).send('Forbidden');
       } else {
