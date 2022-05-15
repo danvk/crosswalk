@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.0
+
+- Added route-aware middleware, see [README](https://github.com/danvk/crosswalk#route-aware-middleware)
+- Switched to `eslint-plugin-expect-type` for type assertions.
+- Various dependency updates
+
 ## 1.4.1
 
 - Fix bug where query parameters weren't supported or post/patch/put requests [#22](https://github.com/danvk/crosswalk/pull/22)
