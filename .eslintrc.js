@@ -26,6 +26,7 @@ module.exports = {
             caughtErrorsIgnorePattern: '^_',
           },
         ],
+        '@typescript-eslint/ban-types': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         // 'expect-type/expect': 'error',

@@ -8,8 +8,9 @@
   "license": "MIT",
   "scripts": {
     "test": "jest",
-    "lint": "prettier --check 'src/**/*.ts'",
-    "prettier": "prettier --write 'src/**/*.ts'",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write 'src/**/*.ts'",
+    "format:check": "prettier --check 'src/**/*.ts'",
     "update-test-schema": "typescript-json-schema --required --noExtraProps --strictNullChecks src/__tests__/api.ts API --out src/__tests__/api.schema.json"
   },
   "repository": {

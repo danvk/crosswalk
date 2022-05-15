@@ -44,7 +44,7 @@ test('TypedRouter', async () => {
     };
   });
 
-  router.post('/users', async ({}, user, request, response) => {
+  router.post('/users', async (_, user, request, response) => {
     assertType(user, _ as {age: number; name: string});
     assertType(request.params, _ as {});
     assertType(request.body, _ as {age: number; name: string});
@@ -73,7 +73,7 @@ test('TypedRouter', async () => {
   router.registerEndpoint(
     'put',
     '/users/:userId',
-    async (params, {age, name}, request, response) => {
+    async (params, {age, name}, request, _response) => {
       assertType(params, _ as {userId: string});
       assertType(request.params, _ as {userId: string});
       assertType(request.body, _ as {age?: number; name?: string});
@@ -98,11 +98,11 @@ test('TypedRouter', async () => {
   router.registerEndpoint('patch', '/users/:userId', async () => {
     throw new Error('Not implemented');
   });
-  router.post('/complex', async ({}, body) => {
+  router.post('/complex', async (_, body) => {
     assertType(body.user, _ as User | null);
     return users[0];
   });
-  router.patch('/complex', async ({}, body) => {
+  router.patch('/complex', async (_, _body) => {
     return users[0];
   });
 
@@ -260,7 +260,7 @@ test('invalid registrations should be type errors', () => {
   router.get('/users', () => ({users}));
 
   // @ts-expect-error should be userId, not id
-  router.get('/users/:userId', async ({id}) => users[0]);
+  router.get('/users/:userId', async ({id: _}) => users[0]);
 });
 
 test('Throwing HTTPError should set status code', async () => {
@@ -361,7 +361,7 @@ test('router middleware', async () => {
     return {users: []};
   });
 
-  router.get('/users/:userId', async ({userId}) => {
+  router.get('/users/:userId', async ({userId: _}) => {
     return {
       id: '1',
       name: 'John',
@@ -370,7 +370,7 @@ test('router middleware', async () => {
   });
 
   const api = request(app);
-  let r = await api.get('/users/fred').expect(200);
+  const r = await api.get('/users/fred').expect(200);
   expect(r.body).toMatchObject({
     name: 'John',
     age: 34,

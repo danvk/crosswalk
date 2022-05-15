@@ -33,11 +33,12 @@ jobs:
       - name: Log Versions
         run: yarn tsc --version && yarn jest --version
 
-      # Runs a single command using the runners shell
-      - name: Prettier
+      - name: eslint
         run: yarn lint
 
-      # Runs a set of commands using the runners shell
+      - name: Prettier
+        run: yarn format:check
+
       - name: Test
         run: yarn test --coverage
 
