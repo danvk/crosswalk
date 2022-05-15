@@ -8,7 +8,7 @@ module.exports = {
 
       plugins: [
         '@typescript-eslint',
-        // 'eslint-plugin-expect-type',
+        'eslint-plugin-expect-type',
       ],
       parserOptions: {
         project: './tsconfig.json'
@@ -29,7 +29,7 @@ module.exports = {
         '@typescript-eslint/ban-types': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
-        // 'expect-type/expect': 'error',
+        'expect-type/expect': 'error',
       }
     },
   ],
