@@ -3,21 +3,24 @@ import {DeepReadonly} from '../utils';
 
 describe('utils', () => {
   it('should make deep readonly types', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     type ReadonlyArray = DeepReadonly<string[]>;
-    assertType(_ as ReadonlyArray, _ as readonly string[]);
+    //   ^? type ReadonlyArray = readonly string[]
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     type ReadonlyObj = DeepReadonly<{foo: string}>;
-    assertType(_ as ReadonlyObj, _ as {readonly foo: string});
+    //   ^? type ReadonlyObj = { readonly foo: string; }
 
-    const u = {
+    const user = {
       foo: {
         bar: ['baz', 'quux'],
       },
     };
-    assertType(u, _ as {foo: {bar: string[]}});
-    assertType(
-      _ as DeepReadonly<typeof u>,
-      _ as {readonly foo: {readonly bar: readonly string[]}},
-    );
+    user
+    // ^? const user: { foo: { bar: string[]; }; }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    type T = DeepReadonly<typeof user>;
+    //   ^? type T = {readonly foo: {readonly bar: readonly string[]; }; }
   });
 });
