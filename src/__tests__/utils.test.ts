@@ -1,4 +1,3 @@
-import {assert as assertType, _} from 'spec.ts';
 import {DeepReadonly} from '../utils';
 
 describe('utils', () => {
@@ -21,6 +20,6 @@ describe('utils', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     type T = DeepReadonly<typeof user>;
-    //   ^? type T = {readonly foo: {readonly bar: readonly string[]; }; }
+    //   ^? type T = { readonly foo: { readonly bar: readonly string[]; }; }
   });
 });
