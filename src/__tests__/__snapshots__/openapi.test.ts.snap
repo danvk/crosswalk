@@ -1,53 +1,53 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Open API integration should have the expected endpoints: open-api 1`] = `
-Object {
-  "definitions": Object {
-    "Partial<Pick<User,\\"name\\"|\\"age\\">>": Object {
+{
+  "definitions": {
+    "Partial<Pick<User,"name"|"age">>": {
       "additionalProperties": false,
-      "properties": Object {
-        "age": Object {
+      "properties": {
+        "age": {
           "type": "number",
         },
-        "name": Object {
+        "name": {
           "type": "string",
         },
       },
       "type": "object",
     },
-    "Pick<User,\\"name\\"|\\"age\\">": Object {
+    "Pick<User,"name"|"age">": {
       "additionalProperties": false,
-      "properties": Object {
-        "age": Object {
+      "properties": {
+        "age": {
           "type": "number",
         },
-        "name": Object {
+        "name": {
           "type": "string",
         },
       },
-      "required": Array [
+      "required": [
         "age",
         "name",
       ],
       "type": "object",
     },
-    "User": Object {
+    "User": {
       "additionalProperties": false,
-      "properties": Object {
-        "age": Object {
+      "properties": {
+        "age": {
           "type": "number",
         },
-        "id": Object {
+        "id": {
           "type": "string",
         },
-        "name": Object {
+        "name": {
           "type": "string",
         },
-        "suffix": Object {
+        "suffix": {
           "type": "string",
         },
       },
-      "required": Array [
+      "required": [
         "age",
         "id",
         "name",
@@ -55,32 +55,32 @@ Object {
       "type": "object",
     },
   },
-  "info": Object {
+  "info": {
     "description": "testing testing",
     "title": "Generated API",
     "version": "",
   },
-  "paths": Object {
-    "/complex": Object {
-      "patch": Object {
-        "parameters": Array [
-          Object {
+  "paths": {
+    "/complex": {
+      "patch": {
+        "parameters": [
+          {
             "in": "body",
             "name": "body",
-            "schema": Object {
+            "schema": {
               "additionalProperties": false,
-              "properties": Object {
-                "age": Object {
+              "properties": {
+                "age": {
                   "type": "number",
                 },
-                "id": Object {
+                "id": {
                   "type": "string",
                 },
-                "name": Object {
+                "name": {
                   "type": "string",
                 },
               },
-              "required": Array [
+              "required": [
                 "age",
                 "id",
                 "name",
@@ -89,44 +89,44 @@ Object {
             },
           },
         ],
-        "responses": Object {
-          "200": Object {
-            "schema": Object {
+        "responses": {
+          "200": {
+            "schema": {
               "$ref": "#/definitions/User",
             },
           },
         },
         "summary": undefined,
       },
-      "post": Object {
-        "parameters": Array [
-          Object {
+      "post": {
+        "parameters": [
+          {
             "in": "body",
             "name": "body",
-            "schema": Object {
+            "schema": {
               "additionalProperties": false,
-              "properties": Object {
-                "user": Object {
-                  "anyOf": Array [
-                    Object {
+              "properties": {
+                "user": {
+                  "anyOf": [
+                    {
                       "$ref": "#/definitions/User",
                     },
-                    Object {
+                    {
                       "type": "null",
                     },
                   ],
                 },
               },
-              "required": Array [
+              "required": [
                 "user",
               ],
               "type": "object",
             },
           },
         ],
-        "responses": Object {
-          "200": Object {
-            "schema": Object {
+        "responses": {
+          "200": {
+            "schema": {
               "$ref": "#/definitions/User",
             },
           },
@@ -134,18 +134,18 @@ Object {
         "summary": undefined,
       },
     },
-    "/random": Object {
-      "get": Object {
-        "responses": Object {
-          "200": Object {
-            "schema": Object {
+    "/random": {
+      "get": {
+        "responses": {
+          "200": {
+            "schema": {
               "additionalProperties": false,
-              "properties": Object {
-                "random": Object {
+              "properties": {
+                "random": {
                   "type": "number",
                 },
               },
-              "required": Array [
+              "required": [
                 "random",
               ],
               "type": "object",
@@ -155,37 +155,37 @@ Object {
         "summary": "Get a random number",
       },
     },
-    "/users": Object {
-      "get": Object {
-        "parameters": Array [
-          Object {
+    "/users": {
+      "get": {
+        "parameters": [
+          {
             "in": "query",
             "name": "minAge",
-            "schema": Object {
+            "schema": {
               "type": "number",
             },
           },
-          Object {
+          {
             "in": "query",
             "name": "nameIncludes",
-            "schema": Object {
+            "schema": {
               "type": "string",
             },
           },
         ],
-        "responses": Object {
-          "200": Object {
-            "schema": Object {
+        "responses": {
+          "200": {
+            "schema": {
               "additionalProperties": false,
-              "properties": Object {
-                "users": Object {
-                  "items": Object {
+              "properties": {
+                "users": {
+                  "items": {
                     "$ref": "#/definitions/User",
                   },
                   "type": "array",
                 },
               },
-              "required": Array [
+              "required": [
                 "users",
               ],
               "type": "object",
@@ -194,33 +194,33 @@ Object {
         },
         "summary": "Get the full list of users",
       },
-      "post": Object {
-        "parameters": Array [
-          Object {
+      "post": {
+        "parameters": [
+          {
             "in": "body",
             "name": "body",
-            "schema": Object {
-              "$ref": "#/definitions/Pick<User,\\"name\\"|\\"age\\">",
+            "schema": {
+              "$ref": "#/definitions/Pick<User,"name"|"age">",
             },
           },
-          Object {
+          {
             "in": "query",
             "name": "nameIncludes",
-            "schema": Object {
+            "schema": {
               "type": "string",
             },
           },
-          Object {
+          {
             "in": "query",
             "name": "suffix",
-            "schema": Object {
+            "schema": {
               "type": "string",
             },
           },
         ],
-        "responses": Object {
-          "200": Object {
-            "schema": Object {
+        "responses": {
+          "200": {
+            "schema": {
               "$ref": "#/definitions/User",
             },
           },
@@ -228,97 +228,97 @@ Object {
         "summary": "Create a new user",
       },
     },
-    "/users/{userId}": Object {
-      "delete": Object {
-        "parameters": Array [
-          Object {
+    "/users/{userId}": {
+      "delete": {
+        "parameters": [
+          {
             "in": "path",
             "name": "userId",
             "type": "string",
           },
-          Object {
+          {
             "in": "body",
             "name": "body",
-            "schema": Object {
-              "properties": Object {},
+            "schema": {
+              "properties": {},
               "type": "object",
             },
           },
         ],
-        "responses": Object {
-          "200": Object {
-            "schema": Object {
+        "responses": {
+          "200": {
+            "schema": {
               "$ref": "#/definitions/User",
             },
           },
         },
         "summary": undefined,
       },
-      "get": Object {
-        "parameters": Array [
-          Object {
+      "get": {
+        "parameters": [
+          {
             "in": "path",
             "name": "userId",
             "type": "string",
           },
-          Object {
+          {
             "in": "query",
             "name": "firstName",
-            "schema": Object {
+            "schema": {
               "type": "string",
             },
           },
         ],
-        "responses": Object {
-          "200": Object {
-            "schema": Object {
+        "responses": {
+          "200": {
+            "schema": {
               "$ref": "#/definitions/User",
             },
           },
         },
         "summary": undefined,
       },
-      "patch": Object {
-        "parameters": Array [
-          Object {
+      "patch": {
+        "parameters": [
+          {
             "in": "path",
             "name": "userId",
             "type": "string",
           },
-          Object {
+          {
             "in": "body",
             "name": "body",
-            "schema": Object {
-              "$ref": "#/definitions/Partial<Pick<User,\\"name\\"|\\"age\\">>",
+            "schema": {
+              "$ref": "#/definitions/Partial<Pick<User,"name"|"age">>",
             },
           },
         ],
-        "responses": Object {
-          "200": Object {
-            "schema": Object {
+        "responses": {
+          "200": {
+            "schema": {
               "$ref": "#/definitions/User",
             },
           },
         },
         "summary": "Edit an existing user",
       },
-      "put": Object {
-        "parameters": Array [
-          Object {
+      "put": {
+        "parameters": [
+          {
             "in": "path",
             "name": "userId",
             "type": "string",
           },
-          Object {
+          {
             "in": "body",
             "name": "body",
-            "schema": Object {
+            "schema": {
               "additionalProperties": false,
-              "properties": Object {
-                "age": Object {
+              "properties": {
+                "age": {
                   "type": "number",
                 },
-                "name": Object {
+                "name": {
                   "type": "string",
                 },
               },
@@ -326,9 +326,9 @@ Object {
             },
           },
         ],
-        "responses": Object {
-          "200": Object {
-            "schema": Object {
+        "responses": {
+          "200": {
+            "schema": {
               "$ref": "#/definitions/User",
             },
           },

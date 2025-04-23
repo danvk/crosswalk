@@ -47,11 +47,10 @@ export interface Options {
   schemes?: ('http' | 'https')[];
 }
 
-const isObject = <T>(x: T): x is object & T => !!x && typeof x === 'object';
 
 function extractPathParams(path: string): PathParam[] {
   const tokens = pathToRegexp.parse(path);
-  return tokens.filter(isObject).map(tok => ({
+  return tokens.tokens.filter(token => token.type === 'param').map(tok => ({
     name: '' + tok.name,
     in: 'path',
     type: 'string',
