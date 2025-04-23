@@ -24,7 +24,7 @@ type ParamVarArgs<Params, Query> = DeepReadonly<
       [params?: PlaceholderEmpty, query?: Query]
     : [
         params: [{}] extends Params ? PlaceholderEmpty : Params,
-        ...query: [{}] extends [Query] ? [query?: Query] : [query: Query]
+        ...query: [{}] extends [Query] ? [query?: Query] : [query: Query],
       ]
 >;
 
@@ -41,7 +41,7 @@ export function apiUrlMaker<API>(prefix = '') {
     Args extends [endpoint: keyof API, method?: AllMethods],
     Path extends Args[0] = Args[0],
     P extends API[Path] = API[Path],
-    AllMethods extends keyof P = keyof P
+    AllMethods extends keyof P = keyof P,
   >(
     ...[endpoint, _method]: Args
   ) => {
@@ -82,46 +82,42 @@ export function typedApi<API>(options?: Options) {
 
   const urlMaker = apiUrlMaker<API>(prefix);
 
-  const requestWithBody = <Method extends HTTPVerb>(method: Method) => <
-    Path extends PathsForMethod<API, Method>
-  >(
-    endpoint: Path,
-  ) => {
-    type Params = ExtractRouteParams<Path & string>;
-    type Endpoint = SafeKey<API[Path], Method>;
-    type Request = DeepReadonly<SafeKey<Endpoint, 'request'>>;
-    type Response = SafeKey<Endpoint, 'response'>;
-    type Query = SafeKey<Endpoint, 'query'>;
-    type Args = [
-      params: Params,
-      body: Request,
-      // No query params -> don't take a third argument
-      // All optional query params -> third argument is optional
-      // Mandatory query params -> third argument is required
-      ...queryArgs: [Query] extends [null]
-        ? []
-        : [{}] extends [Query]
-        ? [query?: Query]
-        : [query: Query]
-    ];
-    const makeUrl = urlMaker(endpoint, method as any);
-    return (...[params, body, query]: Args): Promise<Response> =>
-      fetcher((makeUrl as any)(params, query), method, body) as Promise<Response>;
-  };
+  const requestWithBody =
+    <Method extends HTTPVerb>(method: Method) =>
+    <Path extends PathsForMethod<API, Method>>(endpoint: Path) => {
+      type Params = ExtractRouteParams<Path & string>;
+      type Endpoint = SafeKey<API[Path], Method>;
+      type Request = DeepReadonly<SafeKey<Endpoint, 'request'>>;
+      type Response = SafeKey<Endpoint, 'response'>;
+      type Query = SafeKey<Endpoint, 'query'>;
+      type Args = [
+        params: Params,
+        body: Request,
+        // No query params -> don't take a third argument
+        // All optional query params -> third argument is optional
+        // Mandatory query params -> third argument is required
+        ...queryArgs: [Query] extends [null]
+          ? []
+          : [{}] extends [Query]
+          ? [query?: Query]
+          : [query: Query],
+      ];
+      const makeUrl = urlMaker(endpoint, method as any);
+      return (...[params, body, query]: Args): Promise<Response> =>
+        fetcher((makeUrl as any)(params, query), method, body) as Promise<Response>;
+    };
 
-  const requestWithoutBody = <Method extends HTTPVerb>(method: Method) => <
-    Path extends PathsForMethod<API, Method>
-  >(
-    endpoint: Path,
-  ) => {
-    type Params = ExtractRouteParams<Path & string>;
-    type Endpoint = SafeKey<API[Path], Method>;
-    type Response = SafeKey<Endpoint, 'response'>;
-    type Query = SafeKey<Endpoint, 'query'>;
+  const requestWithoutBody =
+    <Method extends HTTPVerb>(method: Method) =>
+    <Path extends PathsForMethod<API, Method>>(endpoint: Path) => {
+      type Params = ExtractRouteParams<Path & string>;
+      type Endpoint = SafeKey<API[Path], Method>;
+      type Response = SafeKey<Endpoint, 'response'>;
+      type Query = SafeKey<Endpoint, 'query'>;
 
-    return (...params: ParamVarArgs<Params, Query>): Promise<Response> =>
-      (requestWithBody(method)(endpoint) as any)(params?.[0], null as any, params?.[1]);
-  };
+      return (...params: ParamVarArgs<Params, Query>): Promise<Response> =>
+        (requestWithBody(method)(endpoint) as any)(params?.[0], null as any, params?.[1]);
+    };
 
   return {
     get: requestWithoutBody('get'),

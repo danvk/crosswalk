@@ -47,14 +47,15 @@ export interface Options {
   schemes?: ('http' | 'https')[];
 }
 
-
 function extractPathParams(path: string): PathParam[] {
   const tokens = pathToRegexp.parse(path);
-  return tokens.tokens.filter(token => token.type === 'param').map(tok => ({
-    name: '' + tok.name,
-    in: 'path',
-    type: 'string',
-  }));
+  return tokens.tokens
+    .filter(token => token.type === 'param')
+    .map(tok => ({
+      name: '' + tok.name,
+      in: 'path',
+      type: 'string',
+    }));
 }
 
 /** Convert /foo/:bar/:baz --> /foo/{bar}/{baz} */
