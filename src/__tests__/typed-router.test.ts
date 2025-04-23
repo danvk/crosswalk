@@ -83,8 +83,8 @@ test('TypedRouter', async () => {
       // ^? const params: { userId: string; }
       body;
       // ^? const body: {
-      //        name?: string | undefined;
-      //        age?: number | undefined;
+      //        name?: string;
+      //        age?: number;
       //    }
 
       const {userId} = pathParams;
