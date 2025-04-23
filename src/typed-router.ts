@@ -1,6 +1,6 @@
 /** Type-safe wrapper around Express router for REST APIs */
 
-import Ajv from 'ajv';
+import { ErrorObject, ValidateFunction, Ajv } from 'ajv';
 import express from 'express';
 
 import {Endpoint, HTTPVerb} from './api-spec';
@@ -78,9 +78,9 @@ export interface InvalidRequestHandlerArgs {
   /** The invalid payload object */
   payload: unknown;
   /** Ajv validator that found the problem. */
-  ajv: Ajv.Ajv;
+  ajv: Ajv;
   /** List of errors with the payload, as reported by Ajv. */
-  errors: Ajv.ErrorObject[];
+  errors: ErrorObject[];
 }
 
 export function defaultInvalidRequestHandler({
@@ -103,7 +103,7 @@ export interface TypedRouterOptions {
 export class TypedRouter<API> {
   router: express.Router;
   apiSchema?: any;
-  ajv?: Ajv.Ajv;
+  ajv?: Ajv;
   middlewareFns: express.RequestHandler[];
   registrations: {path: string; method: HTTPVerb}[];
   handleInvalidRequest: TypedRouterOptions['invalidRequestHandler'];
@@ -235,7 +235,7 @@ export class TypedRouter<API> {
     route: string,
     method: HTTPVerb,
     property: 'request' | 'query',
-  ): Ajv.ValidateFunction | null {
+  ): ValidateFunction | null {
     const {apiSchema} = this;
     if (!apiSchema) {
       return null;
