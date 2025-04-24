@@ -24,7 +24,7 @@ interface QueryParam {
 
 interface OpenAPIV3PathParam extends Omit<PathParam, 'type'> {
   required: boolean;
-  schema: { type: string };
+  schema: {type: string};
 }
 
 interface OpenAPIV3QueryParam extends QueryParam {
@@ -100,7 +100,7 @@ function extractOpenAPIV3PathParams(path: string): OpenAPIV3PathParam[] {
       name: '' + tok.name,
       in: 'path',
       required: true,
-      schema: { type: 'string' },
+      schema: {type: 'string'},
     }));
 }
 
@@ -262,7 +262,7 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
 
   // Create components structure for OpenAPI 3.0
   apiSpec.components = {
-    schemas
+    schemas,
   };
 
   // Remove endpoints, helpers
@@ -312,8 +312,8 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
             content: {
               'application/json': {
                 schema: transformedResponse,
-              }
-            }
+              },
+            },
           },
         },
       };
@@ -330,20 +330,21 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
 
         // Fix null types in anyOf (particularly in /complex.post endpoint)
         if (transformedRequest.properties?.user?.anyOf) {
-          transformedRequest.properties.user.anyOf = transformedRequest.properties.user.anyOf.map((item: any) => {
-            if (item.type === 'null') {
-              return { type: 'object', nullable: true };
-            }
-            return item;
-          });
+          transformedRequest.properties.user.anyOf =
+            transformedRequest.properties.user.anyOf.map((item: any) => {
+              if (item.type === 'null') {
+                return {type: 'object', nullable: true};
+              }
+              return item;
+            });
         }
 
         openApi.requestBody = {
           content: {
             'application/json': {
               schema: transformedRequest,
-            }
-          }
+            },
+          },
         };
       }
 
