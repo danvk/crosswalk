@@ -83,8 +83,8 @@ test('TypedRouter', async () => {
       // ^? const params: { userId: string; }
       body;
       // ^? const body: {
-      //        name?: string | undefined;
-      //        age?: number | undefined;
+      //        name?: string;
+      //        age?: number;
       //    }
 
       const {userId} = pathParams;
@@ -164,7 +164,7 @@ test('TypedRouter', async () => {
     .expect(400)
     .expect(response => {
       expect(response.body).toMatchObject({
-        error: `data should have required property 'name'`,
+        error: `data must have required property 'name'`,
       });
     });
 
@@ -175,7 +175,7 @@ test('TypedRouter', async () => {
     .expect(400)
     .expect(response => {
       expect(response.body).toMatchObject({
-        error: 'data.age should be number',
+        error: 'data/age must be number',
       });
     });
 
@@ -186,7 +186,7 @@ test('TypedRouter', async () => {
     .expect(400)
     .expect(response => {
       expect(response.body).toMatchObject({
-        error: 'data should NOT have additional properties',
+        error: 'data must NOT have additional properties',
       });
     });
 
@@ -197,7 +197,7 @@ test('TypedRouter', async () => {
     .expect(400)
     .expect(response => {
       expect(response.body.error).toMatchInlineSnapshot(
-        `"data.user should be object, data.user should be null, data.user should match some schema in anyOf"`,
+        `"data/user must be object, data/user must be null, data/user must match a schema in anyOf"`,
       );
     });
 
@@ -210,7 +210,7 @@ test('TypedRouter', async () => {
     .expect(400)
     .expect(response => {
       expect(response.body.error).toMatchInlineSnapshot(
-        `"data.user should have required property 'age', data.user should be null, data.user should match some schema in anyOf"`,
+        `"data/user must have required property 'age', data/user must be null, data/user must match a schema in anyOf"`,
       );
     });
 
@@ -233,7 +233,7 @@ test('TypedRouter', async () => {
     .expect(400)
     .expect(response => {
       expect(response.body.error).toMatchInlineSnapshot(
-        `"data should have required property 'age'"`,
+        `"data must have required property 'age'"`,
       );
     });
 
@@ -244,7 +244,7 @@ test('TypedRouter', async () => {
     .expect(400)
     .expect(response => {
       expect(response.body.error).toMatchInlineSnapshot(
-        `"data should have required property 'id'"`,
+        `"data must have required property 'id'"`,
       );
     });
 
@@ -310,10 +310,10 @@ test('Throwing HTTPError should set status code', async () => {
   });
 
   r = await api.get('/users?minAge=Fred').expect(400);
-  expect(r.body).toMatchObject({error: 'data.minAge should be number'});
+  expect(r.body).toMatchObject({error: 'data/minAge must be number'});
 
   r = await api.get('/users?maxAge=5').expect(400);
-  expect(r.body).toMatchObject({error: 'data should NOT have additional properties'});
+  expect(r.body).toMatchObject({error: 'data must NOT have additional properties'});
 
   r = await api.get('/users/throw-400').expect(400);
   expect(r.body).toMatchObject({error: 'Very bad request'});
@@ -339,7 +339,7 @@ test('Custom 400 handler', async () => {
     .send({age: '42'})
     .set('Accept', 'application/json')
     .expect(418);
-  expect(r.text).toMatchInlineSnapshot(`"Bad request, not a teapot: data should be object"`);
+  expect(r.text).toMatchInlineSnapshot(`"Bad request, not a teapot: data must be object"`);
 });
 
 test('router middleware', async () => {
@@ -386,8 +386,8 @@ test('router middleware', async () => {
     age: 34,
   });
   expect(lastCall).toMatchInlineSnapshot(`
-    Object {
-      "params": Object {
+    {
+      "params": {
         "userId": "fred",
       },
       "path": "/users/fred",
@@ -396,8 +396,8 @@ test('router middleware', async () => {
   `);
   await api.get('/users/badguy').expect(403);
   expect(lastCall).toMatchInlineSnapshot(`
-    Object {
-      "params": Object {
+    {
+      "params": {
         "userId": "badguy",
       },
       "path": "/users/badguy",
@@ -408,8 +408,8 @@ test('router middleware', async () => {
   const {body} = await api.get('/users').expect(200);
   expect(body).toEqual({users: []});
   expect(lastCall).toMatchInlineSnapshot(`
-    Object {
-      "params": Object {},
+    {
+      "params": {},
       "path": "/users",
       "route": "/users",
     }

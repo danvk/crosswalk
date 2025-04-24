@@ -1,6 +1,6 @@
 /** Type-safe wrapper around Express router for REST APIs */
 
-import Ajv from 'ajv';
+import {ErrorObject, ValidateFunction, Ajv} from 'ajv';
 import express from 'express';
 
 import {Endpoint, HTTPVerb} from './api-spec';
@@ -33,42 +33,40 @@ type ExpressRequest<Path extends string, Spec> = unknown &
 
 type ExpressResponse<Spec> = unknown & express.Response<SafeKey<Spec, 'response'>>;
 
-const registerWithBody = <Method extends HTTPVerb, API>(
-  method: Method,
-  router: TypedRouter<API>,
-) => <
-  Path extends PathsForMethod<API, Method>,
-  Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>
->(
-  route: Path,
-  handler: (
-    params: ExtractRouteParams<Path>,
-    body: SafeKey<Spec, 'request'>,
-    request: ExpressRequest<Path, Spec>,
-    response: ExpressResponse<Spec>,
-  ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
-) => {
-  router.registerEndpoint(method, route as any, handler as any);
-};
+const registerWithBody =
+  <Method extends HTTPVerb, API>(method: Method, router: TypedRouter<API>) =>
+  <
+    Path extends PathsForMethod<API, Method>,
+    Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>,
+  >(
+    route: Path,
+    handler: (
+      params: ExtractRouteParams<Path>,
+      body: SafeKey<Spec, 'request'>,
+      request: ExpressRequest<Path, Spec>,
+      response: ExpressResponse<Spec>,
+    ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
+  ) => {
+    router.registerEndpoint(method, route as any, handler as any);
+  };
 
-const registerWithoutBody = <Method extends HTTPVerb, API>(
-  method: Method,
-  router: TypedRouter<API>,
-) => <
-  Path extends PathsForMethod<API, Method>,
-  Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>
->(
-  route: Path,
-  handler: (
-    params: ExtractRouteParams<Path>,
-    request: ExpressRequest<Path, Spec>,
-    response: ExpressResponse<Spec>,
-  ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
-) => {
-  router.registerEndpoint(method, route as any, (params, _, request, response) =>
-    handler(params as any, request as any, response as any),
-  );
-};
+const registerWithoutBody =
+  <Method extends HTTPVerb, API>(method: Method, router: TypedRouter<API>) =>
+  <
+    Path extends PathsForMethod<API, Method>,
+    Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>,
+  >(
+    route: Path,
+    handler: (
+      params: ExtractRouteParams<Path>,
+      request: ExpressRequest<Path, Spec>,
+      response: ExpressResponse<Spec>,
+    ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
+  ) => {
+    router.registerEndpoint(method, route as any, (params, _, request, response) =>
+      handler(params as any, request as any, response as any),
+    );
+  };
 
 export interface InvalidRequestHandlerArgs {
   /** Which part of the request was invalid (request body or query parameters)? */
@@ -78,9 +76,9 @@ export interface InvalidRequestHandlerArgs {
   /** The invalid payload object */
   payload: unknown;
   /** Ajv validator that found the problem. */
-  ajv: Ajv.Ajv;
+  ajv: Ajv;
   /** List of errors with the payload, as reported by Ajv. */
-  errors: Ajv.ErrorObject[];
+  errors: ErrorObject[];
 }
 
 export function defaultInvalidRequestHandler({
@@ -103,7 +101,7 @@ export interface TypedRouterOptions {
 export class TypedRouter<API> {
   router: express.Router;
   apiSchema?: any;
-  ajv?: Ajv.Ajv;
+  ajv?: Ajv;
   middlewareFns: express.RequestHandler[];
   registrations: {path: string; method: HTTPVerb}[];
   handleInvalidRequest: TypedRouterOptions['invalidRequestHandler'];
@@ -132,7 +130,7 @@ export class TypedRouter<API> {
   registerEndpoint<
     Method extends HTTPVerb,
     Path extends PathsForMethod<API, Method>,
-    Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>
+    Spec extends SafeKey<API[Path], Method> = SafeKey<API[Path], Method>,
   >(
     method: Method,
     route: Path,
@@ -235,7 +233,7 @@ export class TypedRouter<API> {
     route: string,
     method: HTTPVerb,
     property: 'request' | 'query',
-  ): Ajv.ValidateFunction | null {
+  ): ValidateFunction | null {
     const {apiSchema} = this;
     if (!apiSchema) {
       return null;
