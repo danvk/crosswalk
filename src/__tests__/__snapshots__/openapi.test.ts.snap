@@ -490,6 +490,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
@@ -525,6 +526,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
@@ -537,6 +539,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
       "get": {
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "additionalProperties": false,
               "properties": {
@@ -574,6 +577,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "additionalProperties": false,
               "properties": {
@@ -619,6 +623,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
@@ -646,6 +651,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
@@ -670,6 +676,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
@@ -694,6 +701,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
@@ -727,6 +735,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
