@@ -1,5 +1,404 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Open API integration should have the expected endpoints for v3: open-api-v3 1`] = `
+{
+  "components": {
+    "schemas": {
+      "Partial_Pick_User__name___age___": {
+        "additionalProperties": false,
+        "properties": {
+          "age": {
+            "type": "number",
+          },
+          "name": {
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+      "Pick_User__name___age__": {
+        "additionalProperties": false,
+        "properties": {
+          "age": {
+            "type": "number",
+          },
+          "name": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "age",
+          "name",
+        ],
+        "type": "object",
+      },
+      "User": {
+        "additionalProperties": false,
+        "properties": {
+          "age": {
+            "type": "number",
+          },
+          "id": {
+            "type": "string",
+          },
+          "name": {
+            "type": "string",
+          },
+          "suffix": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "age",
+          "id",
+          "name",
+        ],
+        "type": "object",
+      },
+    },
+  },
+  "info": {
+    "description": "testing testing",
+    "title": "Generated API",
+    "version": "",
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/complex": {
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "age": {
+                    "type": "number",
+                  },
+                  "id": {
+                    "type": "string",
+                  },
+                  "name": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "age",
+                  "id",
+                  "name",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+        },
+        "summary": undefined,
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "user": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/User",
+                      },
+                      {
+                        "nullable": true,
+                        "type": "object",
+                      },
+                    ],
+                  },
+                },
+                "required": [
+                  "user",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+        },
+        "summary": undefined,
+      },
+    },
+    "/random": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "random": {
+                      "type": "number",
+                    },
+                  },
+                  "required": [
+                    "random",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+        },
+        "summary": "Get a random number",
+      },
+    },
+    "/users": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "minAge",
+            "schema": {
+              "type": "number",
+            },
+          },
+          {
+            "in": "query",
+            "name": "nameIncludes",
+            "schema": {
+              "type": "string",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "users": {
+                      "items": {
+                        "$ref": "#/components/schemas/User",
+                      },
+                      "type": "array",
+                    },
+                  },
+                  "required": [
+                    "users",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+        },
+        "summary": "Get the full list of users",
+      },
+      "post": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "nameIncludes",
+            "schema": {
+              "type": "string",
+            },
+          },
+          {
+            "in": "query",
+            "name": "suffix",
+            "schema": {
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pick_User__name___age__",
+              },
+            },
+          },
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+        },
+        "summary": "Create a new user",
+      },
+    },
+    "/users/{userId}": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+        },
+        "summary": undefined,
+      },
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string",
+            },
+          },
+          {
+            "in": "query",
+            "name": "firstName",
+            "schema": {
+              "type": "string",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+        },
+        "summary": undefined,
+      },
+      "patch": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Partial_Pick_User__name___age___",
+              },
+            },
+          },
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+        },
+        "summary": "Edit an existing user",
+      },
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "age": {
+                    "type": "number",
+                  },
+                  "name": {
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+        },
+        "summary": undefined,
+      },
+    },
+  },
+}
+`;
+
 exports[`Open API integration should have the expected endpoints: open-api 1`] = `
 {
   "definitions": {
@@ -91,6 +490,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
@@ -126,6 +526,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
@@ -138,6 +539,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
       "get": {
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "additionalProperties": false,
               "properties": {
@@ -175,6 +577,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "additionalProperties": false,
               "properties": {
@@ -220,6 +623,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
@@ -247,6 +651,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
@@ -271,6 +676,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
@@ -295,6 +701,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
@@ -328,6 +735,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         ],
         "responses": {
           "200": {
+            "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
             },
