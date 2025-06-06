@@ -109,66 +109,127 @@ function expressPathToOpenApiPath(path: string): string {
   return path.replace(/:([^/]+)/g, '{$1}');
 }
 
-const DEFINITION = '#/definitions/';
-const SCHEMA = '#/components/schemas/';
+const DEFINITION = '#/definitions/' as const;
+const SCHEMA = '#/components/schemas/' as const;
 
-export function followApiRefV2(spec: any, schema: Schema): [string, unknown] {
-  const ref = schema.$ref;
-  if (!ref.startsWith(DEFINITION)) {
-    throw new Error(`Confused by ${schema} / ${ref}`);
+/** Helper to recursively resolve schema references. Return the names of all nested references and the resolved schema. */
+function resolveSchemaRef(
+  spec: any,
+  schema: Schema,
+  prefix: typeof DEFINITION | typeof SCHEMA,
+): [string[], unknown] {
+  if (!schema.$ref) {
+    throw new Error(`Expected schema with $ref, got ${JSON.stringify(schema)}`);
   }
 
-  const name = ref.slice(DEFINITION.length);
-  const def = spec.definitions[name];
+  const ref = schema.$ref;
+  if (!ref.startsWith(prefix)) {
+    throw new Error(`Expected reference starting with ${prefix}, got ${ref}`);
+  }
+
+  const name = ref.slice(prefix.length);
+  const def = prefix === DEFINITION ? spec.definitions[name] : spec.components?.schemas[name];
+
   if (!def) {
     throw new Error(`Unable to find definition for ${name}`);
   }
-  return [name, def];
+
+  if (def.$ref) {
+    const [nestedNames, resolvedDef] = resolveSchemaRef(spec, def, prefix);
+    return [[name, ...nestedNames], resolvedDef];
+  }
+
+  return [[name], def];
 }
 
-export function followApiRefV3(spec: any, schema: Schema): [string, unknown] {
-  const ref = schema.$ref;
-  if (!ref.startsWith(SCHEMA)) {
-    throw new Error(`Confused by ${schema} / ${ref}`);
-  }
+export function followApiRefV2(spec: any, schema: Schema): [string[], unknown] {
+  return resolveSchemaRef(spec, schema, DEFINITION);
+}
 
-  const name = ref.slice(SCHEMA.length);
-  const def = spec.components.schemas[name];
-  if (!def) {
-    throw new Error(`Unable to find definition for ${name}`);
+export function followApiRefV3(spec: any, schema: Schema): [string[], unknown] {
+  return resolveSchemaRef(spec, schema, SCHEMA);
+}
+
+function handleNullTypes(result: any): void {
+  if (
+    result.anyOf &&
+    Array.isArray(result.anyOf) &&
+    result.anyOf.some((item: any) => item.type === 'null')
+  ) {
+    const nonNullTypes = result.anyOf.filter((item: any) => item.type !== 'null');
+    if (nonNullTypes.length) {
+      if (nonNullTypes.length === 1) {
+        Object.assign(result, nonNullTypes[0]);
+        delete result.anyOf;
+      } else {
+        result.anyOf = nonNullTypes;
+      }
+      result.nullable = true;
+    }
   }
-  return [name, def];
+  if (Array.isArray(result.type) && result.type.some((item: any) => item === 'null')) {
+    const nonNullTypes = result.type.filter((item: any) => item !== 'null');
+    if (nonNullTypes) {
+      result.type = nonNullTypes.length === 1 ? nonNullTypes[0] : nonNullTypes;
+      result.nullable = true;
+    }
+  }
+  if (Array.isArray(result.enum) && result.enum.some((item: any) => item === null)) {
+    const nonNullEnums = result.enum.filter((item: any) => item !== null);
+    result.enum = nonNullEnums;
+  }
 }
 
 /**
- * Transforms JSON Schema references to OpenAPI 3.0 format.
- *
- * The input JSON Schema (and OpenAPI 2.0) uses references in the format:
- *   #/definitions/ModelName
- *
- * OpenAPI 3.0 changed this reference format to:
- *   #/components/schemas/ModelName
- *
- * This function recursively traverses an object structure and updates all $ref
- * properties to use the OpenAPI 3.0 format.
- *
- * @param obj The object containing references to transform
- * @returns The object with updated references
+ * Recursively transforms all references in an object from OpenAPI 2.0 to 3.0 format
+ * and sanitizes component names in the process.
  */
-function transformReferencesToV3(obj: any): any {
-  if (!obj) return obj;
-
-  if (typeof obj === 'object') {
-    if (obj.$ref && typeof obj.$ref === 'string') {
-      obj.$ref = obj.$ref.replace(DEFINITION, SCHEMA);
-    }
-
-    Object.keys(obj).forEach(key => {
-      obj[key] = transformReferencesToV3(obj[key]);
-    });
+function transformToOpenApiV3(obj: any): any {
+  if (!obj || typeof obj !== 'object') {
+    return obj;
   }
 
-  return obj;
+  // Handle arrays
+  if (Array.isArray(obj)) {
+    return obj.map(item => transformToOpenApiV3(item));
+  }
+
+  // Handle objects
+  const result = {...obj};
+
+  if (result.properties) {
+    for (const [key, value] of Object.entries(obj.properties)) {
+      result.properties[key] = transformToOpenApiV3(value);
+    }
+  }
+
+  // Transform $ref if it exists
+  if (result.$ref && typeof result.$ref === 'string') {
+    if (result.$ref.startsWith(DEFINITION)) {
+      const refName = result.$ref.slice(DEFINITION.length);
+      const sanitizedName = sanitizeComponentName(refName);
+      result.$ref = `${SCHEMA}${sanitizedName}`;
+    }
+  }
+  // Handle anyOf with null type (convert to nullable)
+  handleNullTypes(result);
+
+  if (result.definitions) {
+    const componentSchemas: Record<string, any> = {};
+    for (const [key, value] of Object.entries(result.definitions)) {
+      const sanitizedKey = sanitizeComponentName(key);
+      componentSchemas[sanitizedKey] = transformToOpenApiV3(value);
+    }
+    result.components = {schemas: componentSchemas};
+    delete result.definitions;
+  }
+
+  // Recursively transform all properties
+  for (const [key, value] of Object.entries(result)) {
+    result[key] = transformToOpenApiV3(value);
+  }
+
+  return result;
 }
 
 /**
@@ -187,14 +248,14 @@ function apiSpecToOpenApi2(apiSpec: any, options?: Options): any {
   // Remove endpoints, helpers
   const paths: Record<string, any> = {};
 
-  const toDelete = new Set<string>();
+  const typesToDelete = new Set<string>();
 
   for (const endpoint of endpoints) {
     const openApiPath = expressPathToOpenApiPath(endpoint);
     paths[openApiPath] = {};
     const byVerb = endpointSpecs[endpoint].properties;
     for (const [verb, ref] of Object.entries(byVerb)) {
-      const [name, schema] = followApiRefV2(apiSpec, ref as Schema);
+      const [names, schema] = followApiRefV2(apiSpec, ref as Schema);
       const {request, response, query} = (schema as any).properties;
 
       const parameters: Param[] = extractPathParams(endpoint);
@@ -227,11 +288,13 @@ function apiSpecToOpenApi2(apiSpec: any, options?: Options): any {
         },
       };
       paths[openApiPath][verb] = swagger;
-      toDelete.add(name);
+      for (const name of names) {
+        typesToDelete.add(name);
+      }
     }
   }
 
-  toDelete.forEach(name => {
+  typesToDelete.forEach(name => {
     delete definitions[name];
   });
 
@@ -251,23 +314,12 @@ function apiSpecToOpenApi2(apiSpec: any, options?: Options): any {
 /** Convert an API spec to OpenAPI 3.0 */
 function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
   apiSpec = JSON.parse(JSON.stringify(apiSpec)); // defensive copy
-  const {required: endpoints, properties: endpointSpecs, definitions} = apiSpec;
-
-  // Create sanitized component schemas
-  const schemas: Record<string, any> = {};
-  for (const [key, value] of Object.entries(definitions)) {
-    const sanitizedKey = sanitizeComponentName(key);
-    schemas[sanitizedKey] = value;
-  }
-
-  // Create components structure for OpenAPI 3.0
-  apiSpec.components = {
-    schemas,
-  };
+  const transformedSpec = transformToOpenApiV3(apiSpec);
+  const {required: endpoints, properties: endpointSpecs} = transformedSpec;
 
   // Remove endpoints, helpers
   const paths: Record<string, any> = {};
-  const toDelete = new Set<string>();
+  const typesToDelete = new Set<string>();
 
   for (const endpoint of endpoints) {
     const openApiPath = expressPathToOpenApiPath(endpoint);
@@ -275,11 +327,7 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
     const byVerb = endpointSpecs[endpoint].properties;
 
     for (const [verb, ref] of Object.entries(byVerb)) {
-      // Skip requestBody for DELETE operations
-      const hasRequestBody = verb.toLowerCase() !== 'delete';
-
-      // First get the reference in its original format
-      const [name, schema] = followApiRefV2(apiSpec, ref as Schema);
+      const [names, schema] = followApiRefV3(transformedSpec, ref as Schema);
       const {request, response, query} = (schema as any).properties;
 
       // Create updated parameters using OpenAPI 3.0 format
@@ -295,14 +343,6 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
         }
       }
 
-      // Transform the response schema to sanitized names
-      const transformedResponse = JSON.parse(JSON.stringify(response));
-      if (transformedResponse.$ref) {
-        const refName = transformedResponse.$ref.split('/').pop();
-        const sanitizedName = sanitizeComponentName(refName);
-        transformedResponse.$ref = `#/components/schemas/${sanitizedName}`;
-      }
-
       const openApi: OpenAPIV3Endpoint = {
         summary: (ref as any).description,
         ...(parameters.length && {parameters}),
@@ -311,7 +351,7 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
             description: 'Successful response',
             content: {
               'application/json': {
-                schema: transformedResponse,
+                schema: response,
               },
             },
           },
@@ -319,46 +359,26 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
       };
 
       // Add requestBody for 3.0 if request exists and it's not a DELETE operation
-      if (request?.type !== 'null' && hasRequestBody) {
-        // Transform the request schema to sanitized names
-        const transformedRequest = JSON.parse(JSON.stringify(request));
-        if (transformedRequest.$ref) {
-          const refName = transformedRequest.$ref.split('/').pop();
-          const sanitizedName = sanitizeComponentName(refName);
-          transformedRequest.$ref = `#/components/schemas/${sanitizedName}`;
-        }
-
-        // Fix null types in anyOf (particularly in /complex.post endpoint)
-        if (transformedRequest.properties?.user?.anyOf) {
-          transformedRequest.properties.user.anyOf =
-            transformedRequest.properties.user.anyOf.map((item: any) => {
-              if (item.type === 'null') {
-                return {type: 'object', nullable: true};
-              }
-              return item;
-            });
-        }
-
+      if (request?.type !== 'null' && verb.toLowerCase() !== 'delete') {
         openApi.requestBody = {
           content: {
             'application/json': {
-              schema: transformedRequest,
+              schema: request,
             },
           },
         };
       }
 
       paths[openApiPath][verb] = openApi;
-      toDelete.add(name);
+      for (const name of names) {
+        typesToDelete.add(sanitizeComponentName(name));
+      }
     }
   }
 
-  toDelete.forEach(name => {
-    delete apiSpec.components.schemas[sanitizeComponentName(name)];
+  typesToDelete.forEach(name => {
+    delete transformedSpec.components.schemas[name];
   });
-
-  // Transform all references in the paths to OpenAPI 3.0 format
-  const transformedPaths = transformReferencesToV3(paths);
 
   delete options?.version;
 
@@ -369,10 +389,8 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
       description: 'testing testing',
       version: '',
     },
-    paths: transformedPaths,
-    components: {
-      schemas: apiSpec.components.schemas,
-    },
+    paths,
+    components: transformedSpec.components,
     ...options,
   };
 }

@@ -2,9 +2,8 @@ import {apiSpecToOpenApi} from '../openapi';
 import apiSchemaJson from './api.schema.json';
 
 describe('Open API integration', () => {
-  const openApi = apiSpecToOpenApi(apiSchemaJson, {version: '2.0'});
-
   it('should have the expected endpoints', () => {
+    const openApi = apiSpecToOpenApi(apiSchemaJson, {version: '2.0'});
     expect(openApi).toMatchSnapshot('open-api');
   });
 
@@ -13,9 +12,8 @@ describe('Open API integration', () => {
 });
 
 describe('Open API V3', () => {
-  const openApi = apiSpecToOpenApi(apiSchemaJson, {version: '3.0'});
-
   it('should have the expected endpoints', () => {
+    const openApi = apiSpecToOpenApi(apiSchemaJson, {version: '3.0'});
     expect(openApi).toMatchSnapshot('open-api-v3');
   });
 

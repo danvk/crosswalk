@@ -17,11 +17,33 @@ test('TypedRouter', async () => {
       id: 'fred',
       name: 'Fred',
       age: 42,
+      phoneNumbers: [],
+      permanentAddress: {
+        street: '123 Main St',
+        city: 'Anytown',
+        state: 'CA',
+        zip: '12345',
+        location: {
+          latitude: 37.774929,
+          longitude: -122.419416,
+        },
+      },
     },
     {
       id: 'wilma',
       name: 'Wilma',
       age: 41,
+      phoneNumbers: [],
+      permanentAddress: {
+        street: '123 Main St',
+        city: 'Anytown',
+        state: 'CA',
+        zip: '12345',
+        location: {
+          latitude: 37.774929,
+          longitude: -122.419416,
+        },
+      },
     },
   ];
 
@@ -85,6 +107,8 @@ test('TypedRouter', async () => {
       // ^? const body: {
       //        name?: string;
       //        age?: number;
+      //        phoneNumbers?: PhoneNumber[];
+      //        permanentAddress?: Address;
       //    }
 
       const {userId} = pathParams;
@@ -116,6 +140,10 @@ test('TypedRouter', async () => {
     return users[0];
   });
 
+  router.get('/search', async (_, {query: {numResults}}) => {
+    return {users: users.slice(0, numResults)};
+  });
+
   const api = request(app);
 
   const responseAllUsers = await api.get('/users').expect(200);
@@ -128,7 +156,22 @@ test('TypedRouter', async () => {
   expect(responseMinAge.body).toEqual({users: [users[0]]});
 
   const fredResponse = await api.get('/users/fred').expect(200);
-  expect(fredResponse.body).toEqual({id: 'fred', name: 'Fred', age: 42});
+  expect(fredResponse.body).toEqual({
+    id: 'fred',
+    name: 'Fred',
+    age: 42,
+    phoneNumbers: [],
+    permanentAddress: {
+      street: '123 Main St',
+      city: 'Anytown',
+      state: 'CA',
+      zip: '12345',
+      location: {
+        latitude: 37.774929,
+        longitude: -122.419416,
+      },
+    },
+  });
 
   await api.get('/users/pebbles').expect(404, {error: 'No such user pebbles'});
 
@@ -139,17 +182,57 @@ test('TypedRouter', async () => {
     .send({age: 42})
     .set('Accept', 'application/json')
     .expect(200);
-  expect(responseNewWilma.body).toEqual({id: 'wilma', name: 'Wilma', age: 42});
+  expect(responseNewWilma.body).toEqual({
+    id: 'wilma',
+    name: 'Wilma',
+    age: 42,
+    phoneNumbers: [],
+    permanentAddress: {
+      street: '123 Main St',
+      city: 'Anytown',
+      state: 'CA',
+      zip: '12345',
+      location: {
+        latitude: 37.774929,
+        longitude: -122.419416,
+      },
+    },
+  });
 
   const pebblesResponse = await api
     .post('/users')
     .set('Accept', 'application/json')
-    .send({name: 'Pebbles', age: 2})
+    .send({
+      name: 'Pebbles',
+      age: 2,
+      phoneNumbers: [],
+      permanentAddress: {
+        street: '123 Main St',
+        city: 'Anytown',
+        state: 'CA',
+        zip: '12345',
+        location: {
+          latitude: 37.774929,
+          longitude: -122.419416,
+        },
+      },
+    })
     .expect(201);
   expect(pebblesResponse.body).toEqual({
     id: 'id',
     name: 'Pebbles',
     age: 2,
+    phoneNumbers: [],
+    permanentAddress: {
+      street: '123 Main St',
+      city: 'Anytown',
+      state: 'CA',
+      zip: '12345',
+      location: {
+        latitude: 37.774929,
+        longitude: -122.419416,
+      },
+    },
   });
 
   await api.get('/users/id').expect(200);
@@ -159,7 +242,20 @@ test('TypedRouter', async () => {
   // Request validation tests
   await api
     .post('/users')
-    .send({age: 42})
+    .send({
+      age: 42,
+      phoneNumbers: [],
+      permanentAddress: {
+        street: '123 Main St',
+        city: 'Anytown',
+        state: 'CA',
+        zip: '12345',
+        location: {
+          latitude: 37.774929,
+          longitude: -122.419416,
+        },
+      },
+    })
     .set('Accept', 'application/json')
     .expect(400)
     .expect(response => {
@@ -216,13 +312,45 @@ test('TypedRouter', async () => {
 
   await api
     .post('/complex')
-    .send({user: {id: 'id', name: 'name', age: 42}})
+    .send({
+      user: {
+        id: 'id',
+        name: 'name',
+        age: 42,
+        phoneNumbers: [],
+        permanentAddress: {
+          street: '123 Main St',
+          city: 'Anytown',
+          state: 'CA',
+          zip: '12345',
+          location: {
+            latitude: 37.774929,
+            longitude: -122.419416,
+          },
+        },
+      },
+    })
     .set('Accept', 'application/json')
     .expect(200);
 
   await api
     .patch('/complex')
-    .send({id: 'id', name: 'name', age: 42})
+    .send({
+      id: 'id',
+      name: 'name',
+      age: 42,
+      phoneNumbers: [],
+      permanentAddress: {
+        street: '123 Main St',
+        city: 'Anytown',
+        state: 'CA',
+        zip: '12345',
+        location: {
+          latitude: 37.774929,
+          longitude: -122.419416,
+        },
+      },
+    })
     .set('Accept', 'application/json')
     .expect(200);
 
@@ -299,6 +427,17 @@ test('Throwing HTTPError should set status code', async () => {
       id: '1',
       name: 'John',
       age: 34,
+      phoneNumbers: [],
+      permanentAddress: {
+        street: '123 Main St',
+        city: 'Anytown',
+        state: 'CA',
+        zip: '12345',
+        location: {
+          latitude: 37.774929,
+          longitude: -122.419416,
+        },
+      },
     };
   });
 
@@ -376,6 +515,17 @@ test('router middleware', async () => {
       id: '1',
       name: 'John',
       age: 34,
+      phoneNumbers: [],
+      permanentAddress: {
+        street: '123 Main St',
+        city: 'Anytown',
+        state: 'CA',
+        zip: '12345',
+        location: {
+          latitude: 37.774929,
+          longitude: -122.419416,
+        },
+      },
     };
   });
 

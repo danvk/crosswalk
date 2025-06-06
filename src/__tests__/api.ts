@@ -5,9 +5,32 @@ export interface User {
   name: string;
   suffix?: string;
   age: number;
+  phoneNumbers: PhoneNumber[];
+  permanentAddress: Address;
 }
 
-export type CreateUserRequest = Pick<User, 'name' | 'age'>;
+export type CreateUserRequest = Pick<
+  User,
+  'name' | 'age' | 'phoneNumbers' | 'permanentAddress'
+>;
+
+export interface PhoneNumber {
+  number: string;
+  type: 'home' | 'work' | 'mobile' | null;
+}
+
+export interface Address {
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  location: Location;
+}
+
+export interface Location {
+  latitude: number;
+  longitude: number;
+}
 
 export interface API {
   '/random': {
@@ -24,7 +47,10 @@ export interface API {
     get: GetEndpoint<User, {firstName?: string}>;
     /** Edit an existing user */
     patch: Endpoint<Partial<CreateUserRequest>, User>;
-    put: Endpoint<{name?: string; age?: number}, User>;
+    put: Endpoint<
+      {name?: string; age?: number; phoneNumbers?: PhoneNumber[]; permanentAddress?: Address},
+      User
+    >;
     delete: Endpoint<{}, User>;
   };
   '/complex': {
