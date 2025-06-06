@@ -4,31 +4,96 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
 {
   "components": {
     "schemas": {
-      "Partial_Pick_User__name___age___": {
+      "Address": {
         "additionalProperties": false,
         "properties": {
-          "age": {
-            "type": "number",
-          },
-          "name": {
+          "city": {
             "type": "string",
           },
-        },
-        "type": "object",
-      },
-      "Pick_User__name___age__": {
-        "additionalProperties": false,
-        "properties": {
-          "age": {
-            "type": "number",
+          "location": {
+            "$ref": "#/components/schemas/Location",
           },
-          "name": {
+          "state": {
+            "type": "string",
+          },
+          "street": {
+            "type": "string",
+          },
+          "zip": {
             "type": "string",
           },
         },
         "required": [
-          "age",
+          "street",
+          "city",
+          "state",
+          "zip",
+          "location",
+        ],
+        "type": "object",
+      },
+      "CreateUserRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "age": {
+            "type": "number",
+          },
+          "name": {
+            "type": "string",
+          },
+          "permanentAddress": {
+            "$ref": "#/components/schemas/Address",
+          },
+          "phoneNumbers": {
+            "items": {
+              "$ref": "#/components/schemas/PhoneNumber",
+            },
+            "type": "array",
+          },
+        },
+        "required": [
           "name",
+          "age",
+          "phoneNumbers",
+          "permanentAddress",
+        ],
+        "type": "object",
+      },
+      "Location": {
+        "additionalProperties": false,
+        "properties": {
+          "latitude": {
+            "type": "number",
+          },
+          "longitude": {
+            "type": "number",
+          },
+        },
+        "required": [
+          "latitude",
+          "longitude",
+        ],
+        "type": "object",
+      },
+      "PhoneNumber": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "type": "string",
+          },
+          "type": {
+            "enum": [
+              "home",
+              "work",
+              "mobile",
+            ],
+            "nullable": true,
+            "type": "string",
+          },
+        },
+        "required": [
+          "number",
+          "type",
         ],
         "type": "object",
       },
@@ -44,14 +109,25 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
           "name": {
             "type": "string",
           },
+          "permanentAddress": {
+            "$ref": "#/components/schemas/Address",
+          },
+          "phoneNumbers": {
+            "items": {
+              "$ref": "#/components/schemas/PhoneNumber",
+            },
+            "type": "array",
+          },
           "suffix": {
             "type": "string",
           },
         },
         "required": [
-          "age",
           "id",
           "name",
+          "age",
+          "phoneNumbers",
+          "permanentAddress",
         ],
         "type": "object",
       },
@@ -81,11 +157,22 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
                   "name": {
                     "type": "string",
                   },
+                  "permanentAddress": {
+                    "$ref": "#/components/schemas/Address",
+                  },
+                  "phoneNumbers": {
+                    "items": {
+                      "$ref": "#/components/schemas/PhoneNumber",
+                    },
+                    "type": "array",
+                  },
                 },
                 "required": [
                   "age",
                   "id",
                   "name",
+                  "permanentAddress",
+                  "phoneNumbers",
                 ],
                 "type": "object",
               },
@@ -114,15 +201,8 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
                 "additionalProperties": false,
                 "properties": {
                   "user": {
-                    "anyOf": [
-                      {
-                        "$ref": "#/components/schemas/User",
-                      },
-                      {
-                        "nullable": true,
-                        "type": "object",
-                      },
-                    ],
+                    "$ref": "#/components/schemas/User",
+                    "nullable": true,
                   },
                 },
                 "required": [
@@ -172,6 +252,51 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
           },
         },
         "summary": "Get a random number",
+      },
+    },
+    "/search": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "numResults",
+            "schema": {
+              "type": "number",
+            },
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "users": {
+                      "items": {
+                        "$ref": "#/components/schemas/User",
+                      },
+                      "type": "array",
+                    },
+                  },
+                  "required": [
+                    "users",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+        },
+        "summary": undefined,
       },
     },
     "/users": {
@@ -239,7 +364,7 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Pick_User__name___age__",
+                "$ref": "#/components/schemas/CreateUserRequest",
               },
             },
           },
@@ -332,7 +457,25 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Partial_Pick_User__name___age___",
+                "additionalProperties": false,
+                "properties": {
+                  "age": {
+                    "type": "number",
+                  },
+                  "name": {
+                    "type": "string",
+                  },
+                  "permanentAddress": {
+                    "$ref": "#/components/schemas/Address",
+                  },
+                  "phoneNumbers": {
+                    "items": {
+                      "$ref": "#/components/schemas/PhoneNumber",
+                    },
+                    "type": "array",
+                  },
+                },
+                "type": "object",
               },
             },
           },
@@ -374,6 +517,15 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
                   "name": {
                     "type": "string",
                   },
+                  "permanentAddress": {
+                    "$ref": "#/components/schemas/Address",
+                  },
+                  "phoneNumbers": {
+                    "items": {
+                      "$ref": "#/components/schemas/PhoneNumber",
+                    },
+                    "type": "array",
+                  },
                 },
                 "type": "object",
               },
@@ -402,31 +554,99 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
 exports[`Open API integration should have the expected endpoints: open-api 1`] = `
 {
   "definitions": {
-    "Partial<Pick<User,"name"|"age">>": {
+    "Address": {
       "additionalProperties": false,
       "properties": {
-        "age": {
-          "type": "number",
-        },
-        "name": {
+        "city": {
           "type": "string",
         },
-      },
-      "type": "object",
-    },
-    "Pick<User,"name"|"age">": {
-      "additionalProperties": false,
-      "properties": {
-        "age": {
-          "type": "number",
+        "location": {
+          "$ref": "#/definitions/Location",
         },
-        "name": {
+        "state": {
+          "type": "string",
+        },
+        "street": {
+          "type": "string",
+        },
+        "zip": {
           "type": "string",
         },
       },
       "required": [
-        "age",
+        "street",
+        "city",
+        "state",
+        "zip",
+        "location",
+      ],
+      "type": "object",
+    },
+    "CreateUserRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "age": {
+          "type": "number",
+        },
+        "name": {
+          "type": "string",
+        },
+        "permanentAddress": {
+          "$ref": "#/definitions/Address",
+        },
+        "phoneNumbers": {
+          "items": {
+            "$ref": "#/definitions/PhoneNumber",
+          },
+          "type": "array",
+        },
+      },
+      "required": [
         "name",
+        "age",
+        "phoneNumbers",
+        "permanentAddress",
+      ],
+      "type": "object",
+    },
+    "Location": {
+      "additionalProperties": false,
+      "properties": {
+        "latitude": {
+          "type": "number",
+        },
+        "longitude": {
+          "type": "number",
+        },
+      },
+      "required": [
+        "latitude",
+        "longitude",
+      ],
+      "type": "object",
+    },
+    "PhoneNumber": {
+      "additionalProperties": false,
+      "properties": {
+        "number": {
+          "type": "string",
+        },
+        "type": {
+          "enum": [
+            "home",
+            "work",
+            "mobile",
+            null,
+          ],
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+      },
+      "required": [
+        "number",
+        "type",
       ],
       "type": "object",
     },
@@ -442,14 +662,25 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         "name": {
           "type": "string",
         },
+        "permanentAddress": {
+          "$ref": "#/definitions/Address",
+        },
+        "phoneNumbers": {
+          "items": {
+            "$ref": "#/definitions/PhoneNumber",
+          },
+          "type": "array",
+        },
         "suffix": {
           "type": "string",
         },
       },
       "required": [
-        "age",
         "id",
         "name",
+        "age",
+        "phoneNumbers",
+        "permanentAddress",
       ],
       "type": "object",
     },
@@ -478,11 +709,22 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
                 "name": {
                   "type": "string",
                 },
+                "permanentAddress": {
+                  "$ref": "#/definitions/Address",
+                },
+                "phoneNumbers": {
+                  "items": {
+                    "$ref": "#/definitions/PhoneNumber",
+                  },
+                  "type": "array",
+                },
               },
               "required": [
                 "age",
                 "id",
                 "name",
+                "permanentAddress",
+                "phoneNumbers",
               ],
               "type": "object",
             },
@@ -557,6 +799,47 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         "summary": "Get a random number",
       },
     },
+    "/search": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "numResults",
+            "schema": {
+              "type": "number",
+            },
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "additionalProperties": false,
+              "properties": {
+                "users": {
+                  "items": {
+                    "$ref": "#/definitions/User",
+                  },
+                  "type": "array",
+                },
+              },
+              "required": [
+                "users",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "summary": undefined,
+      },
+    },
     "/users": {
       "get": {
         "parameters": [
@@ -603,7 +886,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
             "in": "body",
             "name": "body",
             "schema": {
-              "$ref": "#/definitions/Pick<User,"name"|"age">",
+              "$ref": "#/definitions/CreateUserRequest",
             },
           },
           {
@@ -644,7 +927,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
             "in": "body",
             "name": "body",
             "schema": {
-              "properties": {},
+              "additionalProperties": false,
               "type": "object",
             },
           },
@@ -695,7 +978,25 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
             "in": "body",
             "name": "body",
             "schema": {
-              "$ref": "#/definitions/Partial<Pick<User,"name"|"age">>",
+              "additionalProperties": false,
+              "properties": {
+                "age": {
+                  "type": "number",
+                },
+                "name": {
+                  "type": "string",
+                },
+                "permanentAddress": {
+                  "$ref": "#/definitions/Address",
+                },
+                "phoneNumbers": {
+                  "items": {
+                    "$ref": "#/definitions/PhoneNumber",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
             },
           },
         ],
@@ -727,6 +1028,15 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
                 },
                 "name": {
                   "type": "string",
+                },
+                "permanentAddress": {
+                  "$ref": "#/definitions/Address",
+                },
+                "phoneNumbers": {
+                  "items": {
+                    "$ref": "#/definitions/PhoneNumber",
+                  },
+                  "type": "array",
                 },
               },
               "type": "object",

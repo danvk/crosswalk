@@ -324,11 +324,43 @@ describe('typed requests', () => {
       const createUser = api.post('/users');
 
       mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});
-      const newUser = await createUser({}, {name: 'Fred', age: 42});
-      //    ^? const newUser: User
+      const newUser = await createUser(
+        //    ^? const newUser: User
+
+        {},
+        {
+          name: 'Fred',
+          age: 42,
+          phoneNumbers: [],
+          permanentAddress: {
+            street: '123 Main St',
+            city: 'Anytown',
+            state: 'CA',
+            zip: '12345',
+            location: {
+              latitude: 37.774929,
+              longitude: -122.419416,
+            },
+          },
+        },
+      );
       expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
-      expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
+      expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {
+        name: 'Fred',
+        age: 42,
+        phoneNumbers: [],
+        permanentAddress: {
+          street: '123 Main St',
+          city: 'Anytown',
+          state: 'CA',
+          zip: '12345',
+          location: {
+            latitude: 37.774929,
+            longitude: -122.419416,
+          },
+        },
+      });
     });
 
     it('should generate POST requests with query parameters', async () => {
@@ -338,13 +370,42 @@ describe('typed requests', () => {
       const createUser = api.post('/users');
 
       mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});
-      const newUser = await createUser({}, {name: 'Fred', age: 42}, {suffix: 'sr'});
-      //    ^? const newUser: User
+      const newUser = await createUser(
+        //    ^? const newUser: User
+        {},
+        {
+          name: 'Fred',
+          age: 42,
+          phoneNumbers: [],
+          permanentAddress: {
+            street: '123 Main St',
+            city: 'Anytown',
+            state: 'CA',
+            zip: '12345',
+            location: {
+              latitude: 37.774929,
+              longitude: -122.419416,
+            },
+          },
+        },
+        {suffix: 'sr'},
+      );
       expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
       expect(mockFetcher).toHaveBeenCalledWith('/users?suffix=sr', 'post', {
         name: 'Fred',
         age: 42,
+        phoneNumbers: [],
+        permanentAddress: {
+          street: '123 Main St',
+          city: 'Anytown',
+          state: 'CA',
+          zip: '12345',
+          location: {
+            latitude: 37.774929,
+            longitude: -122.419416,
+          },
+        },
       });
     });
 
@@ -374,11 +435,42 @@ describe('typed requests', () => {
       const createUser = api.request('post', '/users');
 
       mockFetcher.mockReturnValueOnce({id: 'fred', name: 'Fred', age: 42});
-      const newUser = await createUser({}, {name: 'Fred', age: 42});
-      //    ^? const newUser: User
+      const newUser = await createUser(
+        //    ^? const newUser: User
+        {},
+        {
+          name: 'Fred',
+          age: 42,
+          phoneNumbers: [],
+          permanentAddress: {
+            street: '123 Main St',
+            city: 'Anytown',
+            state: 'CA',
+            zip: '12345',
+            location: {
+              latitude: 37.774929,
+              longitude: -122.419416,
+            },
+          },
+        },
+      );
       expect(newUser).toEqual({id: 'fred', name: 'Fred', age: 42});
       expect(mockFetcher).toHaveBeenCalledTimes(1);
-      expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {name: 'Fred', age: 42});
+      expect(mockFetcher).toHaveBeenCalledWith('/users', 'post', {
+        name: 'Fred',
+        age: 42,
+        phoneNumbers: [],
+        permanentAddress: {
+          street: '123 Main St',
+          city: 'Anytown',
+          state: 'CA',
+          zip: '12345',
+          location: {
+            latitude: 37.774929,
+            longitude: -122.419416,
+          },
+        },
+      });
     });
 
     it('should accept readonly objects in POST requests', async () => {

@@ -228,6 +228,30 @@ export class TypedRouter<API> {
     return this;
   }
 
+  /** Recursively resolve schema references to find the validation type */
+  private resolveSchemaType(schema: any, apiSchema: any): any {
+    if (!schema) return null;
+
+    // If it's a direct reference, resolve it
+    if (typeof schema === 'string' && schema.startsWith('#/definitions/')) {
+      const refName = schema.slice('#/definitions/'.length);
+      return this.resolveSchemaType(apiSchema.definitions[refName], apiSchema);
+    }
+
+    // If it's an object with a reference, resolve that
+    if (schema.$ref) {
+      return this.resolveSchemaType(schema.$ref, apiSchema);
+    }
+
+    // If it's a null type, return null
+    if (schema.type === 'null') {
+      return null;
+    }
+
+    // Otherwise return the schema as is (could be inline type or resolved type)
+    return schema;
+  }
+
   /** Get a validation function for request bodies for the endpoint, or null if not applicable. */
   getValidator(
     route: string,
@@ -243,14 +267,24 @@ export class TypedRouter<API> {
     if (!apiDef[route]) {
       throw new Error(`API JSONSchema is missing entry for ${route}`);
     }
-    const refSchema: string = apiDef[route].properties[method].$ref;
-    const endpoint = refSchema.slice('#/definitions/'.length);
-    const endpointTypes = (apiSchema.definitions as any)[endpoint].properties;
-    let validateType = endpointTypes[property];
-    if (validateType.$ref) {
-      validateType = validateType.$ref; // allow either references or inline types
-    } else if (validateType.type && validateType.type === 'null') {
-      validateType = null; // no request body, no validation
+
+    // Get the endpoint schema and resolve it
+    const endpointSchema = apiDef[route].properties[method];
+    if (!endpointSchema) {
+      throw new Error(`API JSONSchema is missing ${method} method for ${route}`);
+    }
+
+    const resolvedEndpoint = this.resolveSchemaType(endpointSchema, apiSchema);
+    if (!resolvedEndpoint || !resolvedEndpoint.properties) {
+      throw new Error(`Invalid endpoint schema for ${method} ${route}`);
+    }
+
+    const validateType = this.resolveSchemaType(
+      resolvedEndpoint.properties[property],
+      apiSchema,
+    );
+    if (!validateType && this.ajv) {
+      return null;
     }
 
     if (validateType && this.ajv) {

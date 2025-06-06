@@ -1,6 +1,6 @@
 {
   "name": "crosswalk",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Type-safe express routing with TypeScript",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,7 +11,7 @@
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write 'src/**/*.ts'",
     "format:check": "prettier --check 'src/**/*.ts'",
-    "update-test-schema": "typescript-json-schema --required --noExtraProps --strictNullChecks src/__tests__/api.ts API --out src/__tests__/api.schema.json"
+    "update-test-schema": "ts-json-schema-generator --no-ref-encode --no-top-ref --path src/__tests__/api.ts --type API --out src/__tests__/api.schema.json"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
   "devDependencies": {
     "@types/express": "^5.0.1",
     "@types/jest": "^26.0.15",
+    "@types/node": "^22.15.30",
     "@types/supertest": "^2.0.10",
     "@types/swagger-ui-express": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^5.22.0",
@@ -41,8 +42,8 @@
     "prettier": "^2.2.0",
     "supertest": "^6.0.1",
     "ts-jest": "^29.3.2",
-    "typescript": "5",
-    "typescript-json-schema": "^0.43.0"
+    "ts-json-schema-generator": "^2.4.0",
+    "typescript": "5"
   },
   "dependencies": {
     "ajv": "^8.17.1",

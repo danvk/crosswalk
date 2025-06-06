@@ -1,408 +1,592 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "additionalProperties": false,
-    "definitions": {
-        "Endpoint<Partial<Pick<User,\"name\"|\"age\">>,User,null>": {
-            "additionalProperties": false,
-            "properties": {
-                "query": {
-                    "type": "null"
-                },
-                "request": {
-                    "$ref": "#/definitions/Partial<Pick<User,\"name\"|\"age\">>"
-                },
-                "response": {
-                    "$ref": "#/definitions/User"
-                }
-            },
-            "required": [
-                "query",
-                "request",
-                "response"
-            ],
-            "type": "object"
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "definitions": {
+    "Address": {
+      "additionalProperties": false,
+      "properties": {
+        "city": {
+          "type": "string"
         },
-        "Endpoint<Pick<User,\"name\"|\"age\">&{id:string;},User,null>": {
-            "additionalProperties": false,
-            "properties": {
-                "query": {
-                    "type": "null"
-                },
-                "request": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "age": {
-                            "type": "number"
-                        },
-                        "id": {
-                            "type": "string"
-                        },
-                        "name": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "age",
-                        "id",
-                        "name"
-                    ],
-                    "type": "object"
-                },
-                "response": {
-                    "$ref": "#/definitions/User"
-                }
-            },
-            "required": [
-                "query",
-                "request",
-                "response"
-            ],
-            "type": "object"
+        "location": {
+          "$ref": "#/definitions/Location"
         },
-        "Endpoint<Pick<User,\"name\"|\"age\">,User,{nameIncludes?:string|undefined;suffix?:string|undefined;}>": {
-            "additionalProperties": false,
-            "properties": {
-                "query": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "nameIncludes": {
-                            "type": "string"
-                        },
-                        "suffix": {
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "request": {
-                    "$ref": "#/definitions/Pick<User,\"name\"|\"age\">"
-                },
-                "response": {
-                    "$ref": "#/definitions/User"
-                }
-            },
-            "required": [
-                "query",
-                "request",
-                "response"
-            ],
-            "type": "object"
+        "state": {
+          "type": "string"
         },
-        "Endpoint<{name?:string|undefined;age?:number|undefined;},User,null>": {
-            "additionalProperties": false,
-            "properties": {
-                "query": {
-                    "type": "null"
-                },
-                "request": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "age": {
-                            "type": "number"
-                        },
-                        "name": {
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "response": {
-                    "$ref": "#/definitions/User"
-                }
-            },
-            "required": [
-                "query",
-                "request",
-                "response"
-            ],
-            "type": "object"
+        "street": {
+          "type": "string"
         },
-        "Endpoint<{user:User|null;},User,null>": {
-            "additionalProperties": false,
-            "properties": {
-                "query": {
-                    "type": "null"
-                },
-                "request": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "user": {
-                            "anyOf": [
-                                {
-                                    "$ref": "#/definitions/User"
-                                },
-                                {
-                                    "type": "null"
-                                }
-                            ]
-                        }
-                    },
-                    "required": [
-                        "user"
-                    ],
-                    "type": "object"
-                },
-                "response": {
-                    "$ref": "#/definitions/User"
-                }
-            },
-            "required": [
-                "query",
-                "request",
-                "response"
-            ],
-            "type": "object"
-        },
-        "Endpoint<{},User,null>": {
-            "additionalProperties": false,
-            "properties": {
-                "query": {
-                    "type": "null"
-                },
-                "request": {
-                    "properties": {
-                    },
-                    "type": "object"
-                },
-                "response": {
-                    "$ref": "#/definitions/User"
-                }
-            },
-            "required": [
-                "query",
-                "request",
-                "response"
-            ],
-            "type": "object"
-        },
-        "GetEndpoint<User,{firstName?:string|undefined;}>": {
-            "additionalProperties": false,
-            "properties": {
-                "query": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "firstName": {
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "request": {
-                    "type": "null"
-                },
-                "response": {
-                    "$ref": "#/definitions/User"
-                }
-            },
-            "required": [
-                "query",
-                "request",
-                "response"
-            ],
-            "type": "object"
-        },
-        "GetEndpoint<{random:number;},null>": {
-            "additionalProperties": false,
-            "properties": {
-                "query": {
-                    "type": "null"
-                },
-                "request": {
-                    "type": "null"
-                },
-                "response": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "random": {
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "random"
-                    ],
-                    "type": "object"
-                }
-            },
-            "required": [
-                "query",
-                "request",
-                "response"
-            ],
-            "type": "object"
-        },
-        "GetEndpoint<{users:User[];},{nameIncludes?:string|undefined;minAge?:number|undefined;}>": {
-            "additionalProperties": false,
-            "properties": {
-                "query": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "minAge": {
-                            "type": "number"
-                        },
-                        "nameIncludes": {
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "request": {
-                    "type": "null"
-                },
-                "response": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "users": {
-                            "items": {
-                                "$ref": "#/definitions/User"
-                            },
-                            "type": "array"
-                        }
-                    },
-                    "required": [
-                        "users"
-                    ],
-                    "type": "object"
-                }
-            },
-            "required": [
-                "query",
-                "request",
-                "response"
-            ],
-            "type": "object"
-        },
-        "Partial<Pick<User,\"name\"|\"age\">>": {
-            "additionalProperties": false,
-            "properties": {
-                "age": {
-                    "type": "number"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "type": "object"
-        },
-        "Pick<User,\"name\"|\"age\">": {
-            "additionalProperties": false,
-            "properties": {
-                "age": {
-                    "type": "number"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "age",
-                "name"
-            ],
-            "type": "object"
-        },
-        "User": {
-            "additionalProperties": false,
-            "properties": {
-                "age": {
-                    "type": "number"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "suffix": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "age",
-                "id",
-                "name"
-            ],
-            "type": "object"
+        "zip": {
+          "type": "string"
         }
+      },
+      "required": [
+        "street",
+        "city",
+        "state",
+        "zip",
+        "location"
+      ],
+      "type": "object"
     },
-    "properties": {
-        "/complex": {
-            "additionalProperties": false,
-            "properties": {
-                "patch": {
-                    "$ref": "#/definitions/Endpoint<Pick<User,\"name\"|\"age\">&{id:string;},User,null>"
-                },
-                "post": {
-                    "$ref": "#/definitions/Endpoint<{user:User|null;},User,null>"
-                }
-            },
-            "required": [
-                "patch",
-                "post"
-            ],
-            "type": "object"
+    "CreateUserRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "age": {
+          "type": "number"
         },
-        "/random": {
-            "additionalProperties": false,
-            "properties": {
-                "get": {
-                    "$ref": "#/definitions/GetEndpoint<{random:number;},null>",
-                    "description": "Get a random number"
-                }
-            },
-            "required": [
-                "get"
-            ],
-            "type": "object"
+        "name": {
+          "type": "string"
         },
-        "/users": {
-            "additionalProperties": false,
-            "properties": {
-                "get": {
-                    "$ref": "#/definitions/GetEndpoint<{users:User[];},{nameIncludes?:string|undefined;minAge?:number|undefined;}>",
-                    "description": "Get the full list of users"
-                },
-                "post": {
-                    "$ref": "#/definitions/Endpoint<Pick<User,\"name\"|\"age\">,User,{nameIncludes?:string|undefined;suffix?:string|undefined;}>",
-                    "description": "Create a new user"
-                }
-            },
-            "required": [
-                "get",
-                "post"
-            ],
-            "type": "object"
+        "permanentAddress": {
+          "$ref": "#/definitions/Address"
         },
-        "/users/:userId": {
-            "additionalProperties": false,
-            "properties": {
-                "delete": {
-                    "$ref": "#/definitions/Endpoint<{},User,null>"
-                },
-                "get": {
-                    "$ref": "#/definitions/GetEndpoint<User,{firstName?:string|undefined;}>"
-                },
-                "patch": {
-                    "$ref": "#/definitions/Endpoint<Partial<Pick<User,\"name\"|\"age\">>,User,null>",
-                    "description": "Edit an existing user"
-                },
-                "put": {
-                    "$ref": "#/definitions/Endpoint<{name?:string|undefined;age?:number|undefined;},User,null>"
-                }
-            },
-            "required": [
-                "delete",
-                "get",
-                "patch",
-                "put"
-            ],
-            "type": "object"
+        "phoneNumbers": {
+          "items": {
+            "$ref": "#/definitions/PhoneNumber"
+          },
+          "type": "array"
         }
+      },
+      "required": [
+        "name",
+        "age",
+        "phoneNumbers",
+        "permanentAddress"
+      ],
+      "type": "object"
     },
-    "required": [
-        "/complex",
-        "/random",
-        "/users",
-        "/users/:userId"
-    ],
-    "type": "object"
+    "Endpoint<(def-alias-1619584020-201-306-1619584020-0-1730&structure-1619584020-1552-1565-1619584020-1533-1565-1619584020-1523-1572-1619584020-1433-1573-1619584020-1303-1577-1619584020-1289-1578-1619584020-591-1729-1619584020-0-1730),User>": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "null"
+        },
+        "request": {
+          "additionalProperties": false,
+          "properties": {
+            "age": {
+              "type": "number"
+            },
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "permanentAddress": {
+              "$ref": "#/definitions/Address"
+            },
+            "phoneNumbers": {
+              "items": {
+                "$ref": "#/definitions/PhoneNumber"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "age",
+            "id",
+            "name",
+            "permanentAddress",
+            "phoneNumbers"
+          ],
+          "type": "object"
+        },
+        "response": {
+          "$ref": "#/definitions/User"
+        }
+      },
+      "required": [
+        "request",
+        "response",
+        "query"
+      ],
+      "type": "object"
+    },
+    "Endpoint<CreateUserRequest,User,structure-1619584020-912-953-1619584020-878-954-1619584020-839-955-1619584020-718-959-1619584020-706-960-1619584020-591-1729-1619584020-0-1730>": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "additionalProperties": false,
+          "properties": {
+            "nameIncludes": {
+              "type": "string"
+            },
+            "suffix": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "request": {
+          "$ref": "#/definitions/CreateUserRequest"
+        },
+        "response": {
+          "$ref": "#/definitions/User"
+        }
+      },
+      "required": [
+        "request",
+        "response",
+        "query"
+      ],
+      "type": "object"
+    },
+    "Endpoint<alias-731470504-72960-73056-731470504-0-217694<def-alias-1619584020-201-306-1619584020-0-1730>,User>": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "null"
+        },
+        "request": {
+          "additionalProperties": false,
+          "properties": {
+            "age": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            },
+            "permanentAddress": {
+              "$ref": "#/definitions/Address"
+            },
+            "phoneNumbers": {
+              "items": {
+                "$ref": "#/definitions/PhoneNumber"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        },
+        "response": {
+          "$ref": "#/definitions/User"
+        }
+      },
+      "required": [
+        "request",
+        "response",
+        "query"
+      ],
+      "type": "object"
+    },
+    "Endpoint<null,User,structure-1619584020-1009-1030-1619584020-991-1031-1619584020-982-1032-1619584020-980-1288-1619584020-960-1289-1619584020-591-1729-1619584020-0-1730>": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "additionalProperties": false,
+          "properties": {
+            "firstName": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "request": {
+          "type": "null"
+        },
+        "response": {
+          "$ref": "#/definitions/User"
+        }
+      },
+      "required": [
+        "request",
+        "response",
+        "query"
+      ],
+      "type": "object"
+    },
+    "Endpoint<null,structure-1619584020-1667-1682-1619584020-1654-1721-1619584020-1593-1722-1619584020-1591-1726-1619584020-1578-1727-1619584020-591-1729-1619584020-0-1730,structure-1619584020-1683-1720-1619584020-1654-1721-1619584020-1593-1722-1619584020-1591-1726-1619584020-1578-1727-1619584020-591-1729-1619584020-0-1730>": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "additionalProperties": false,
+          "properties": {
+            "numResults": {
+              "type": "number"
+            },
+            "query": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "type": "object"
+        },
+        "request": {
+          "type": "null"
+        },
+        "response": {
+          "additionalProperties": false,
+          "properties": {
+            "users": {
+              "items": {
+                "$ref": "#/definitions/User"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "users"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "request",
+        "response",
+        "query"
+      ],
+      "type": "object"
+    },
+    "Endpoint<null,structure-1619584020-683-699-1619584020-670-700-1619584020-630-701-1619584020-628-705-1619584020-615-706-1619584020-591-1729-1619584020-0-1730,null>": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "null"
+        },
+        "request": {
+          "type": "null"
+        },
+        "response": {
+          "additionalProperties": false,
+          "properties": {
+            "random": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "random"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "request",
+        "response",
+        "query"
+      ],
+      "type": "object"
+    },
+    "Endpoint<null,structure-1619584020-780-795-1619584020-767-838-1619584020-720-839-1619584020-718-959-1619584020-706-960-1619584020-591-1729-1619584020-0-1730,structure-1619584020-796-837-1619584020-767-838-1619584020-720-839-1619584020-718-959-1619584020-706-960-1619584020-591-1729-1619584020-0-1730>": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "additionalProperties": false,
+          "properties": {
+            "minAge": {
+              "type": "number"
+            },
+            "nameIncludes": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "request": {
+          "type": "null"
+        },
+        "response": {
+          "additionalProperties": false,
+          "properties": {
+            "users": {
+              "items": {
+                "$ref": "#/definitions/User"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "users"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "request",
+        "response",
+        "query"
+      ],
+      "type": "object"
+    },
+    "Endpoint<structure-1619584020-1139-1233-1619584020-1129-1251-1619584020-1120-1252-1619584020-980-1288-1619584020-960-1289-1619584020-591-1729-1619584020-0-1730,User>": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "null"
+        },
+        "request": {
+          "additionalProperties": false,
+          "properties": {
+            "age": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            },
+            "permanentAddress": {
+              "$ref": "#/definitions/Address"
+            },
+            "phoneNumbers": {
+              "items": {
+                "$ref": "#/definitions/PhoneNumber"
+              },
+              "type": "array"
+            }
+          },
+          "type": "object"
+        },
+        "response": {
+          "$ref": "#/definitions/User"
+        }
+      },
+      "required": [
+        "request",
+        "response",
+        "query"
+      ],
+      "type": "object"
+    },
+    "Endpoint<structure-1619584020-1274-1276-1619584020-1264-1283-1619584020-1252-1284-1619584020-980-1288-1619584020-960-1289-1619584020-591-1729-1619584020-0-1730,User>": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "null"
+        },
+        "request": {
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "response": {
+          "$ref": "#/definitions/User"
+        }
+      },
+      "required": [
+        "request",
+        "response",
+        "query"
+      ],
+      "type": "object"
+    },
+    "Endpoint<structure-1619584020-1406-1425-1619584020-1396-1432-1619584020-1305-1433-1619584020-1303-1577-1619584020-1289-1578-1619584020-591-1729-1619584020-0-1730,User>": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "null"
+        },
+        "request": {
+          "additionalProperties": false,
+          "properties": {
+            "user": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/User"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "user"
+          ],
+          "type": "object"
+        },
+        "response": {
+          "$ref": "#/definitions/User"
+        }
+      },
+      "required": [
+        "request",
+        "response",
+        "query"
+      ],
+      "type": "object"
+    },
+    "GetEndpoint<User,structure-1619584020-1009-1030-1619584020-991-1031-1619584020-982-1032-1619584020-980-1288-1619584020-960-1289-1619584020-591-1729-1619584020-0-1730>": {
+      "$ref": "#/definitions/Endpoint<null,User,structure-1619584020-1009-1030-1619584020-991-1031-1619584020-982-1032-1619584020-980-1288-1619584020-960-1289-1619584020-591-1729-1619584020-0-1730>"
+    },
+    "GetEndpoint<structure-1619584020-1667-1682-1619584020-1654-1721-1619584020-1593-1722-1619584020-1591-1726-1619584020-1578-1727-1619584020-591-1729-1619584020-0-1730,structure-1619584020-1683-1720-1619584020-1654-1721-1619584020-1593-1722-1619584020-1591-1726-1619584020-1578-1727-1619584020-591-1729-1619584020-0-1730>": {
+      "$ref": "#/definitions/Endpoint<null,structure-1619584020-1667-1682-1619584020-1654-1721-1619584020-1593-1722-1619584020-1591-1726-1619584020-1578-1727-1619584020-591-1729-1619584020-0-1730,structure-1619584020-1683-1720-1619584020-1654-1721-1619584020-1593-1722-1619584020-1591-1726-1619584020-1578-1727-1619584020-591-1729-1619584020-0-1730>"
+    },
+    "GetEndpoint<structure-1619584020-683-699-1619584020-670-700-1619584020-630-701-1619584020-628-705-1619584020-615-706-1619584020-591-1729-1619584020-0-1730>": {
+      "$ref": "#/definitions/Endpoint<null,structure-1619584020-683-699-1619584020-670-700-1619584020-630-701-1619584020-628-705-1619584020-615-706-1619584020-591-1729-1619584020-0-1730,null>"
+    },
+    "GetEndpoint<structure-1619584020-780-795-1619584020-767-838-1619584020-720-839-1619584020-718-959-1619584020-706-960-1619584020-591-1729-1619584020-0-1730,structure-1619584020-796-837-1619584020-767-838-1619584020-720-839-1619584020-718-959-1619584020-706-960-1619584020-591-1729-1619584020-0-1730>": {
+      "$ref": "#/definitions/Endpoint<null,structure-1619584020-780-795-1619584020-767-838-1619584020-720-839-1619584020-718-959-1619584020-706-960-1619584020-591-1729-1619584020-0-1730,structure-1619584020-796-837-1619584020-767-838-1619584020-720-839-1619584020-718-959-1619584020-706-960-1619584020-591-1729-1619584020-0-1730>"
+    },
+    "Location": {
+      "additionalProperties": false,
+      "properties": {
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude"
+      ],
+      "type": "object"
+    },
+    "PhoneNumber": {
+      "additionalProperties": false,
+      "properties": {
+        "number": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "home",
+            "work",
+            "mobile",
+            null
+          ],
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "number",
+        "type"
+      ],
+      "type": "object"
+    },
+    "User": {
+      "additionalProperties": false,
+      "properties": {
+        "age": {
+          "type": "number"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "permanentAddress": {
+          "$ref": "#/definitions/Address"
+        },
+        "phoneNumbers": {
+          "items": {
+            "$ref": "#/definitions/PhoneNumber"
+          },
+          "type": "array"
+        },
+        "suffix": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "age",
+        "phoneNumbers",
+        "permanentAddress"
+      ],
+      "type": "object"
+    }
+  },
+  "properties": {
+    "/complex": {
+      "additionalProperties": false,
+      "properties": {
+        "patch": {
+          "$ref": "#/definitions/Endpoint<(def-alias-1619584020-201-306-1619584020-0-1730&structure-1619584020-1552-1565-1619584020-1533-1565-1619584020-1523-1572-1619584020-1433-1573-1619584020-1303-1577-1619584020-1289-1578-1619584020-591-1729-1619584020-0-1730),User>"
+        },
+        "post": {
+          "$ref": "#/definitions/Endpoint<structure-1619584020-1406-1425-1619584020-1396-1432-1619584020-1305-1433-1619584020-1303-1577-1619584020-1289-1578-1619584020-591-1729-1619584020-0-1730,User>"
+        }
+      },
+      "required": [
+        "post",
+        "patch"
+      ],
+      "type": "object"
+    },
+    "/random": {
+      "additionalProperties": false,
+      "properties": {
+        "get": {
+          "$ref": "#/definitions/GetEndpoint<structure-1619584020-683-699-1619584020-670-700-1619584020-630-701-1619584020-628-705-1619584020-615-706-1619584020-591-1729-1619584020-0-1730>",
+          "description": "Get a random number"
+        }
+      },
+      "required": [
+        "get"
+      ],
+      "type": "object"
+    },
+    "/search": {
+      "additionalProperties": false,
+      "properties": {
+        "get": {
+          "$ref": "#/definitions/GetEndpoint<structure-1619584020-1667-1682-1619584020-1654-1721-1619584020-1593-1722-1619584020-1591-1726-1619584020-1578-1727-1619584020-591-1729-1619584020-0-1730,structure-1619584020-1683-1720-1619584020-1654-1721-1619584020-1593-1722-1619584020-1591-1726-1619584020-1578-1727-1619584020-591-1729-1619584020-0-1730>"
+        }
+      },
+      "required": [
+        "get"
+      ],
+      "type": "object"
+    },
+    "/users": {
+      "additionalProperties": false,
+      "properties": {
+        "get": {
+          "$ref": "#/definitions/GetEndpoint<structure-1619584020-780-795-1619584020-767-838-1619584020-720-839-1619584020-718-959-1619584020-706-960-1619584020-591-1729-1619584020-0-1730,structure-1619584020-796-837-1619584020-767-838-1619584020-720-839-1619584020-718-959-1619584020-706-960-1619584020-591-1729-1619584020-0-1730>",
+          "description": "Get the full list of users"
+        },
+        "post": {
+          "$ref": "#/definitions/Endpoint<CreateUserRequest,User,structure-1619584020-912-953-1619584020-878-954-1619584020-839-955-1619584020-718-959-1619584020-706-960-1619584020-591-1729-1619584020-0-1730>",
+          "description": "Create a new user"
+        }
+      },
+      "required": [
+        "get",
+        "post"
+      ],
+      "type": "object"
+    },
+    "/users/:userId": {
+      "additionalProperties": false,
+      "properties": {
+        "delete": {
+          "$ref": "#/definitions/Endpoint<structure-1619584020-1274-1276-1619584020-1264-1283-1619584020-1252-1284-1619584020-980-1288-1619584020-960-1289-1619584020-591-1729-1619584020-0-1730,User>"
+        },
+        "get": {
+          "$ref": "#/definitions/GetEndpoint<User,structure-1619584020-1009-1030-1619584020-991-1031-1619584020-982-1032-1619584020-980-1288-1619584020-960-1289-1619584020-591-1729-1619584020-0-1730>"
+        },
+        "patch": {
+          "$ref": "#/definitions/Endpoint<alias-731470504-72960-73056-731470504-0-217694<def-alias-1619584020-201-306-1619584020-0-1730>,User>",
+          "description": "Edit an existing user"
+        },
+        "put": {
+          "$ref": "#/definitions/Endpoint<structure-1619584020-1139-1233-1619584020-1129-1251-1619584020-1120-1252-1619584020-980-1288-1619584020-960-1289-1619584020-591-1729-1619584020-0-1730,User>"
+        }
+      },
+      "required": [
+        "get",
+        "patch",
+        "put",
+        "delete"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "/random",
+    "/users",
+    "/users/:userId",
+    "/complex",
+    "/search"
+  ],
+  "type": "object"
 }
-
