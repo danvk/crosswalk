@@ -14,11 +14,11 @@ test('TypedRouter', async () => {
   const router = new TypedRouter<API>(app, apiSchemaJson);
 
   // Configure multer for file uploads
-  const upload = multer({ 
+  const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
-      fileSize: 1024 * 1024 // 1MB limit
-    }
+      fileSize: 1024 * 1024, // 1MB limit
+    },
   });
 
   let users: User[] = [
@@ -174,7 +174,7 @@ test('TypedRouter', async () => {
   router.post('/upload', async (_, body, req) => {
     // Multer puts the file in req.file and other fields in req.body
     const file = (req as any).file;
-    
+
     return {
       success: true,
       filename: file?.originalname || 'unknown.txt',
@@ -351,7 +351,7 @@ test('TypedRouter', async () => {
     .field('source', 'test description')
     .attach('file', Buffer.from('test file content'), 'test.txt')
     .expect(200);
-  
+
   expect(uploadResponse.body).toMatchObject({
     success: true,
     filename: 'test.txt',

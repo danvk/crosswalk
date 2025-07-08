@@ -20,7 +20,7 @@ export class HTTPError extends Error {
 
 type RequestParams = Parameters<express.RequestHandler>;
 
-type AnyEndpoint = Endpoint<any, any, any> | {request: any; response: any; query: any; contentType: 'multipart'};
+type AnyEndpoint = Endpoint<any, any, any, any>;
 
 type ExpressRequest<Path extends string, Spec> = unknown &
   express.Request<
@@ -33,9 +33,11 @@ type ExpressRequest<Path extends string, Spec> = unknown &
 type ExpressResponse<Spec> = unknown & express.Response<SafeKey<Spec, 'response'>>;
 
 /** Remove File fields from request type for multipart endpoints as multer middleware will handle them */
-type RemoveFileFields<T> = T extends { contentType: 'multipart' }
+type RemoveFileFields<T> = T extends {contentType: 'multipart'}
   ? {
-      [K in keyof SafeKey<T, 'request'> as SafeKey<T, 'request'>[K] extends File ? never : K]: SafeKey<T, 'request'>[K]
+      [K in keyof SafeKey<T, 'request'> as SafeKey<T, 'request'>[K] extends File
+        ? never
+        : K]: SafeKey<T, 'request'>[K];
     }
   : SafeKey<T, 'request'>;
 
@@ -301,7 +303,9 @@ export class TypedRouter<API> {
           delete validateType.properties[key];
         }
       }
-      validateType.required = validateType.required.filter((key: string) => !!validateType.properties[key]);
+      validateType.required = validateType.required.filter(
+        (key: string) => !!validateType.properties[key],
+      );
     }
 
     if (!validateType && this.ajv) {

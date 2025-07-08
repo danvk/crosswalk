@@ -1,19 +1,24 @@
-export interface Endpoint<Request, Response, Query = null> {
+export interface Endpoint<
+  Request,
+  Response,
+  Query = null,
+  ContentType extends 'json' | 'multipart' = 'json',
+> {
   request: Request;
   response: Response;
   query: Query;
-  contentType: 'json';
+  contentType: ContentType;
 }
 
-export interface MultipartEndpoint<Request, Response, Query = null> {
-  request: Request;
-  response: Response;
-  query: Query;
-  contentType: 'multipart';
-}
+export type MultipartEndpoint<Request, Response, Query = null> = Endpoint<
+  Request,
+  Response,
+  Query,
+  'multipart'
+>;
 
 /** File upload field */
-export type File = { __type: 'file' };
+export type File = {__type: 'file'};
 
 export type GetEndpoint<Response, Query = null> = Endpoint<null, Response, Query>;
 

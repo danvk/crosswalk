@@ -256,12 +256,11 @@ function sanitizeComponentName(name: string): string {
  * This is a heuristic based on common file field names and types.
  */
 function isFileField(fieldName: string, schema: any): boolean {
-  
   // Check if it references the File definition
   if (schema.properties?.__type?.enum?.includes('file')) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -284,13 +283,18 @@ function generateMultipartSchema(requestSchema: any, apiSchema?: any): any {
     // Resolve the schema if it's a reference
     let resolvedSchema = fieldSchema as any;
     if ((fieldSchema as any).$ref && apiSchema) {
-      const refName = (fieldSchema as any).$ref.replace('#/definitions/', '').replace('#/components/schemas/', '');
+      const refName = (fieldSchema as any).$ref
+        .replace('#/definitions/', '')
+        .replace('#/components/schemas/', '');
       // Check both definitions (OpenAPI 2.0) and components.schemas (OpenAPI 3.0)
-      resolvedSchema = apiSchema.definitions?.[refName] || apiSchema.components?.schemas?.[refName] || fieldSchema;
+      resolvedSchema =
+        apiSchema.definitions?.[refName] ||
+        apiSchema.components?.schemas?.[refName] ||
+        fieldSchema;
     }
-    
+
     const isFile = isFileField(fieldName, resolvedSchema);
-    
+
     if (isFile) {
       // Mark as binary file upload
       multipartSchema.properties[fieldName] = {
@@ -431,8 +435,9 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
 
       // Add requestBody for 3.0 if request exists and it's not a DELETE operation
       if (request?.type !== 'null' && verb.toLowerCase() !== 'delete') {
-        const isMultipart = contentType?.const === 'multipart' || contentType?.enum?.includes('multipart');
-        
+        const isMultipart =
+          contentType?.const === 'multipart' || contentType?.enum?.includes('multipart');
+
         if (isMultipart) {
           // Generate multipart/form-data schema
           const multipartSchema = generateMultipartSchema(request, transformedSpec);

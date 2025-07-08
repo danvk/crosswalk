@@ -126,8 +126,5 @@ export function typedApi<API>(options?: Options) {
     post: requestWithBody('post'),
     patch: requestWithBody('patch'),
     put: requestWithBody('put'),
-
-    request: <Method extends HTTPVerb>(method: Method, path: PathsForMethod<API, Method>) =>
-      requestWithBody(method)(path),
   };
 }

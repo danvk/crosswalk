@@ -68,6 +68,9 @@ export interface API {
   };
   '/upload': {
     /** Upload a single file */
-    post: MultipartEndpoint<{source: string, file: File}, {success: boolean; filename: string; size: number}>;
+    post: MultipartEndpoint<
+      {source: string; file: File},
+      {success: boolean; filename: string; size: number}
+    >;
   };
 }
