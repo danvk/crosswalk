@@ -7,6 +7,9 @@ export interface User {
   age: number;
   phoneNumbers: PhoneNumber[];
   permanentAddress: Address;
+  role: 'user';
+  signupMethod?: 'email';
+  fromSystem?: 'google' | null;
 }
 
 export type CreateUserRequest = Pick<

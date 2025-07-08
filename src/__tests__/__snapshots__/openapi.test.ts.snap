@@ -103,6 +103,13 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
           "age": {
             "type": "number",
           },
+          "fromSystem": {
+            "enum": [
+              "google",
+            ],
+            "nullable": true,
+            "type": "string",
+          },
           "id": {
             "type": "string",
           },
@@ -118,6 +125,18 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
             },
             "type": "array",
           },
+          "role": {
+            "enum": [
+              "user",
+            ],
+            "type": "string",
+          },
+          "signupMethod": {
+            "enum": [
+              "email",
+            ],
+            "type": "string",
+          },
           "suffix": {
             "type": "string",
           },
@@ -128,6 +147,7 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
           "age",
           "phoneNumbers",
           "permanentAddress",
+          "role",
         ],
         "type": "object",
       },
@@ -656,6 +676,16 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         "age": {
           "type": "number",
         },
+        "fromSystem": {
+          "enum": [
+            "google",
+            null,
+          ],
+          "type": [
+            "string",
+            "null",
+          ],
+        },
         "id": {
           "type": "string",
         },
@@ -671,6 +701,14 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
           },
           "type": "array",
         },
+        "role": {
+          "const": "user",
+          "type": "string",
+        },
+        "signupMethod": {
+          "const": "email",
+          "type": "string",
+        },
         "suffix": {
           "type": "string",
         },
@@ -681,6 +719,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         "age",
         "phoneNumbers",
         "permanentAddress",
+        "role",
       ],
       "type": "object",
     },
