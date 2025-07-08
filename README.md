@@ -413,3 +413,79 @@ To publish:
 [graphql]: https://graphql.org/
 [apollo]: https://www.apollographql.com/
 [finish]: https://nodejs.org/api/http.html#http_event_finish
+
+## File Upload (multipart/form-data) Support
+
+Crosswalk supports type-safe file upload endpoints using `multipart/form-data` and integrates smoothly with middleware like [multer](https://github.com/expressjs/multer).
+
+### How to Define File Upload Endpoints
+
+1. **Mark file fields in your API spec:**
+   - Use a type file that conforms to `{__type: 'file'}` interface to indicate file field in the form.
+   - Use MultipartEndpoint.
+   - Example:
+
+```ts
+// api-spec.ts
+export type File = {__type: 'file'};
+
+export interface API {
+  '/upload': {
+    post: MultipartEndpoint<{ file: File; description: string }, { success: boolean }>;
+  };
+}
+```
+
+2. **Implement the endpoint using multer:**
+   - Register a route-aware middleware for the upload endpoint that uses `multer` to handle file parsing.
+   - In your handler, access the file via `req.file` and the rest of the form data via `req.body`.
+
+```ts
+import multer from 'multer';
+const upload = multer({ storage: multer.memoryStorage() });
+
+router.useRouterMiddleware((req, res, next) => {
+  if (req.route.path === '/upload' && req.method === 'POST') {
+    upload.single('file')(req as any, res as any, () => {
+      // Optionally inject a dummy value for the file field so validation passes
+      if (req.file) req.body.file = 'uploaded';
+      next();
+    });
+  } else {
+    next();
+  }
+});
+
+router.post('/upload', async (_, body, req) => {
+  const file = req.file;
+  return {
+    success: true,
+    filename: file?.originalname || 'unknown.txt',
+    size: file?.size || 0,
+  };
+});
+```
+
+### How Validation Works
+- For `multipart/form-data` endpoints, Crosswalk automatically removes all fields of type `File` from the request body before validation.
+- This allows you to use type-safe request validation for the rest of the form fields, while letting `multer` handle the file(s).
+- In your handler, the `body` parameter will only include non-file fields; use `req.file` or `req.files` for the uploaded file(s).
+
+### OpenAPI/Swagger Generation
+- File fields are automatically documented as `type: string, format: binary` in the generated OpenAPI 3.0 schema.
+- Example:
+
+```yaml
+requestBody:
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        properties:
+          file:
+            type: string
+            format: binary
+          description:
+            type: string
+```
+

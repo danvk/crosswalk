@@ -1,5 +1,6 @@
 import bodyParser from 'body-parser';
 import express from 'express';
+import multer from 'multer';
 import request from 'supertest';
 
 import {API, User} from './api';
@@ -11,6 +12,14 @@ test('TypedRouter', async () => {
   app.use(bodyParser.json());
 
   const router = new TypedRouter<API>(app, apiSchemaJson);
+
+  // Configure multer for file uploads
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 1024 * 1024, // 1MB limit
+    },
+  });
 
   let users: User[] = [
     {
@@ -152,6 +161,26 @@ test('TypedRouter', async () => {
 
   router.get('/search', async (_, {query: {numResults}}) => {
     return {users: users.slice(0, numResults)};
+  });
+
+  router.useRouterMiddleware((req, res, next) => {
+    if (req.route.path === '/upload' && req.method === 'POST') {
+      // Use multer middleware for file uploads
+      upload.single('file')(req as any, res as any, next);
+    } else {
+      next();
+    }
+  });
+  router.post('/upload', async (_, body, req) => {
+    // Multer puts the file in req.file and other fields in req.body
+    const file = (req as any).file;
+
+    return {
+      success: true,
+      filename: file?.originalname || 'unknown.txt',
+      size: file?.size || 0,
+      formData: body,
+    };
   });
 
   const api = request(app);
@@ -315,6 +344,22 @@ test('TypedRouter', async () => {
     });
 
   await api.post('/complex').send({user: null}).set('Accept', 'application/json').expect(200);
+
+  // Test file upload
+  const uploadResponse = await api
+    .post('/upload')
+    .field('source', 'test description')
+    .attach('file', Buffer.from('test file content'), 'test.txt')
+    .expect(200);
+
+  expect(uploadResponse.body).toMatchObject({
+    success: true,
+    filename: 'test.txt',
+    size: expect.any(Number),
+    formData: {
+      source: 'test description',
+    },
+  });
 
   await api
     .post('/complex')

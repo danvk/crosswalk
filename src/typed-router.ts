@@ -1,11 +1,10 @@
 /** Type-safe wrapper around Express router for REST APIs */
 
-import {ErrorObject, ValidateFunction, Ajv} from 'ajv';
+import Ajv, {ValidateFunction, ErrorObject} from 'ajv';
 import express from 'express';
-
-import {Endpoint, HTTPVerb} from './api-spec';
+import {PathsForMethod, SafeKey, ExtractRouteParams} from './utils';
+import {File, Endpoint, HTTPVerb} from './api-spec';
 import {STATUS_CODES} from './status-codes';
-import {ExtractRouteParams, PathsForMethod, SafeKey} from './utils';
 
 /** Throw this in a handler to produce an HTTP error response */
 export class HTTPError extends Error {
@@ -21,7 +20,7 @@ export class HTTPError extends Error {
 
 type RequestParams = Parameters<express.RequestHandler>;
 
-type AnyEndpoint = Endpoint<any, any, any>;
+type AnyEndpoint = Endpoint<any, any, any, any>;
 
 type ExpressRequest<Path extends string, Spec> = unknown &
   express.Request<
@@ -33,6 +32,15 @@ type ExpressRequest<Path extends string, Spec> = unknown &
 
 type ExpressResponse<Spec> = unknown & express.Response<SafeKey<Spec, 'response'>>;
 
+/** Remove File fields from request type for multipart endpoints as multer middleware will handle them */
+type RemoveFileFields<T> = T extends {contentType: 'multipart'}
+  ? {
+      [K in keyof SafeKey<T, 'request'> as SafeKey<T, 'request'>[K] extends File
+        ? never
+        : K]: SafeKey<T, 'request'>[K];
+    }
+  : SafeKey<T, 'request'>;
+
 const registerWithBody =
   <Method extends HTTPVerb, API>(method: Method, router: TypedRouter<API>) =>
   <
@@ -42,7 +50,7 @@ const registerWithBody =
     route: Path,
     handler: (
       params: ExtractRouteParams<Path>,
-      body: SafeKey<Spec, 'request'>,
+      body: RemoveFileFields<Spec>,
       request: ExpressRequest<Path, Spec>,
       response: ExpressResponse<Spec>,
     ) => Promise<Spec extends AnyEndpoint ? Spec['response'] : never>,
@@ -279,10 +287,27 @@ export class TypedRouter<API> {
       throw new Error(`Invalid endpoint schema for ${method} ${route}`);
     }
 
-    const validateType = this.resolveSchemaType(
+    const isMultipart = resolvedEndpoint.properties.contentType?.const === 'multipart';
+
+    let validateType = this.resolveSchemaType(
       resolvedEndpoint.properties[property],
       apiSchema,
     );
+
+    if (isMultipart && property === 'request') {
+      validateType = JSON.parse(JSON.stringify(validateType));
+      // Omit all files types from the schema because they are extracted by multer middleware
+      for (const key in validateType.properties) {
+        const propertyType = this.resolveSchemaType(validateType.properties[key], apiSchema);
+        if (propertyType?.properties?.__type?.const === 'file') {
+          delete validateType.properties[key];
+        }
+      }
+      validateType.required = validateType.required.filter(
+        (key: string) => !!validateType.properties[key],
+      );
+    }
+
     if (!validateType && this.ajv) {
       return null;
     }

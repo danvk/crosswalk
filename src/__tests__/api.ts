@@ -1,4 +1,4 @@
-import {Endpoint, GetEndpoint} from '../api-spec';
+import {Endpoint, GetEndpoint, MultipartEndpoint, File} from '../api-spec';
 
 export interface User {
   id: string;
@@ -65,5 +65,12 @@ export interface API {
   '/search': {
     // This endpoint has mandatory query parameters
     get: GetEndpoint<{users: User[]}, {query: string; numResults?: number}>;
+  };
+  '/upload': {
+    /** Upload a single file */
+    post: MultipartEndpoint<
+      {source: string; file: File},
+      {success: boolean; filename: string; size: number}
+    >;
   };
 }
