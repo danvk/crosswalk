@@ -59,6 +59,22 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
         ],
         "type": "object",
       },
+      "File": {
+        "additionalProperties": false,
+        "description": "File upload field",
+        "properties": {
+          "__type": {
+            "enum": [
+              "file",
+            ],
+            "type": "string",
+          },
+        },
+        "required": [
+          "__type",
+        ],
+        "type": "object",
+      },
       "Location": {
         "additionalProperties": false,
         "properties": {
@@ -317,6 +333,62 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
           },
         },
         "summary": undefined,
+      },
+    },
+    "/upload": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string",
+                  },
+                  "source": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "source",
+                  "file",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "filename": {
+                      "type": "string",
+                    },
+                    "size": {
+                      "type": "number",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                    "filename",
+                    "size",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+        },
+        "summary": "Upload a single file",
       },
     },
     "/users": {
@@ -629,6 +701,20 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
       ],
       "type": "object",
     },
+    "File": {
+      "additionalProperties": false,
+      "description": "File upload field",
+      "properties": {
+        "__type": {
+          "const": "file",
+          "type": "string",
+        },
+      },
+      "required": [
+        "__type",
+      ],
+      "type": "object",
+    },
     "Location": {
       "additionalProperties": false,
       "properties": {
@@ -877,6 +963,58 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
           },
         },
         "summary": undefined,
+      },
+    },
+    "/upload": {
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "additionalProperties": false,
+              "properties": {
+                "file": {
+                  "$ref": "#/definitions/File",
+                },
+                "source": {
+                  "type": "string",
+                },
+              },
+              "required": [
+                "source",
+                "file",
+              ],
+              "type": "object",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "additionalProperties": false,
+              "properties": {
+                "filename": {
+                  "type": "string",
+                },
+                "size": {
+                  "type": "number",
+                },
+                "success": {
+                  "type": "boolean",
+                },
+              },
+              "required": [
+                "success",
+                "filename",
+                "size",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "summary": "Upload a single file",
       },
     },
     "/users": {

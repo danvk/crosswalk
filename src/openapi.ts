@@ -52,7 +52,10 @@ interface OpenAPIV3Endpoint {
   parameters?: OpenAPIV3Param[];
   requestBody?: {
     content: {
-      'application/json': {
+      'application/json'?: {
+        schema: Schema;
+      };
+      'multipart/form-data'?: {
         schema: Schema;
       };
     };
@@ -248,6 +251,66 @@ function sanitizeComponentName(name: string): string {
   return name.replace(/[^A-Za-z0-9\-._]/g, '_');
 }
 
+/**
+ * Detect if a field should be treated as a file upload in multipart requests.
+ * This is a heuristic based on common file field names and types.
+ */
+function isFileField(fieldName: string, schema: any): boolean {
+  
+  // Check if it references the File definition
+  if (schema.properties?.__type?.enum?.includes('file')) {
+    return true;
+  }
+  
+  return false;
+}
+
+/**
+ * Generate a multipart/form-data schema from a JSON Schema.
+ * This converts the schema to follow OpenAPI 3.0 multipart specification.
+ */
+function generateMultipartSchema(requestSchema: any, apiSchema?: any): any {
+  if (!requestSchema || !requestSchema.properties) {
+    return requestSchema;
+  }
+
+  const multipartSchema = {
+    type: 'object',
+    properties: {} as Record<string, any>,
+    required: [] as string[],
+  };
+
+  for (const [fieldName, fieldSchema] of Object.entries(requestSchema.properties)) {
+    // Resolve the schema if it's a reference
+    let resolvedSchema = fieldSchema as any;
+    if ((fieldSchema as any).$ref && apiSchema) {
+      const refName = (fieldSchema as any).$ref.replace('#/definitions/', '').replace('#/components/schemas/', '');
+      // Check both definitions (OpenAPI 2.0) and components.schemas (OpenAPI 3.0)
+      resolvedSchema = apiSchema.definitions?.[refName] || apiSchema.components?.schemas?.[refName] || fieldSchema;
+    }
+    
+    const isFile = isFileField(fieldName, resolvedSchema);
+    
+    if (isFile) {
+      // Mark as binary file upload
+      multipartSchema.properties[fieldName] = {
+        type: 'string',
+        format: 'binary',
+      };
+    } else {
+      // Regular form field
+      multipartSchema.properties[fieldName] = fieldSchema;
+    }
+  }
+
+  // Copy required fields
+  if (requestSchema.required) {
+    multipartSchema.required = requestSchema.required;
+  }
+
+  return multipartSchema;
+}
+
 /** Convert an API spec to OpenAPI 2.0 (Swagger) */
 function apiSpecToOpenApi2(apiSpec: any, options?: Options): any {
   apiSpec = JSON.parse(JSON.stringify(apiSpec)); // defensive copy
@@ -336,7 +399,7 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
 
     for (const [verb, ref] of Object.entries(byVerb)) {
       const [names, schema] = followApiRefV3(transformedSpec, ref as Schema);
-      const {request, response, query} = (schema as any).properties;
+      const {request, response, query, contentType} = (schema as any).properties;
 
       // Create updated parameters using OpenAPI 3.0 format
       const parameters: OpenAPIV3Param[] = extractOpenAPIV3PathParams(endpoint);
@@ -368,13 +431,28 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
 
       // Add requestBody for 3.0 if request exists and it's not a DELETE operation
       if (request?.type !== 'null' && verb.toLowerCase() !== 'delete') {
-        openApi.requestBody = {
-          content: {
-            'application/json': {
-              schema: request,
+        const isMultipart = contentType?.const === 'multipart' || contentType?.enum?.includes('multipart');
+        
+        if (isMultipart) {
+          // Generate multipart/form-data schema
+          const multipartSchema = generateMultipartSchema(request, transformedSpec);
+          openApi.requestBody = {
+            content: {
+              'multipart/form-data': {
+                schema: multipartSchema,
+              },
             },
-          },
-        };
+          };
+        } else {
+          // Standard JSON request body
+          openApi.requestBody = {
+            content: {
+              'application/json': {
+                schema: request,
+              },
+            },
+          };
+        }
       }
 
       paths[openApiPath][verb] = openApi;
