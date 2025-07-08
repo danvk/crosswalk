@@ -421,12 +421,13 @@ Crosswalk supports type-safe file upload endpoints using `multipart/form-data` a
 ### How to Define File Upload Endpoints
 
 1. **Mark file fields in your API spec:**
-   - Use crosswalk's exported File 
+   - Use a type file that conforms to `{__type: 'file'}` interface to indicate file field in the form.
+   - Use MultipartEndpoint.
    - Example:
 
 ```ts
 // api-spec.ts
-export type File = string & { __brand: 'file' };
+export type File = {__type: 'file'};
 
 export interface API {
   '/upload': {
@@ -456,7 +457,7 @@ router.useRouterMiddleware((req, res, next) => {
 });
 
 router.post('/upload', async (_, body, req) => {
-  const file = (req as any).file;
+  const file = req.file;
   return {
     success: true,
     filename: file?.originalname || 'unknown.txt',
@@ -488,6 +489,3 @@ requestBody:
             type: string
 ```
 
-### Notes
-- You can use `upload.array('fieldName')` or other multer methods for multiple files; just mark the corresponding field as `File[]` in your API spec.
-- The Crosswalk type system ensures that only non-file fields are validated, and file fields are handled by your middleware.
