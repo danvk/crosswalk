@@ -28,6 +28,9 @@ test('TypedRouter', async () => {
           longitude: -122.419416,
         },
       },
+      role: 'user',
+      fromSystem: 'google',
+      signupMethod: 'email',
     },
     {
       id: 'wilma',
@@ -44,6 +47,7 @@ test('TypedRouter', async () => {
           longitude: -122.419416,
         },
       },
+      role: 'user',
     },
   ];
 
@@ -74,7 +78,7 @@ test('TypedRouter', async () => {
     body;
     // ^? const body: CreateUserRequest
 
-    const newUser = {id: 'id', ...user};
+    const newUser = {id: 'id', ...user, role: 'user' as const, fromSystem: 'google' as const, signupMethod: 'email' as const};
     users.push(newUser);
     response.status(201);
     return newUser;
@@ -160,6 +164,9 @@ test('TypedRouter', async () => {
     id: 'fred',
     name: 'Fred',
     age: 42,
+    role: 'user',
+    fromSystem: 'google',
+    signupMethod: 'email',
     phoneNumbers: [],
     permanentAddress: {
       street: '123 Main St',
@@ -186,6 +193,7 @@ test('TypedRouter', async () => {
     id: 'wilma',
     name: 'Wilma',
     age: 42,
+    role: 'user',
     phoneNumbers: [],
     permanentAddress: {
       street: '123 Main St',
@@ -233,6 +241,9 @@ test('TypedRouter', async () => {
         longitude: -122.419416,
       },
     },
+    role: 'user',
+    fromSystem: 'google',
+    signupMethod: 'email'
   });
 
   await api.get('/users/id').expect(200);
@@ -318,6 +329,7 @@ test('TypedRouter', async () => {
         name: 'name',
         age: 42,
         phoneNumbers: [],
+        role: 'user',
         permanentAddress: {
           street: '123 Main St',
           city: 'Anytown',
@@ -428,6 +440,7 @@ test('Throwing HTTPError should set status code', async () => {
       name: 'John',
       age: 34,
       phoneNumbers: [],
+      role: 'user',
       permanentAddress: {
         street: '123 Main St',
         city: 'Anytown',
@@ -516,6 +529,7 @@ test('router middleware', async () => {
       name: 'John',
       age: 34,
       phoneNumbers: [],
+      role: 'user',
       permanentAddress: {
         street: '123 Main St',
         city: 'Anytown',
