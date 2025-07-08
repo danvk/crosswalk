@@ -180,6 +180,13 @@ function handleNullTypes(result: any): void {
   }
 }
 
+function handleLiteralTypes(result: any): void {
+  if (result.const) {
+    result.enum = [result.const];
+    delete result.const;
+  }
+}
+
 /**
  * Recursively transforms all references in an object from OpenAPI 2.0 to 3.0 format
  * and sanitizes component names in the process.
@@ -213,6 +220,7 @@ function transformToOpenApiV3(obj: any): any {
   }
   // Handle anyOf with null type (convert to nullable)
   handleNullTypes(result);
+  handleLiteralTypes(result);
 
   if (result.definitions) {
     const componentSchemas: Record<string, any> = {};
