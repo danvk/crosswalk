@@ -78,7 +78,13 @@ test('TypedRouter', async () => {
     body;
     // ^? const body: CreateUserRequest
 
-    const newUser = {id: 'id', ...user, role: 'user' as const, fromSystem: 'google' as const, signupMethod: 'email' as const};
+    const newUser = {
+      id: 'id',
+      ...user,
+      role: 'user' as const,
+      fromSystem: 'google' as const,
+      signupMethod: 'email' as const,
+    };
     users.push(newUser);
     response.status(201);
     return newUser;
@@ -243,7 +249,7 @@ test('TypedRouter', async () => {
     },
     role: 'user',
     fromSystem: 'google',
-    signupMethod: 'email'
+    signupMethod: 'email',
   });
 
   await api.get('/users/id').expect(200);
