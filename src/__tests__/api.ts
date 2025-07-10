@@ -35,6 +35,11 @@ export interface Location {
   longitude: number;
 }
 
+export interface FileUpload {
+  source: string;
+  file: File;
+}
+
 export interface API {
   '/random': {
     /** Get a random number */
@@ -68,9 +73,6 @@ export interface API {
   };
   '/upload': {
     /** Upload a single file */
-    post: MultipartEndpoint<
-      {source: string; file: File},
-      {success: boolean; filename: string; size: number}
-    >;
+    post: MultipartEndpoint<FileUpload, {success: boolean; filename: string; size: number}>;
   };
 }

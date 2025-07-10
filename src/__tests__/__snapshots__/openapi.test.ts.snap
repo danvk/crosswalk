@@ -75,6 +75,22 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
         ],
         "type": "object",
       },
+      "FileUpload": {
+        "additionalProperties": false,
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/File",
+          },
+          "source": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "source",
+          "file",
+        ],
+        "type": "object",
+      },
       "Location": {
         "additionalProperties": false,
         "properties": {
@@ -715,6 +731,22 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
       ],
       "type": "object",
     },
+    "FileUpload": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "$ref": "#/definitions/File",
+        },
+        "source": {
+          "type": "string",
+        },
+      },
+      "required": [
+        "source",
+        "file",
+      ],
+      "type": "object",
+    },
     "Location": {
       "additionalProperties": false,
       "properties": {
@@ -972,20 +1004,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
             "in": "body",
             "name": "body",
             "schema": {
-              "additionalProperties": false,
-              "properties": {
-                "file": {
-                  "$ref": "#/definitions/File",
-                },
-                "source": {
-                  "type": "string",
-                },
-              },
-              "required": [
-                "source",
-                "file",
-              ],
-              "type": "object",
+              "$ref": "#/definitions/FileUpload",
             },
           },
         ],

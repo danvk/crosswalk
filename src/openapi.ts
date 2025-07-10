@@ -255,7 +255,7 @@ function sanitizeComponentName(name: string): string {
  * Detect if a field should be treated as a file upload in multipart requests.
  * This is a heuristic based on common file field names and types.
  */
-function isFileField(fieldName: string, schema: any): boolean {
+function isFileField(schema: any): boolean {
   // Check if it references the File definition
   if (schema.properties?.__type?.enum?.includes('file')) {
     return true;
@@ -269,6 +269,10 @@ function isFileField(fieldName: string, schema: any): boolean {
  * This converts the schema to follow OpenAPI 3.0 multipart specification.
  */
 function generateMultipartSchema(requestSchema: any, apiSchema?: any): any {
+  if (requestSchema.$ref) {
+    requestSchema = followApiRefV3(apiSchema, requestSchema)[1];
+  }
+
   if (!requestSchema || !requestSchema.properties) {
     return requestSchema;
   }
@@ -281,19 +285,11 @@ function generateMultipartSchema(requestSchema: any, apiSchema?: any): any {
 
   for (const [fieldName, fieldSchema] of Object.entries(requestSchema.properties)) {
     // Resolve the schema if it's a reference
-    let resolvedSchema = fieldSchema as any;
-    if ((fieldSchema as any).$ref && apiSchema) {
-      const refName = (fieldSchema as any).$ref
-        .replace('#/definitions/', '')
-        .replace('#/components/schemas/', '');
-      // Check both definitions (OpenAPI 2.0) and components.schemas (OpenAPI 3.0)
-      resolvedSchema =
-        apiSchema.definitions?.[refName] ||
-        apiSchema.components?.schemas?.[refName] ||
-        fieldSchema;
-    }
+    const resolvedSchema = (fieldSchema as any).$ref
+      ? (followApiRefV3(apiSchema, fieldSchema as Schema)[1] as Schema)
+      : fieldSchema;
 
-    const isFile = isFileField(fieldName, resolvedSchema);
+    const isFile = isFileField(resolvedSchema);
 
     if (isFile) {
       // Mark as binary file upload
