@@ -40,6 +40,10 @@ export interface FileUpload {
   file: File;
 }
 
+export interface QueryParams {
+  createdAt?: string;
+}
+
 export interface API {
   '/random': {
     /** Get a random number */
@@ -63,7 +67,7 @@ export interface API {
   };
   '/complex': {
     // This endpoint references an interface from an inline type, see issue #10.
-    post: Endpoint<{user: User | null}, User>;
+    post: Endpoint<{user: User | null}, User, QueryParams>;
     // This endpoint is used to test that intersection types work as expected.
     patch: Endpoint<CreateUserRequest & {id: string}, User>;
   };
