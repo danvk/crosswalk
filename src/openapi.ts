@@ -340,6 +340,13 @@ function apiSpecToOpenApi2(apiSpec: any, options?: Options): any {
 
       if (query?.properties) {
         for (const [key, value] of Object.entries<Schema>(query.properties)) {
+          // Resolve query parameter references to track types that should be preserved
+          if (value.$ref) {
+            const [queryNames] = followApiRefV2(apiSpec, value);
+            for (const name of queryNames) {
+              typesToDelete.delete(name); // Don't delete types used in query parameters
+            }
+          }
           parameters.push({
             name: key,
             in: 'query',
@@ -400,12 +407,17 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
     for (const [verb, ref] of Object.entries(byVerb)) {
       const [names, schema] = followApiRefV3(transformedSpec, ref as Schema);
       const {request, response, query, contentType} = (schema as any).properties;
+      let resolvedQuery = query;
 
       // Create updated parameters using OpenAPI 3.0 format
       const parameters: OpenAPIV3Param[] = extractOpenAPIV3PathParams(endpoint);
 
-      if (query?.properties) {
-        for (const [key, value] of Object.entries<Schema>(query.properties)) {
+      if (resolvedQuery?.$ref) {
+        resolvedQuery = followApiRefV3(transformedSpec, query)[1];
+      }
+
+      if (resolvedQuery?.properties) {
+        for (const [key, value] of Object.entries<Schema>(resolvedQuery.properties)) {
           parameters.push({
             name: key,
             in: 'query',

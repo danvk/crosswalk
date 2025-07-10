@@ -129,6 +129,15 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
         ],
         "type": "object",
       },
+      "QueryParams": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
       "User": {
         "additionalProperties": false,
         "properties": {
@@ -246,6 +255,15 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
         "summary": undefined,
       },
       "post": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "createdAt",
+            "schema": {
+              "type": "string",
+            },
+          },
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -786,6 +804,15 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         "number",
         "type",
       ],
+      "type": "object",
+    },
+    "QueryParams": {
+      "additionalProperties": false,
+      "properties": {
+        "createdAt": {
+          "type": "string",
+        },
+      },
       "type": "object",
     },
     "User": {
