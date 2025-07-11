@@ -491,7 +491,7 @@ test('Throwing HTTPError should set status code', async () => {
       name: 'John',
       age: 34,
       phoneNumbers: [],
-      role: 'user',
+      role: 'user' as const,
       permanentAddress: {
         street: '123 Main St',
         city: 'Anytown',
@@ -503,6 +503,67 @@ test('Throwing HTTPError should set status code', async () => {
         },
       },
     };
+  });
+
+  const api = request(app);
+  let r = await api.get('/users/fred').expect(200);
+  expect(r.body).toMatchObject({
+    name: 'John',
+    age: 34,
+  });
+
+  r = await api.get('/users?minAge=Fred').expect(400);
+  expect(r.body).toMatchObject({error: 'data/minAge must be number'});
+
+  r = await api.get('/users?maxAge=5').expect(400);
+  expect(r.body).toMatchObject({error: 'data must NOT have additional properties'});
+
+  r = await api.get('/users/throw-400').expect(400);
+  expect(r.body).toMatchObject({error: 'Very bad request'});
+
+  r = await api.get('/users/throw-pg-error').expect(500);
+  expect(r.body).toEqual({});
+});
+
+test('Throwing HTTPError should set status code in non-async handlers', async () => {
+  const app = express();
+  const router = new TypedRouter<API>(app, apiSchemaJson);
+
+  class PGError extends Error {
+    constructor(public code: string) {
+      super();
+    }
+  }
+
+  router.get('/users', async () => {
+    return {users: [] as User[]};
+  });
+
+  router.get('/users/:userId', ({userId}) => {
+    if (userId === 'throw-400') {
+      throw new HTTPError(400, 'Very bad request');
+    } else if (userId === 'throw-pg-error') {
+      // See https://github.com/danvk/crosswalk/issues/6
+      throw new PGError('23505');
+    }
+
+    return Promise.resolve({
+      id: '1',
+      name: 'John',
+      age: 34,
+      phoneNumbers: [],
+      role: 'user' as const,
+      permanentAddress: {
+        street: '123 Main St',
+        city: 'Anytown',
+        state: 'CA',
+        zip: '12345',
+        location: {
+          latitude: 37.774929,
+          longitude: -122.419416,
+        },
+      },
+    });
   });
 
   const api = request(app);

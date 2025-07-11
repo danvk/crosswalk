@@ -153,7 +153,7 @@ export class TypedRouter<API> {
     const queryValidate = this.getValidator(route, method, 'query');
     this.registrations.push({path: route as string, method});
 
-    let handlerFn = (...[req, response, next]: RequestParams) => {
+    let handlerFn = async (...[req, response, next]: RequestParams) => {
       const {body, query} = req;
 
       if (bodyValidate && !bodyValidate(body)) {
@@ -183,33 +183,33 @@ export class TypedRouter<API> {
         console.debug(method, route, 'params=', req.params, 'body=', body, 'query=', query);
       }
 
-      handler(req.params as any, body, req as any, response)
-        .then(responseObject => {
-          if (responseObject === null) {
-            // nothing to do. This can happen if the response redirected, say.
-          } else if (typeof responseObject === 'string') {
-            response.status(200).send(responseObject);
-          } else {
-            response.json(responseObject);
-          }
-        })
-        .catch((error: any) => {
-          // With target below ES2015, instanceof doesn't work here.
-          if (
-            error instanceof HTTPError ||
-            (error.code && STATUS_CODES.indexOf(error.code) >= 0)
-          ) {
-            response.status(error.code).json({error: error.message});
-          } else {
-            next(error);
-          }
-        });
+      try {
+        const responseObject = await handler(req.params as any, body, req as any, response);
+
+        if (responseObject === null) {
+          // nothing to do. This can happen if the response redirected, say.
+        } else if (typeof responseObject === 'string') {
+          response.status(200).send(responseObject);
+        } else {
+          response.json(responseObject);
+        }
+      } catch (error: any) {
+        // Handle synchronous throws
+        if (
+          error instanceof HTTPError ||
+          (error.code && STATUS_CODES.indexOf(error.code) >= 0)
+        ) {
+          response.status(error.code).json({error: error.message});
+        } else {
+          next(error);
+        }
+      }
     };
 
     for (let i = this.middlewareFns.length - 1; i >= 0; i--) {
       const middlewareFn = this.middlewareFns[i];
       const prevHandlerFn = handlerFn;
-      handlerFn = (req: any, res: any, next: any) =>
+      handlerFn = async (req: any, res: any, next: any) =>
         middlewareFn(req, res, () => prevHandlerFn(req, res, next));
     }
 
