@@ -530,7 +530,6 @@ test('Throwing HTTPError should set status code', async () => {
 
   r = await api.get('/users/throw-pg-error').expect(500);
   expect(r.body).toEqual({});
-
 });
 
 test('Throwing HTTPError should set status code in non-async handlers', async () => {
