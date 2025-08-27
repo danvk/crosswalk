@@ -183,6 +183,11 @@ test('TypedRouter', async () => {
     };
   });
 
+  router.post('/void-response', async () => {
+    // This endpoint returns void (no response body)
+    return;
+  });
+
   const api = request(app);
 
   const responseAllUsers = await api.get('/users').expect(200);
@@ -439,6 +444,8 @@ test('TypedRouter', async () => {
       );
     });
 
+  await api.post('/void-response').expect(200);
+
   router.assertAllRoutesRegistered();
 });
 
@@ -523,6 +530,7 @@ test('Throwing HTTPError should set status code', async () => {
 
   r = await api.get('/users/throw-pg-error').expect(500);
   expect(r.body).toEqual({});
+
 });
 
 test('Throwing HTTPError should set status code in non-async handlers', async () => {

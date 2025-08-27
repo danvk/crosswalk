@@ -434,7 +434,7 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
             description: 'Successful response',
             content: {
               'application/json': {
-                schema: response,
+                schema: response?.type === 'null' ? {} : response,
               },
             },
           },
