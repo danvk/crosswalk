@@ -183,6 +183,11 @@ test('TypedRouter', async () => {
     };
   });
 
+  router.post('/void-response', async () => {
+    // This endpoint returns void (no response body)
+    return;
+  });
+
   const api = request(app);
 
   const responseAllUsers = await api.get('/users').expect(200);
@@ -438,6 +443,8 @@ test('TypedRouter', async () => {
         `"data must have required property 'id'"`,
       );
     });
+
+  await api.post('/void-response').expect(200);
 
   router.assertAllRoutesRegistered();
 });

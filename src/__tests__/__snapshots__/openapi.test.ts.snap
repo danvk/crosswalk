@@ -673,6 +673,31 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
         "summary": undefined,
       },
     },
+    "/void-response": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {},
+              },
+            },
+            "description": "Successful response",
+          },
+        },
+        "summary": undefined,
+      },
+    },
   },
 }
 `;
@@ -1271,6 +1296,29 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
             "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
+            },
+          },
+        },
+        "summary": undefined,
+      },
+    },
+    "/void-response": {
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "additionalProperties": false,
+              "type": "object",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "null",
             },
           },
         },

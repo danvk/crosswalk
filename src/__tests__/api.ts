@@ -79,4 +79,7 @@ export interface API {
     /** Upload a single file */
     post: MultipartEndpoint<FileUpload, {success: boolean; filename: string; size: number}>;
   };
+  '/void-response': {
+    post: Endpoint<{}, void>;
+  };
 }
