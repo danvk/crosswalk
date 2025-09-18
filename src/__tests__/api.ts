@@ -45,7 +45,6 @@ export interface QueryParams {
 }
 
 export interface TypeWithEmptyLiteral {
-  null: null;
   emptyStr: '';
   emptyObj: {};
   emptyArray: [];

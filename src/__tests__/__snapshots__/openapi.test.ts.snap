@@ -202,12 +202,8 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
             ],
             "type": "string",
           },
-          "null": {
-            "type": "null",
-          },
         },
         "required": [
-          "null",
           "emptyStr",
           "emptyObj",
           "emptyArray",
@@ -997,12 +993,8 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
           "const": "",
           "type": "string",
         },
-        "null": {
-          "type": "null",
-        },
       },
       "required": [
-        "null",
         "emptyStr",
         "emptyObj",
         "emptyArray",
