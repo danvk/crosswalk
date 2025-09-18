@@ -44,6 +44,15 @@ export interface QueryParams {
   createdAt?: string;
 }
 
+export interface TypeWithEmptyLiteral {
+  emptyStr: '';
+  emptyObj: {};
+  emptyArray: [];
+  emptyBool: false;
+  emptyNum: 0;
+  complexEmptyUnion: null | '' | {} | [] | false | 0;
+}
+
 export interface API {
   '/random': {
     /** Get a random number */
@@ -81,5 +90,8 @@ export interface API {
   };
   '/void-response': {
     post: Endpoint<{}, void>;
+  };
+  '/empty-literals': {
+    post: Endpoint<TypeWithEmptyLiteral, TypeWithEmptyLiteral>;
   };
 }

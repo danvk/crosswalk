@@ -184,9 +184,18 @@ function handleNullTypes(result: any): void {
 }
 
 function handleLiteralTypes(result: any): void {
-  if (result.const) {
+  if ('const' in result) {
     result.enum = [result.const];
     delete result.const;
+  }
+
+  if (
+    result.type === 'array' &&
+    result.minItems === 0 &&
+    result.maxItems === 0 &&
+    !('items' in result)
+  ) {
+    result.items = {};
   }
 }
 

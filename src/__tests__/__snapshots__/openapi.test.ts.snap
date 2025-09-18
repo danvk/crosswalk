@@ -138,6 +138,81 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
         },
         "type": "object",
       },
+      "TypeWithEmptyLiteral": {
+        "additionalProperties": false,
+        "properties": {
+          "complexEmptyUnion": {
+            "anyOf": [
+              {
+                "enum": [
+                  "",
+                ],
+                "type": "string",
+              },
+              {
+                "additionalProperties": false,
+                "type": "object",
+              },
+              {
+                "items": {},
+                "maxItems": 0,
+                "minItems": 0,
+                "type": "array",
+              },
+              {
+                "enum": [
+                  false,
+                ],
+                "type": "boolean",
+              },
+              {
+                "enum": [
+                  0,
+                ],
+                "type": "number",
+              },
+            ],
+            "nullable": true,
+          },
+          "emptyArray": {
+            "items": {},
+            "maxItems": 0,
+            "minItems": 0,
+            "type": "array",
+          },
+          "emptyBool": {
+            "enum": [
+              false,
+            ],
+            "type": "boolean",
+          },
+          "emptyNum": {
+            "enum": [
+              0,
+            ],
+            "type": "number",
+          },
+          "emptyObj": {
+            "additionalProperties": false,
+            "type": "object",
+          },
+          "emptyStr": {
+            "enum": [
+              "",
+            ],
+            "type": "string",
+          },
+        },
+        "required": [
+          "emptyStr",
+          "emptyObj",
+          "emptyArray",
+          "emptyBool",
+          "emptyNum",
+          "complexEmptyUnion",
+        ],
+        "type": "object",
+      },
       "User": {
         "additionalProperties": false,
         "properties": {
@@ -289,6 +364,32 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/User",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+        },
+        "summary": undefined,
+      },
+    },
+    "/empty-literals": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TypeWithEmptyLiteral",
+              },
+            },
+          },
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypeWithEmptyLiteral",
                 },
               },
             },
@@ -840,6 +941,69 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
       },
       "type": "object",
     },
+    "TypeWithEmptyLiteral": {
+      "additionalProperties": false,
+      "properties": {
+        "complexEmptyUnion": {
+          "anyOf": [
+            {
+              "type": "null",
+            },
+            {
+              "const": "",
+              "type": "string",
+            },
+            {
+              "additionalProperties": false,
+              "type": "object",
+            },
+            {
+              "maxItems": 0,
+              "minItems": 0,
+              "type": "array",
+            },
+            {
+              "const": false,
+              "type": "boolean",
+            },
+            {
+              "const": 0,
+              "type": "number",
+            },
+          ],
+        },
+        "emptyArray": {
+          "maxItems": 0,
+          "minItems": 0,
+          "type": "array",
+        },
+        "emptyBool": {
+          "const": false,
+          "type": "boolean",
+        },
+        "emptyNum": {
+          "const": 0,
+          "type": "number",
+        },
+        "emptyObj": {
+          "additionalProperties": false,
+          "type": "object",
+        },
+        "emptyStr": {
+          "const": "",
+          "type": "string",
+        },
+      },
+      "required": [
+        "emptyStr",
+        "emptyObj",
+        "emptyArray",
+        "emptyBool",
+        "emptyNum",
+        "complexEmptyUnion",
+      ],
+      "type": "object",
+    },
     "User": {
       "additionalProperties": false,
       "properties": {
@@ -980,6 +1144,28 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
             "description": "Successful response",
             "schema": {
               "$ref": "#/definitions/User",
+            },
+          },
+        },
+        "summary": undefined,
+      },
+    },
+    "/empty-literals": {
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/TypeWithEmptyLiteral",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "$ref": "#/definitions/TypeWithEmptyLiteral",
             },
           },
         },
