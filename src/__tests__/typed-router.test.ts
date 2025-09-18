@@ -187,6 +187,17 @@ test('TypedRouter', async () => {
     // This endpoint returns void (no response body)
     return;
   });
+  router.post('/empty-literals', async () => {
+    return {
+      null: null,
+      emptyStr: '',
+      emptyObj: {},
+      emptyArray: [],
+      emptyBool: false,
+      emptyNum: 0,
+      complexEmptyUnion: null,
+    };
+  });
 
   const api = request(app);
 

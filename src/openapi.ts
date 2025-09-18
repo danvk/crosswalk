@@ -181,12 +181,20 @@ function handleNullTypes(result: any): void {
     const nonNullEnums = result.enum.filter((item: any) => item !== null);
     result.enum = nonNullEnums;
   }
+  if (result.type === 'null') {
+    result.enum = [null];
+    delete result.type;
+  }
 }
 
 function handleLiteralTypes(result: any): void {
-  if (result.const) {
+  if ('const' in result) {
     result.enum = [result.const];
     delete result.const;
+  }
+
+  if (result.type === 'array' && result.minItems === 0 && result.maxItems === 0 && !('items' in result)) {
+    result.items = {};
   }
 }
 
