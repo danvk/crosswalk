@@ -1,6 +1,6 @@
 {
   "name": "crosswalk",
-  "version": "2.2.6",
+  "version": "2.2.7",
   "description": "Type-safe express routing with TypeScript",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
