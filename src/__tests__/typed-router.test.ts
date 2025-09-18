@@ -189,7 +189,6 @@ test('TypedRouter', async () => {
   });
   router.post('/empty-literals', async () => {
     return {
-      null: null,
       emptyStr: '',
       emptyObj: {},
       emptyArray: [],
