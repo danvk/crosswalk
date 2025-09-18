@@ -181,10 +181,6 @@ function handleNullTypes(result: any): void {
     const nonNullEnums = result.enum.filter((item: any) => item !== null);
     result.enum = nonNullEnums;
   }
-  if (result.type === 'null') {
-    result.enum = [null];
-    delete result.type;
-  }
 }
 
 function handleLiteralTypes(result: any): void {

@@ -203,7 +203,7 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
             "type": "string",
           },
           "null": {
-            "enum": [],
+            "type": "null",
           },
         },
         "required": [
@@ -405,15 +405,6 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
     },
     "/random": {
       "get": {
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "enum": [],
-              },
-            },
-          },
-        },
         "responses": {
           "200": {
             "content": {
@@ -456,15 +447,6 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
             },
           },
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "enum": [],
-              },
-            },
-          },
-        },
         "responses": {
           "200": {
             "content": {
@@ -566,15 +548,6 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
             },
           },
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "enum": [],
-              },
-            },
-          },
-        },
         "responses": {
           "200": {
             "content": {
@@ -686,15 +659,6 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
             },
           },
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "enum": [],
-              },
-            },
-          },
-        },
         "responses": {
           "200": {
             "content": {
@@ -830,9 +794,7 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "enum": [],
-                },
+                "schema": {},
               },
             },
             "description": "Successful response",
