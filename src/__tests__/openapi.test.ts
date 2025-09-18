@@ -13,7 +13,7 @@ describe('Open API integration', () => {
 
 describe('Open API V3', () => {
   it('should have the expected endpoints', () => {
-    const openApi = apiSpecToOpenApi(apiSchemaJson, {version: '3.0'});
+    const openApi = apiSpecToOpenApi(apiSchemaJson, {version: '3.1.0'});
     expect(openApi).toMatchSnapshot('open-api-v3');
   });
 

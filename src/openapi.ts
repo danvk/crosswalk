@@ -81,7 +81,7 @@ export interface Options {
   host?: string;
   basePath?: string;
   schemes?: ('http' | 'https')[];
-  version?: '2.0' | '3.0';
+  version?: '2.0' | '3.1.0';
 }
 
 function extractPathParams(path: string): PathParam[] {
@@ -482,7 +482,7 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
   delete options?.version;
 
   return {
-    openapi: '3.0.0',
+    openapi: '3.1.0',
     info: {
       title: 'Generated API',
       description: 'testing testing',
