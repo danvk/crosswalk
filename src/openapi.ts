@@ -193,7 +193,12 @@ function handleLiteralTypes(result: any): void {
     delete result.const;
   }
 
-  if (result.type === 'array' && result.minItems === 0 && result.maxItems === 0 && !('items' in result)) {
+  if (
+    result.type === 'array' &&
+    result.minItems === 0 &&
+    result.maxItems === 0 &&
+    !('items' in result)
+  ) {
     result.items = {};
   }
 }
