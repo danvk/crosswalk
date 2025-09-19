@@ -50,6 +50,7 @@ export interface TypeWithEmptyLiteral {
   emptyArray: [];
   emptyBool: false;
   emptyNum: 0;
+  null: null;
   complexEmptyUnion: null | '' | {} | [] | false | 0;
 }
 

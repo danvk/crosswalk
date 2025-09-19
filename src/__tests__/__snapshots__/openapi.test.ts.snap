@@ -118,6 +118,7 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
               "home",
               "work",
               "mobile",
+              null,
             ],
             "nullable": true,
             "type": "string",
@@ -147,32 +148,36 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
                 "enum": [
                   "",
                 ],
+                "nullable": true,
                 "type": "string",
               },
               {
                 "additionalProperties": false,
+                "nullable": true,
                 "type": "object",
               },
               {
                 "items": {},
                 "maxItems": 0,
                 "minItems": 0,
+                "nullable": true,
                 "type": "array",
               },
               {
                 "enum": [
                   false,
                 ],
+                "nullable": true,
                 "type": "boolean",
               },
               {
                 "enum": [
                   0,
                 ],
+                "nullable": true,
                 "type": "number",
               },
             ],
-            "nullable": true,
           },
           "emptyArray": {
             "items": {},
@@ -202,6 +207,9 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
             ],
             "type": "string",
           },
+          "null": {
+            "nullable": true,
+          },
         },
         "required": [
           "emptyStr",
@@ -209,6 +217,7 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
           "emptyArray",
           "emptyBool",
           "emptyNum",
+          "null",
           "complexEmptyUnion",
         ],
         "type": "object",
@@ -222,6 +231,7 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
           "fromSystem": {
             "enum": [
               "google",
+              null,
             ],
             "nullable": true,
             "type": "string",
@@ -346,8 +356,12 @@ exports[`Open API V3 should have the expected endpoints: open-api-v3 1`] = `
                 "additionalProperties": false,
                 "properties": {
                   "user": {
-                    "$ref": "#/components/schemas/User",
-                    "nullable": true,
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/User",
+                        "nullable": true,
+                      },
+                    ],
                   },
                 },
                 "required": [
@@ -993,6 +1007,9 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
           "const": "",
           "type": "string",
         },
+        "null": {
+          "type": "null",
+        },
       },
       "required": [
         "emptyStr",
@@ -1000,6 +1017,7 @@ exports[`Open API integration should have the expected endpoints: open-api 1`] =
         "emptyArray",
         "emptyBool",
         "emptyNum",
+        "null",
         "complexEmptyUnion",
       ],
       "type": "object",

@@ -195,6 +195,7 @@ test('TypedRouter', async () => {
       emptyBool: false,
       emptyNum: 0,
       complexEmptyUnion: null,
+      null: null,
     };
   });
 
