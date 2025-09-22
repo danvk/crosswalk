@@ -1,4 +1,5 @@
 import * as pathToRegexp from 'path-to-regexp';
+import {convertSync as convertFromJsonSchema} from '@openapi-contrib/json-schema-to-openapi-schema';
 
 type Schema = {$ref: string};
 
@@ -150,103 +151,72 @@ export function followApiRefV2(spec: any, schema: Schema): [string[], unknown] {
 }
 
 export function followApiRefV3(spec: any, schema: Schema): [string[], unknown] {
-  return resolveSchemaRef(spec, schema, SCHEMA);
-}
-
-function handleNullTypes(result: any): void {
-  if (
-    result.anyOf &&
-    Array.isArray(result.anyOf) &&
-    result.anyOf.some((item: any) => item.type === 'null')
-  ) {
-    const nonNullTypes = result.anyOf.filter((item: any) => item.type !== 'null');
-    if (nonNullTypes.length) {
-      if (nonNullTypes.length === 1) {
-        Object.assign(result, nonNullTypes[0]);
-        delete result.anyOf;
-      } else {
-        result.anyOf = nonNullTypes;
-      }
-      result.nullable = true;
+  // Try OpenAPI 3.0 format first, then fall back to JSON Schema format
+  try {
+    return resolveSchemaRef(spec, schema, SCHEMA);
+  } catch (error) {
+    if (schema.$ref?.startsWith(DEFINITION)) {
+      return resolveSchemaRef(spec, schema, DEFINITION);
     }
-  }
-  if (Array.isArray(result.type) && result.type.some((item: any) => item === 'null')) {
-    const nonNullTypes = result.type.filter((item: any) => item !== 'null');
-    if (nonNullTypes) {
-      result.type = nonNullTypes.length === 1 ? nonNullTypes[0] : nonNullTypes;
-      result.nullable = true;
-    }
-  }
-  if (Array.isArray(result.enum) && result.enum.some((item: any) => item === null)) {
-    const nonNullEnums = result.enum.filter((item: any) => item !== null);
-    result.enum = nonNullEnums;
-  }
-}
-
-function handleLiteralTypes(result: any): void {
-  if ('const' in result) {
-    result.enum = [result.const];
-    delete result.const;
-  }
-
-  if (
-    result.type === 'array' &&
-    result.minItems === 0 &&
-    result.maxItems === 0 &&
-    !('items' in result)
-  ) {
-    result.items = {};
+    throw error;
   }
 }
 
 /**
- * Recursively transforms all references in an object from OpenAPI 2.0 to 3.0 format
- * and sanitizes component names in the process.
+ * Simple schema converter using the library for individual schemas
  */
-function transformToOpenApiV3(obj: any): any {
+function convertSchemaToOpenApi(schema: any): any {
+  try {
+    return convertFromJsonSchema(schema, {
+      cloneSchema: true,
+      convertUnreferencedDefinitions: true,
+    });
+  } catch (error) {
+    // If conversion fails, return the original schema
+    return schema;
+  }
+}
+
+/**
+ * Transform definitions to OpenAPI 3.0 components/schemas format
+ */
+function transformDefinitionsToComponents(
+  definitions: Record<string, any>,
+): Record<string, any> {
+  const componentSchemas: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(definitions)) {
+    const sanitizedKey = sanitizeComponentName(key);
+    componentSchemas[sanitizedKey] = convertSchemaToOpenApi(value);
+  }
+
+  return componentSchemas;
+}
+
+/**
+ * Transform $ref paths from #/definitions/ to #/components/schemas/
+ */
+function transformRefs(obj: any): any {
   if (!obj || typeof obj !== 'object') {
     return obj;
   }
 
-  // Handle arrays
   if (Array.isArray(obj)) {
-    return obj.map(item => transformToOpenApiV3(item));
+    return obj.map(transformRefs);
   }
 
-  // Handle objects
   const result = {...obj};
 
-  if (result.properties) {
-    for (const [key, value] of Object.entries(obj.properties)) {
-      result.properties[key] = transformToOpenApiV3(value);
-    }
+  if (result.$ref && typeof result.$ref === 'string' && result.$ref.startsWith(DEFINITION)) {
+    const refName = result.$ref.slice(DEFINITION.length);
+    const sanitizedName = sanitizeComponentName(refName);
+    result.$ref = `${SCHEMA}${sanitizedName}`;
   }
 
-  // Transform $ref if it exists
-  if (result.$ref && typeof result.$ref === 'string') {
-    if (result.$ref.startsWith(DEFINITION)) {
-      const refName = result.$ref.slice(DEFINITION.length);
-      const sanitizedName = sanitizeComponentName(refName);
-      result.$ref = `${SCHEMA}${sanitizedName}`;
-    }
-  }
-  // Handle anyOf with null type (convert to nullable)
-  handleNullTypes(result);
-  handleLiteralTypes(result);
-
-  if (result.definitions) {
-    const componentSchemas: Record<string, any> = {};
-    for (const [key, value] of Object.entries(result.definitions)) {
-      const sanitizedKey = sanitizeComponentName(key);
-      componentSchemas[sanitizedKey] = transformToOpenApiV3(value);
-    }
-    result.components = {schemas: componentSchemas};
-    delete result.definitions;
-  }
-
-  // Recursively transform all properties
   for (const [key, value] of Object.entries(result)) {
-    result[key] = transformToOpenApiV3(value);
+    if (typeof value === 'object' && value !== null) {
+      result[key] = transformRefs(value);
+    }
   }
 
   return result;
@@ -401,7 +371,18 @@ function apiSpecToOpenApi2(apiSpec: any, options?: Options): any {
 /** Convert an API spec to OpenAPI 3.0 */
 function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
   apiSpec = JSON.parse(JSON.stringify(apiSpec)); // defensive copy
-  const transformedSpec = transformToOpenApiV3(apiSpec);
+
+  // Convert definitions to components/schemas
+  const componentSchemas = transformDefinitionsToComponents(apiSpec.definitions || {});
+
+  // Transform all references in the spec
+  const transformedSpec = transformRefs(apiSpec);
+  transformedSpec.components = {schemas: componentSchemas};
+  delete transformedSpec.definitions;
+
+  // Transform references in the component schemas as well
+  transformedSpec.components.schemas = transformRefs(transformedSpec.components.schemas);
+
   const {required: endpoints, properties: endpointSpecs} = transformedSpec;
 
   // Remove endpoints, helpers
@@ -443,7 +424,7 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
             description: 'Successful response',
             content: {
               'application/json': {
-                schema: response?.type === 'null' ? {} : response,
+                schema: response?.type === 'null' || response?.nullable ? {} : response,
               },
             },
           },
@@ -451,7 +432,7 @@ function apiSpecToOpenApi3(apiSpec: any, options?: Options): any {
       };
 
       // Add requestBody for 3.0 if request exists and it's not a DELETE operation
-      if (request?.type !== 'null' && verb.toLowerCase() !== 'delete') {
+      if (request?.type !== 'null' && !request?.nullable && verb.toLowerCase() !== 'delete') {
         const isMultipart =
           contentType?.const === 'multipart' || contentType?.enum?.includes('multipart');
 
